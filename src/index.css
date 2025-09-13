@@ -1,0 +1,33 @@
+/* Reset rất nhẹ, không căn giữa layout */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Luôn dùng light mode cho admin */
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  /* ❌ BỎ display:flex; place-items:center (gây căn giữa toàn trang) */
+  background: #ffffff; /* hoặc để trống, admin.css sẽ phủ gradient */
+  color: #213547;
+}
+
+/* Link & button mặc định, không ảnh hưởng admin.css */
+a {
+  color: #2f6feb;
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+button {
+  font: inherit;
+}

@@ -1,0 +1,13 @@
+/* Dọn sạch những style demo của Vite làm căn giữa hoặc giới hạn chiều rộng */
+#root {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: initial;
+}
+
+/* Giữ lại vài class demo nếu bạn còn dùng, nhưng không căn giữa gì cả */
+.logo { height: 6em; padding: 1.5em; }
+.card { padding: 1em; }
+.read-the-docs { color: #888; }

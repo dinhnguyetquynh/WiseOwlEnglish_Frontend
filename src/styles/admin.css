@@ -1,0 +1,138 @@
+:root{
+  --bg1:#e8f2e7;
+  --bg2:#e9f1e6;
+  --line:#2f7d32;
+  --green:#2f7d32;
+  --blue:#234e9b;
+  --red:#b3261e;
+  --text:#0f172a;
+  --muted:#475569;
+  --card:#ffffff;
+  --ring: rgba(0,0,0,0.08);
+}
+
+*{ box-sizing: border-box; }
+body{ margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--text); }
+
+.admin-shell{
+  display:flex;
+  min-height:100vh;
+  background:linear-gradient(180deg, var(--bg1), var(--bg2));
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar{
+  width: 230px;
+  background:#fff;
+  border-right:1px solid #e5e7eb;
+  padding:16px 12px;
+  position: relative;
+}
+
+.logo{
+  display:flex; align-items:center; gap:10px;
+  font-weight:800; font-size:28px; color:#1a7f37;
+  padding:8px 10px; border-radius:12px;
+}
+
+.nav{
+  margin-top:8px; padding-top:8px;
+  display:flex; flex-direction:column; gap:6px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px; color:#0f172a; text-decoration:none;
+}
+.nav-item:hover{ background:#f3f4f6; }
+.nav-item.active{ background:#e7f5ea; border:1px solid #bbdfc3; }
+
+.nav-ico{ width:22px; text-align:center; opacity:.9; }
+
+/* user card bottom */
+.user-card{
+  position:absolute; left:12px; right:12px; bottom:12px;
+  background:#e7f5ea; border:1px solid #bbdfc3; border-radius:14px;
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  font-size:14px;
+}
+.user-avatar{
+  width:30px; height:30px; border-radius:50%;
+  background:#1a7f37; display:grid; place-items:center; color:#fff; font-weight:700;
+}
+
+/* ========== CONTENT ========== */
+.content{
+  flex:1; 
+  padding:16px;
+  display:flex; 
+  justify-content:flex-start;
+  align-items: flex-start;
+}
+.content-inner{
+  width:100%; 
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:saturate(180%) blur(3px);
+  border:1px solid #dfe7dc; border-radius:18px;
+  padding:18px 22px 26px;
+  box-shadow:0 8px 20px var(--ring);
+}
+
+/* header line with centered title */
+.section-title{
+  display:flex; align-items:center; gap:12px; margin:8px 0 14px;
+  color:var(--green); font-weight:700; letter-spacing:.6px;
+}
+.section-title::before, .section-title::after{
+  content:""; flex:1; height:2px; background:var(--green); opacity:.8;
+  border-radius:2px;
+}
+
+/* top bar controls */
+.topbar{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.select{
+  border:1px solid #cbd5e1; padding:8px 10px; border-radius:10px; min-width:160px;
+  background:#fff; font-weight:600;
+}
+.btn{
+  border:none; padding:10px 14px; border-radius:12px; cursor:pointer;
+  background:#1a7f37; color:#fff; font-weight:700; box-shadow:0 2px 0 rgba(0,0,0,.08);
+}
+.btn:active{ transform:translateY(1px); }
+
+/* ========== LESSON CARD ========== */
+.lesson-card{
+  background:var(--card);
+  border:3px solid var(--green);
+  border-radius:16px;
+  padding:14px 16px;
+  box-shadow:0 6px 16px var(--ring);
+  margin:12px 0;
+}
+.lesson-card.blue{ border-color:var(--blue); }
+.lesson-card.red{ border-color:var(--red); }
+
+.lesson-title{
+  font-weight:800; text-transform:uppercase; letter-spacing:.4px;
+  margin-bottom:6px;
+}
+.lesson-meta{ color:var(--muted); font-size:14px; display:flex; gap:18px; }
+
+/* modal (dùng lại cho form tạo bài học) */
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.25);
+  display:grid; place-items:center; z-index:40;
+}
+.modal{
+  width:560px; max-width:calc(100% - 32px);
+  background:#fff; border-radius:16px; padding:18px;
+  border:1px solid #e5e7eb; box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+.modal h3{ margin:4px 0 12px; }
+.modal .row{ margin:8px 0; display:flex; flex-direction:column; gap:6px; }
+.modal input, .modal select{
+  padding:10px 12px; border:1px solid #cbd5e1; border-radius:10px;
+}
+.modal .actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
+.btn.secondary{ background:#0f172a; color:#fff; opacity:.85; }
