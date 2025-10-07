@@ -1,0 +1,74 @@
+/* —— Wrapper —— */
+.fs { position: relative; display: inline-block; }
+
+/* —— Trigger (hộp đã chọn) —— */
+.fs__trigger{
+  display: flex; 
+  align-items: center; gap: 10px;
+  padding: 10px 14px;
+  min-width: 220px;
+  background: #ffff;               /* xanh nhạt */
+  border: 1px solid #e84e6f;          /* viền vàng */
+  border-radius: 16px;
+  box-shadow: 0 2px 0 #e84e6f;
+  font-weight: 800; 
+  color: #089224;
+  cursor: pointer;
+  white-space: nowrap; /* giữ nội dung không xuống dòng */
+
+}
+.fs__trigger:hover{ filter: brightness(0.98); }
+.fs__trigger--open{ outline: 3px solid #a5f3fc; }
+
+/* dấu hỏi đỏ xinh */
+.fs__q{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* background: #ffe2ec; */
+  color: #e84e6f;
+  font-weight: 900;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 16px;
+  white-space: nowrap;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* chữ */
+.fs__text{ flex: 1; opacity: .8; }
+.fs__text--set{ opacity: 1; }
+
+/* mũi tên */
+.fs__chev{ font-size: 12px; transform: rotate(0deg); transition: transform .15s; }
+.fs__chev--up{ transform: rotate(180deg); }
+
+/* —— Menu —— */
+.fs__menu{
+  position: absolute; left: 0; top: calc(100% + 8px);
+  width: 100%;
+  background: #fff;
+  border: 3px solid #ff6bb3;         /* viền hồng */
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.08);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.fs__item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px;
+  font-weight: 700; color: #475569;
+  cursor: pointer;
+  background: #fff;
+}
+.fs__item + .fs__item{ border-top: 1px solid #f1f5f9; }
+.fs__item:hover{ background: #f8fafc; }
+
+.fs__item--selected{
+  background: #23b24b;               /* xanh lá tươi */
+  color: #fff;
+}
+
+.fs__emoji{ width: 26px; text-align: center; font-size: 18px; }
+.fs__label{ letter-spacing: .2px; }

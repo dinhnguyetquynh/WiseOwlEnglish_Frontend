@@ -1,0 +1,68 @@
+.uc {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  background: #f8fafc;
+}
+.uc--active { background: #e6f3ff; }   /* xanh nhạt */
+.uc--done   { background: #f0fdf4; }   /* xanh lá nhạt */
+.uc--locked { background:  #f8fafc; opacity: 0.85; } /* #f8fafc */
+
+.uc__left { display: flex; flex-direction: column; gap: 12px; }
+.uc__title { font-size: 20px; font-weight: 800; color: #0f172a; margin: 0; }
+
+/* progress */
+.uc__progress {
+  position: relative;
+  height: 20px;
+  background: #fff;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+.uc__progress-bar { 
+  height: 100%; 
+  background: #22c55e; 
+}
+.uc__progress-text {
+  position: absolute; inset: 0;
+  font-size: 12px; font-weight: 700; color: #334155;
+  display: grid; place-items: center; mix-blend-mode: multiply;
+}
+
+/* CTA */
+.uc__cta {
+  align-self: flex-start;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid #93c5fd;
+  background: #1CB0F6;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+.uc--locked .uc__cta {
+  background: #fff; 
+  color: #38bdf8; 
+  border: 1px solid #e5e7eb;
+  /* cursor: not-allowed; */
+}
+
+/* right part */
+.uc__right { 
+  display: grid; 
+  align-content: center; 
+  justify-items: end; 
+  gap: 10px; 
+  width: 180px;          /* cố định chiều rộng */
+  height: 100px;
+ }
+
+.uc__owl { 
+  width: 90%; 
+  height: 90%; 
+  object-fit: contain;
+ }

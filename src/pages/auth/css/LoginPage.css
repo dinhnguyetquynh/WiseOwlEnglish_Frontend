@@ -1,0 +1,144 @@
+:root {
+  --green: #128c22;
+  --green-dark: #0f7a1d;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --error-bg: #fff2f2;
+  --error-border: #ffc9c9;
+  --error-text: #b42318;
+}
+
+.lp__wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: var(--text);
+}
+
+.lp__card {
+  width: 100%;
+  max-width: 520px;
+  padding: 0 24px;
+}
+
+.lp__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.lp__logo-img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.lp__title {
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: .5px;
+  color: var(--green);
+  font-size: clamp(28px, 4vw, 42px);
+  margin: 0 0 24px 0;
+}
+
+.lp__form {
+  display: grid;
+  gap: 14px;
+}
+
+.lp__input {
+  width: 100%;
+  height: 56px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fff;
+  outline: none;
+  font-size: 17px;
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.lp__input:focus {
+  border-color: #c6f6d5;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
+}
+
+.lp__pw {
+  position: relative;
+}
+
+.lp__input--pw {
+  padding-right: 64px;
+}
+
+.lp__pw-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.lp__pw-toggle:hover { color: #374151; }
+
+.lp__forgot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.lp__forgot-btn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.lp__forgot-btn:hover { color: #374151; }
+
+.lp__error {
+  border: 1px solid var(--error-border);
+  background: var(--error-bg);
+  color: var(--error-text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.lp__submit {
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform .03s ease, background .15s ease, opacity .15s ease;
+}
+
+.lp__submit:hover { background: var(--green-dark); }
+.lp__submit:active { transform: scale(.995); }
+.lp__submit:disabled { background: #9bd09f; cursor: not-allowed; }
+
+.lp__footer {
+  margin-top: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.lp__link {
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: underline;
+}

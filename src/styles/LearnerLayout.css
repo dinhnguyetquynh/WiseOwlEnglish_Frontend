@@ -1,0 +1,12 @@
+/* src/layouts/LearnerLayout.css */
+.layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #f8fafc;
+}
+
+.layout__main {
+  padding: 10px 30px;
+}
+

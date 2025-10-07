@@ -1,0 +1,37 @@
+.hp { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 5px; }
+
+.hp__header {
+  display: flex;
+  align-items: center; 
+  gap: 10px; 
+  padding: 6px 8px;
+}
+.hp__back {
+  border: 0; background: transparent; font-size: 20px;
+  cursor: pointer; color: #64748b;
+}
+.hp__title { 
+  font-size: 18px;
+  font-weight: 600; 
+  color: #0f172a; 
+}
+.hp__select {
+  padding: 15px 15px; 
+  border-radius: 10px; 
+  border: 1px solid #e5e7eb;
+  font-size: 16px;
+  font-weight: 600; 
+  background: #fff;
+}
+.hp__select:focus { 
+  outline: 2px solid #93c5fd; 
+}
+.hp__divider { 
+  border: 0; 
+  border-top: 1px solid #e5e7eb; }
+
+.hp__units { display: flex; flex-direction: column; gap: 16px; }
+

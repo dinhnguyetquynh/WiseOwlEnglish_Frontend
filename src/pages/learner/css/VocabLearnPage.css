@@ -1,0 +1,145 @@
+.vl {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 24px;
+  color: #2d2d2d;
+}
+
+.vl__top {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.vl__exit {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .7;
+}
+.vl__exit:hover { opacity: 1; }
+
+.vl__progress-wrap {
+  position: relative;
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+.vl__progress-bar {
+  height: 100%;
+  background: #4caf50;
+  border-radius: 8px;
+  transition: width .25s ease;
+}
+.vl__progress-text {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #1f2937;
+}
+
+.vl__header {
+  font-weight: 700;
+  color: #8b5cf6; /* tím nhẹ */
+  margin: 18px 0 8px;
+}
+
+.vl__loading, .vl__error, .vl__empty {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.vl__content {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.vl__image-box {
+  min-height: 260px;
+  border: 2px solid #93c5fd;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.vl__image {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+}
+.vl__image-placeholder {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.vl__audio-row {
+  display: flex;
+  gap: 12px;
+}
+.vl__audio-btn {
+  border: none;
+  background: #f22bc7;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.vl__audio-btn[disabled] {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+.vl__icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.vl__word {
+  font-size: 50px;
+  color: #8b5cf6; /* tím */
+  font-weight: 800;
+  text-align: center;
+}
+.vl__phonetic {
+  text-align: center;
+  color: #6b7280;
+  margin-top: -6px;
+  font-size: 20px;
+}
+.vl__meaning {
+  text-align: center;
+  font-size: 30px;
+  color: #111827;
+}
+
+.vl__bottom {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+}
+.vl__btn {
+  border: none;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.vl__btn--ghost {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.vl__btn--ghost:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+.vl__btn--primary {
+  background: #22c55e;
+  color: white;
+}
