@@ -161,3 +161,18 @@
   margin-top: 12px;
   font-size: 14px;
 }
+.clp-avatar-preview {
+  margin-top: 10px;
+  display: inline-block;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 6px;
+}
+
+.clp-avatar-preview img {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 50%;
+}

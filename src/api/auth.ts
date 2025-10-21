@@ -1,21 +1,33 @@
+import axiosClient from "./axiosClient";
+import { tokenService } from "./tokenService";
+
 export type LoginRequest = { email: string; password: string };
-export type TokenResponse = { accessToken: string; refreshToken: string };
+export type LoginRes = { accessToken: string; refreshToken: string;  hasProfiles:boolean; profileCount: number};
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+export async function loginApi(payload: LoginRequest): Promise<LoginRes> {
+  tokenService.clear();
+  try {
+    const res = await axiosClient.post<LoginRes>("/api/auth/login", payload);
 
-export async function loginApi(payload: LoginRequest): Promise<TokenResponse> {
-  const res = await fetch(`${BASE_URL}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
+    const data = res.data;
+
+    //  Lưu lại token vào localStorage qua tokenService
+    tokenService.setTokens(data.accessToken, data.refreshToken);
+
+    return data;
+  } catch (error: any) {
+    // Bắt lỗi trả về từ BE
     let message = "Đăng nhập thất bại";
-    try {
-      const data = await res.json();
-      message = data?.message ?? message;
-    } catch {}
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    }
     throw new Error(message);
   }
-  return res.json();
 }
+
+// Logout (chỉ xóa token FE)
+export async function logoutApi() {
+  tokenService.clear(); 
+  window.location.href = "/login";
+}
+

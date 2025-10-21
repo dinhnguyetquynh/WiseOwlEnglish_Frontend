@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import UnitCard, { type Unit } from "../../components/learner/ui/UnitCard.tsx"; // 👈 import component đã tách
 import "./css/HomePage.css";
 import FancyClassSelect from "../../components/learner/ui/FancyClassSelect.tsx";
-import { useNavigate } from "react-router-dom";
-import { fetchLessonsByAge, type LessonsByAgeRes } from "../../api/learn.ts";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { fetchLessonsForHomePage, type LessonsByClassRes } from "../../api/learn.ts";
+
 
 
 export default function HomePage() {
@@ -15,7 +16,12 @@ export default function HomePage() {
   const [err, setErr] = useState("");
   const navigate = useNavigate();
    
-    const profileId = Number(localStorage.getItem("currentProfileId") || 0);
+    // const profileId = Number(localStorage.getItem("currentProfileId") || 0);
+
+    //lay learnProfileID tu trang SelectedProfilePage.tsx
+      const [searchParams] = useSearchParams();
+      const profileIdStr = searchParams.get("profileId");
+      const profileId = profileIdStr ? Number(profileIdStr) : undefined;
 
 useEffect(() => {
     if (!profileId) return;
@@ -23,7 +29,7 @@ useEffect(() => {
       try {
         setLoading(true);
         setErr("");
-        const data: LessonsByAgeRes = await fetchLessonsByAge(profileId);
+        const data: LessonsByClassRes = await fetchLessonsForHomePage(profileId);
         setGrade(data.gradeOrderIndex); // hiển thị lớp khớp tuổi
         const mapped: Unit[] = data.lessons.map(l => ({
           id: String(l.id),

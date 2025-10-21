@@ -1,0 +1,170 @@
+:root{
+  --gr-green: #16a34a;
+  --gr-pink: #ec4899;
+  --gr-gold: #f59e0b;
+  --gr-silver: #94a3b8;
+  --gr-bronze: #d97706;
+}
+
+.gr-wrap{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 16px 40px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  color: #1f2937;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Confetti nhẹ */
+.gr-confetti{ position:absolute; inset:0; pointer-events:none; }
+.gr-confetti span{
+  position:absolute; top:-10px; width:8px; height:12px; border-radius:2px;
+  animation: gr-fall 2.2s linear infinite; opacity:.85;
+}
+@keyframes gr-fall{
+  0%{ transform: translateY(-10px) rotate(0deg); }
+  100%{ transform: translateY(110vh) rotate(360deg); }
+}
+.gr-confetti span:nth-child(3n){ background:#60a5fa; left:5%;  animation-delay:.1s;}
+.gr-confetti span:nth-child(3n+1){ background:#34d399; left:20%; animation-delay:.2s;}
+.gr-confetti span:nth-child(3n+2){ background:#f472b6; left:40%; animation-delay:.4s;}
+.gr-confetti span:nth-child(5n){ left:60%; }
+.gr-confetti span:nth-child(7n){ left:80%; }
+.gr-confetti span:nth-child(9n){ left:30%; }
+
+/* Header */
+.gr-title{
+  text-align:center; font-size:32px; font-weight:900; margin:0 0 6px;
+  color: var(--gr-green);
+}
+.gr-subtitle{
+  text-align:center; color:#6b7280; margin:0 0 16px; font-weight:600;
+}
+
+/* Main card */
+.gr-main{
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* Score block */
+.gr-score{
+  display:flex; align-items:center; justify-content:center; gap:24px; margin-bottom:14px;
+  flex-wrap: wrap;
+}
+
+/* Vòng tròn % bằng conic-gradient */
+.gr-ring{
+  --size: 148px;
+  width: var(--size); height: var(--size);
+  border-radius: 999px;
+  background:
+    conic-gradient(#22c55e var(--p), #e5e7eb 0);
+  display:grid; place-items:center;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+.gr-ring-inner{
+  width: calc(var(--size) - 20px);
+  height: calc(var(--size) - 20px);
+  border-radius: 999px;
+  background: #fff;
+  display:grid; place-items:center;
+}
+.gr-percent{
+  font-size: 28px; font-weight: 900; color: #16a34a; line-height:1;
+}
+.gr-percent-sub{
+  font-size: 12px; color:#6b7280; margin-top:4px;
+}
+
+/* Points */
+.gr-points{
+  min-width: 140px; text-align:center;
+  background:#f8fafc;
+  border:1px solid #e5e7eb;
+  border-radius:16px; padding:12px 16px;
+}
+.gr-points-value{
+  font-size:28px; font-weight:900; color:#0ea5e9; line-height:1;
+}
+.gr-points-label{ font-size:12px; color:#64748b; }
+
+/* Badge */
+.gr-badge{
+  margin: 10px auto 12px; text-align:center;
+}
+.gr-medal{
+  font-size: 36px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.05));
+}
+.gr-badge-text{
+  margin-top: 4px; color:#6b7280; font-weight:700;
+}
+
+/* Progress */
+.gr-progress{ margin: 10px auto 6px; max-width: 520px; }
+.gr-progress-track{
+  height:10px; background:#e5e7eb; border-radius:999px; overflow:hidden;
+}
+.gr-progress-bar{
+  height:100%; background:#22c55e; width:0; transition: width .35s ease;
+}
+.gr-progress-note{
+  text-align:center; color:#9ca3af; font-size:12px; margin-top:6px; font-weight:600;
+}
+
+/* Next hint */
+.gr-next{
+  margin: 8px auto 0; text-align:center; color:#374151; font-weight:600;
+}
+
+/* Actions */
+.gr-actions{
+  display:flex; gap:10px; justify-content:center; margin-top:16px; flex-wrap:wrap;
+}
+.gr-btn{
+  border:none; border-radius:14px; padding:12px 16px; font-weight:900; cursor:pointer;
+  transition: transform .05s ease, filter .2s ease, box-shadow .2s ease;
+}
+.gr-btn:hover{ filter:brightness(1.03); }
+.gr-btn:active{ transform: translateY(1px); }
+.gr-btn-ghost{ background:#fff; border:1px solid #e5e7eb; }
+.gr-btn-primary{ background:#8b5cf6; color:#fff; box-shadow: 0 3px 10px rgba(139,92,246,.25); }
+.gr-btn-success{ background:#22c55e; color:#fff; box-shadow: 0 3px 10px rgba(34,197,94,.25); }
+
+/* Chủ đề theo tier (nhẹ nhàng) */
+.gr-gold .gr-title{ color: var(--gr-gold); }
+.gr-silver .gr-title{ color: var(--gr-silver); }
+.gr-bronze .gr-title{ color: var(--gr-bronze); }
+
+/* Responsive */
+@media (max-width: 640px){
+  .gr-title{ font-size:26px; }
+  .gr-main{ padding:14px; }
+  .gr-score{ gap:16px; }
+}
+.gr-exit-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.gr-exit-btn:hover {
+  background: #f8f9fa;
+  border-color: #999;
+  color: #000;
+}

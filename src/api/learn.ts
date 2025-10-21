@@ -1,3 +1,5 @@
+import axiosClient from "./axiosClient";
+
 export type LessonBriefRes = {
   id: number;
   unitName: string;
@@ -7,38 +9,13 @@ export type LessonBriefRes = {
   status: "ACTIVE" | "COMPLETE";
 };
 
-export type LessonsByAgeRes = {
+export type LessonsByClassRes = {
   profileId: number;
-  age: number;
   gradeLevelId: number;
   gradeName: string;
   gradeOrderIndex: number; // 1..5
   lessons: LessonBriefRes[];
 };
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
-
-function getAccessToken() {
-  const t = localStorage.getItem("accessToken");
-  if (!t) throw new Error("NOT_AUTHENTICATED");
-  return t;
-}
-
-export async function fetchLessonsByAge(profileId: number): Promise<LessonsByAgeRes> {
-  const token = getAccessToken();
-  const url = `${BASE_URL}/api/learn/lessons/by-age?profileId=${profileId}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) {
-    let msg = "Không lấy được danh sách bài học";
-    try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
 
 // --- Types giống Backend DTO --- //
 export type MediaType = "IMAGE" | "AUDIO"; // (mở rộng thêm nếu backend có VIDEO)
@@ -63,20 +40,120 @@ export type VocabularyDTORes = {
   partOfSpeech?: string | null;
   mediaAssets: MediaAssetDTORes[];
 };
+export type SentenceDTORes ={
+  id : number;
+  orderIndex: number;
+  sentence_en: string;
+  sentence_vi: string;
+  mediaAssets : MediaAssetDTORes[];
+}
+
+
+// const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+
+// function getAccessToken() {
+//   const t = localStorage.getItem("accessToken");
+//   if (!t) throw new Error("NOT_AUTHENTICATED");
+//   return t;
+// }
+
+// export async function fetchLessonsForHomePage(profileId: number): Promise<LessonsByClassRes> {
+//   const token = getAccessToken();
+//   const url = `${BASE_URL}/api/learn/lessons/home-page?profileId=${profileId}`;
+//   const res = await fetch(url, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+//   if (!res.ok) {
+//     let msg = "Không lấy được danh sách bài học";
+//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
+//     throw new Error(msg);
+//   }
+//   return res.json();
+// }
 
 
 
-// Lấy danh sách từ vựng theo lessonId
-export async function fetchVocabulariesByLesson(lessonId: string | number): Promise<VocabularyDTORes[]> {
-  const token = getAccessToken();
-  const url = `${BASE_URL}/api/vocabularies/${lessonId}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    let msg = "Không lấy được danh sách từ vựng";
-    try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
-    throw new Error(msg);
+
+
+// // Lấy danh sách từ vựng theo lessonId
+// export async function fetchVocabulariesByLesson(lessonId: string | number): Promise<VocabularyDTORes[]> {
+//   const token = getAccessToken();
+//   const url = `${BASE_URL}/api/vocabularies/${lessonId}`;
+//   const res = await fetch(url, {
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+//   if (!res.ok) {
+//     let msg = "Không lấy được danh sách từ vựng";
+//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
+//     throw new Error(msg);
+//   }
+//   return res.json();
+// }
+
+
+
+// // Lấy danh sách cau theo lessonId
+// export async function fetchSentenceByLesson(lessonId: string | number): Promise<SentenceDTORes[]> {
+//   const token = getAccessToken();
+//   const url = `${BASE_URL}/api/sentences/${lessonId}`;
+//   const res = await fetch(url, {
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+//   if (!res.ok) {
+//     let msg = "Không lấy được danh sách cau";
+//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
+//     throw new Error(msg);
+//   }
+//   return res.json();
+// }
+
+
+// --- Helper chung để lấy message lỗi từ BE ---
+function getErrMsg(e: any, fallback: string) {
+  return e?.response?.data?.message ??
+         e?.response?.data?.error ??
+         fallback;
+}
+
+// ---------------------------------------------
+//                 API FUNCTIONS
+// ---------------------------------------------
+
+//  Danh sách bài học cho trang chủ
+export async function fetchLessonsForHomePage(profileId: number): Promise<LessonsByClassRes> {
+  try {
+    const res = await axiosClient.get<LessonsByClassRes>(
+      `/api/learn/lessons/home-page`,
+      { params: { profileId } } // dùng params cho gọn
+    );
+    return res.data;
+  } catch (e: any) {
+    throw new Error(getErrMsg(e, "Không lấy được danh sách bài học"));
   }
-  return res.json();
+}
+
+//  Từ vựng theo lessonId
+export async function fetchVocabulariesByLesson(lessonId: string | number): Promise<VocabularyDTORes[]> {
+  try {
+    const res = await axiosClient.get<VocabularyDTORes[]>(
+      `/api/vocabularies/${lessonId}`
+    );
+    return res.data;
+  } catch (e: any) {
+    throw new Error(getErrMsg(e, "Không lấy được danh sách từ vựng"));
+  }
+}
+
+//  Câu theo lessonId
+export async function fetchSentenceByLesson(lessonId: string | number): Promise<SentenceDTORes[]> {
+  try {
+    const res = await axiosClient.get<SentenceDTORes[]>(
+      `/api/sentences/${lessonId}`
+    );
+    return res.data;
+  } catch (e: any) {
+    throw new Error(getErrMsg(e, "Không lấy được danh sách câu"));
+  }
 }

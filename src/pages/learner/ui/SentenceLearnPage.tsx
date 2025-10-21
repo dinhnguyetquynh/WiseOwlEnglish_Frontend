@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { fetchVocabulariesByLesson, type VocabularyDTORes } from "../../../api/learn";
+import { fetchSentenceByLesson, type SentenceDTORes} from "../../../api/learn";
 import "../css/VocabLearnPage.css";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
-export default function VocabLearnPage() {
+export default function SentenceLearnPage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
+  console.log("unitId la: "+unitId);
   const { state } = useLocation() as { state?: HeaderState };
 
   // Header text (nếu có từ LessonMenu)
   const headerText =
     (state?.unitName && state?.unitTitle && `${state.unitName}: ${state.unitTitle}`) ||
-    state?.title ||  "Học từ vựng";
+    state?.title ||  "Học câu";
   
   //ds vocab kiểu VocabularyDTORes
-  const [list, setList] = useState<VocabularyDTORes[]>([]);
+  const [list, setList] = useState<SentenceDTORes[]>([]);
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
@@ -54,14 +55,14 @@ export default function VocabLearnPage() {
       try {
         setLoading(true);
         setErr("");
-        const data = await fetchVocabulariesByLesson(unitId);
+        const data = await fetchSentenceByLesson(unitId);
         if (!isMounted) return;
         // Sort theo orderIndex asc (phòng khi backend chưa order)
         data.sort((a, b) => a.orderIndex - b.orderIndex);
         setList(data);
         setIdx(0);
       } catch (e: any) {
-        if (isMounted) setErr(e?.message ?? "Lỗi tải từ vựng");
+        if (isMounted) setErr(e?.message ?? "Lỗi tải cau");
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -109,21 +110,22 @@ export default function VocabLearnPage() {
       {/* Header (tên bài) */}
       <h2 className="vl__header">{headerText}</h2>
 
-      {loading && <div className="vl__loading">Đang tải từ vựng…</div>}
+      {loading && <div className="vl__loading">Đang tải câu…</div>}
       {err && <div className="vl__error">{err}</div>}
-      {!loading && !err && total === 0 && <div className="vl__empty">Chưa có từ vựng.</div>}
+      {!loading && !err && total === 0 && <div className="vl__empty">Chưa có câu.</div>}
 
       {current && (
         <div className="vl__content">
           {/* Image box */}
           <div className="vl__image-box">
             {media.image ? (
-              <img src={media.image} alt={current.term_en} className="vl__image" />
+              <img src={media.image} alt={current.sentence_en} className="vl__image" />
             ) : (
               <div className="vl__image-placeholder">No Image</div>
             )}
+            
           </div>
-
+            
           {/* Audio buttons */}
           <div className="vl__audio-row">
             <button className="vl__audio-btn" onClick={playNormal}  title="Phát âm thường">
@@ -147,9 +149,8 @@ export default function VocabLearnPage() {
           <audio ref={slowAudioRef} src={media.slow} preload="auto" />
 
           {/* Word & meaning */}
-          <div className="vl__word">{current.term_en}</div>
-          {!!current.phonetic && <div className="vl__phonetic">{current.phonetic}</div>}
-          <div className="vl__meaning">{current.term_vi}</div>
+          <div className="vl__word">{current.sentence_en}</div>
+          <div className="vl__meaning">{current.sentence_vi}</div>
         </div>
       )}
 

@@ -1,0 +1,9 @@
+.gs-wrap{ max-width:960px; margin:0 auto; padding:32px 16px 40px; color:#333; }
+.gs-title{ text-align:center; font-size:36px; font-weight:800; color:#22c55e; margin:8px 0 6px; }
+.gs-subtitle{ text-align:center; color:#6b7280; margin-bottom:28px; font-size:16px; }
+.gs-list{ display:grid; gap:18px; }
+.gs-footer{ text-align:center; color:#9ca3af; margin-top:22px; font-weight:600; }
+
+@media (max-width:640px){
+  .gs-title{ font-size:28px; }
+}

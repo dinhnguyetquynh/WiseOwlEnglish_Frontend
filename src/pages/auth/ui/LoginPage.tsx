@@ -21,9 +21,14 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await loginApi({ email, password: pw });
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      nav("/create-profile"); // đổi thành route bạn muốn
+      // localStorage.setItem("accessToken", data.accessToken);
+      // localStorage.setItem("refreshToken", data.refreshToken);
+      
+      if(data.profileCount===0){
+        nav("/create-profile");
+      }else{
+        nav("/select-profile");
+      }
     } catch (ex: any) {
       setErr(ex?.message ?? "Đăng nhập thất bại");
     } finally {

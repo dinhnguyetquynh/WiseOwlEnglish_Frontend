@@ -16,6 +16,14 @@ import VerifyOtpPage from './pages/learner/ui/VerifyOtpPage';
 import LoginPage from './pages/auth/ui/LoginPage';
 import CreateLearnerProfilePage from './pages/learner/ui/CreateLearnerProfilePage';
 import VocabLearnPage from './pages/learner/ui/VocabLearnPage';
+import SelectProfilePage from './pages/learner/ui/SelectProfilePage';
+import SentenceLearnPage from './pages/learner/ui/SentenceLearnPage';
+import PictureGuessingGame from './pages/learner/ui/PictureGuessingGame';
+import GameSelectPage from './pages/learner/ui/GameSelectedPage';
+import PictureGuessingGamePage from './pages/learner/ui/PictureGuessingGame';
+import GameResultPage from './pages/learner/ui/GameResultPage';
+import SoundWordGamePage from './pages/learner/ui/SoundWordGamePage';
+import PictureSentenceGamePage from './pages/learner/ui/PictureSentenceGamePage';
 
 function App() {
 
@@ -28,6 +36,7 @@ function App() {
           {/* Đăng ký / Đăng nhập */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage/>} />
+        <Route path="/select-profile" element={<SelectProfilePage/>}/>
          <Route path="/create-profile" element={<CreateLearnerProfilePage/>} />
         <Route path="/verify-otp" element={<VerifyOtpPage />} />
         {/* Tất cả route của learner đều nằm trong LearnerLayout */}
@@ -39,6 +48,12 @@ function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
          <Route path="/learn/units/:unitId/vocab/learn"  element={<VocabLearnPage />} /> 
+         <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage/>}/>
+         <Route path ="/learn/units/:unitId/vocab/review" element={<GameSelectPage/>}/>
+         <Route path ="/learn/units/:unitId/sentence/review" element={<PictureSentenceGamePage/>}/>
+         <Route path="/games/picture-guessing/:unitId" element={<PictureGuessingGamePage />} />
+         <Route path="/games/sound-word/:unitId" element={<SoundWordGamePage />} />
+         <Route path="/game-result" element={<GameResultPage />} />
       </Routes>
     </BrowserRouter>
   )
