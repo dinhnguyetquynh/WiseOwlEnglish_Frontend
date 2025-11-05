@@ -24,7 +24,7 @@ export default function GameResultPage() {
 
     if (!data) return null;
 
-  const { total, correct, points, unitId, from } = data;
+  const { total, correct, points, unitId, from ,gameType} = data;
   const percent = useMemo(
     () => (total > 0 ? Math.round((correct / total) * 100) : 0),
     [correct, total]
@@ -76,9 +76,26 @@ export default function GameResultPage() {
 
   };
 
+  // const toSelectGame = () => {
+  //   unitId ? nav(`/learn/units/${unitId}/vocab/review`,{ replace: true }) : nav("/learn/units/:unitId/sentence/review");
+  // };
+
   const toSelectGame = () => {
-    unitId ? nav(`/learn/units/${unitId}/vocab/review`) : nav("/games/select");
-  };
+    if (!unitId || !gameType) {
+      nav("/games/select", { replace: true });
+      return;
+    }
+
+    // Dùng trực tiếp gameType để xây dựng route
+    if (gameType === "vocab") {
+      nav(`/learn/units/${unitId}/vocab/review`, { replace: true });
+    } else if (gameType === "sentence") {
+      nav(`/learn/units/${unitId}/sentence/review`, { replace: true });
+    } else {
+        // Xử lý các loại game khác hoặc fallback
+        nav("/games/select", { replace: true });
+    }
+};
 
   const toUnit = () => {
     // Điều hướng sang trang “Unit” của bạn (chỉnh theo route thật)

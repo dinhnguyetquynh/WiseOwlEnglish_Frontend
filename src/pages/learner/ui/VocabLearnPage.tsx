@@ -94,12 +94,28 @@ export default function VocabLearnPage() {
     slowAudioRef.current?.load();
     slowAudioRef.current?.play().catch(() => {});
   };
+const toLessonMenu = () => {
+  const qs = new URLSearchParams({
+    title: state?.title ?? "",
+    unitName: state?.unitName ?? "",
+    unitTitle: state?.unitTitle ?? "",
+  }).toString();
+
+  navigate(`/learn/units/${unitId}?${qs}`, {
+    replace: true,                
+    state: { 
+      title: state?.title, 
+      unitName: state?.unitName,
+      unitTitle: state?.unitTitle,
+    },
+  });
+};
 
   return (
     <div className="vl">
       {/* Top bar & close */}
       <div className="vl__top">
-        <button className="vl__exit" onClick={() => navigate(-1)}>×</button>
+        <button className="vl__exit" onClick={() => toLessonMenu()}>×</button>
         <div className="vl__progress-wrap" aria-label={`Tiến độ ${idx + 1}/${total}`}>
           <div className="vl__progress-bar" style={{ width: `${pct}%` }} />
           <span className="vl__progress-text">{idx + 1}/{total}</span>
@@ -148,7 +164,7 @@ export default function VocabLearnPage() {
 
           {/* Word & meaning */}
           <div className="vl__word">{current.term_en}</div>
-          {!!current.phonetic && <div className="vl__phonetic">{current.phonetic}</div>}
+          {!!current.phonetic && <div className="vl__phonetic">{current.phonetic}_({current.partOfSpeech})</div>}
           <div className="vl__meaning">{current.term_vi}</div>
         </div>
       )}

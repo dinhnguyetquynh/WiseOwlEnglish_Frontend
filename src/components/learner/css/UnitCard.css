@@ -6,6 +6,7 @@
   border-radius: 18px;
   padding: 18px;
   background: #f8fafc;
+  align-items: center; 
 }
 .uc--active { background: #e6f3ff; }   /* xanh nhạt */
 .uc--done   { background: #f0fdf4; }   /* xanh lá nhạt */
@@ -53,16 +54,28 @@
 
 /* right part */
 .uc__right { 
-  display: grid; 
+  justify-self: end;  
+  align-self: center;  
+  display: flex;
+  align-items: center; 
+  justify-content: flex-end; 
+  min-height: 100px;
+  /* display: grid; 
   align-content: center; 
   justify-items: end; 
   gap: 10px; 
-  width: 180px;          /* cố định chiều rộng */
-  height: 100px;
+  width: 180px;          
+  height: 100px; */
  }
 
 .uc__owl { 
-  width: 90%; 
+  /* width: 90%; 
   height: 90%; 
+  object-fit: contain; */
+  display: block;
+  max-width: 100%;
+  max-height: 120px;
+  width: auto;
+  height: auto;
   object-fit: contain;
  }

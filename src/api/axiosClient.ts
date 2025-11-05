@@ -4,7 +4,7 @@ import { tokenService } from "../api/tokenService";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
-  headers: { "Content-Type": "application/json" },
+  headers: {},
   withCredentials: false, // nếu dùng cookie HttpOnly hãy bật true và BE cho phép CORS credentials
 });
 

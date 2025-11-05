@@ -161,3 +161,15 @@ export async function uploadAvatarApi(file: File): Promise<string> {
     throw new Error(getErrMsg(e, "Upload ảnh thất bại"));
   }
 }
+
+//Get Learner By profileId
+export async function getProfile(profileId:Number):Promise<LearnerProfileRes> {
+  try {
+    const res = await axiosClient.get<LearnerProfileRes>(`/api/learner-profiles/get-profile/${profileId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch profile:", error);
+    throw error;
+  }
+  
+}

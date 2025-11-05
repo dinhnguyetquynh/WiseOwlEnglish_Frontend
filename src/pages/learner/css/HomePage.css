@@ -1,4 +1,4 @@
-.hp { 
+/* .hp { 
   display: flex; 
   flex-direction: column; 
   gap: 5px; }
@@ -34,4 +34,140 @@
   border-top: 1px solid #e5e7eb; }
 
 .hp__units { display: flex; flex-direction: column; gap: 16px; }
+ */
+/* ===== HomePage header & layout ===== */
+.hp { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px;
+}
 
+.hp__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;   /* 👈 đẩy Select trái, account phải */
+  gap: 16px;
+  padding: 10px 14px;
+}
+
+.hp__title { 
+  font-size: 18px;
+  font-weight: 600; 
+  color: #0f172a; 
+}
+
+.hp__select {
+  padding: 12px 14px; 
+  border-radius: 10px; 
+  border: 1px solid #e5e7eb;
+  font-size: 16px;
+  font-weight: 600; 
+  background: #fff;
+}
+.hp__select:focus { 
+  outline: 2px solid #93c5fd; 
+  box-shadow: 0 0 0 2px rgba(147,197,253,.25);
+}
+
+.hp__divider { 
+  border: 0; 
+  border-top: 1px solid #e5e7eb; 
+}
+
+/* ===== Account block ===== */
+.hp_account{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  /* border: 1px solid #e5e7eb; */
+  border-radius: 12px;
+  background: #fff;
+  transition: box-shadow .2s ease, transform .06s ease;
+}
+.hp_account:hover{
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+.hp_account:active{
+  transform: translateY(1px);
+}
+
+.hp_account_avatar{
+  width: 50px;
+  height: 50px;
+  aspect-ratio: 1 / 1; 
+  border-radius: 50%;
+  overflow: hidden;
+  /* flex: 0 0 40px; */
+  flex-shrink: 0; 
+  border: 2px solid #e2e8f0;        /* viền nhẹ cho avatar */
+  box-shadow: 0 1px 0 rgba(0,0,0,.03) inset;
+}
+.hp_account_avatar img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hp_account p{
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+  font-size: 16px;
+  white-space: nowrap;               /* không xuống dòng tên */
+  /* overflow: hidden; */
+  text-overflow: ellipsis;
+  max-width: 140px;                  /* tránh tràn layout nếu tên dài */
+}
+
+/* ===== Units list ===== */
+.hp__units { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 16px; 
+}
+
+/* ===== States ===== */
+.hp__error{
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 600;
+}
+.hp__loading{
+  color: #0c4a6e;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 600;
+}
+
+/* ===== Mobile tweaks ===== */
+@media (max-width: 480px){
+  .hp__header{
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hp__select{
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .hp_account{
+    padding: 6px 8px;
+    gap: 8px;
+  }
+  .hp_account_avatar{
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+  .hp_account p{
+    max-width: 100px;
+    font-size: 13px;
+  }
+}

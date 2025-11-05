@@ -7,6 +7,7 @@ export type LessonBriefRes = {
   orderIndex: number;
   percentComplete: number; // 0..100
   status: "ACTIVE" | "COMPLETE";
+  mascot : string;
 };
 
 export type LessonsByClassRes = {

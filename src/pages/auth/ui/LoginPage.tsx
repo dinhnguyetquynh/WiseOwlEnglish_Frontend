@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, replace, useNavigate } from "react-router-dom";
 import { loginApi } from "../../../api/auth";
 import "../css/LoginPage.css";
 
@@ -25,9 +25,9 @@ export default function LoginPage() {
       // localStorage.setItem("refreshToken", data.refreshToken);
       
       if(data.profileCount===0){
-        nav("/create-profile");
+        nav("/create-profile",{replace:true});
       }else{
-        nav("/select-profile");
+        nav("/select-profile",{replace:true});
       }
     } catch (ex: any) {
       setErr(ex?.message ?? "Đăng nhập thất bại");

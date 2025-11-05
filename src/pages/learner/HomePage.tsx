@@ -4,6 +4,8 @@ import "./css/HomePage.css";
 import FancyClassSelect from "../../components/learner/ui/FancyClassSelect.tsx";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { fetchLessonsForHomePage, type LessonsByClassRes } from "../../api/learn.ts";
+import { getProfileId } from "../../store/storage.ts";
+import { getProfile, type LearnerProfileRes } from "../../api/learnerProfile.ts";
 
 
 
@@ -14,14 +16,24 @@ export default function HomePage() {
   const [grade, setGrade] = useState<number>(1); // chỉ để hiển thị; API tự tính theo tuổi
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  const [profile, setProfile] = useState<LearnerProfileRes | null>(null);
   const navigate = useNavigate();
    
-    // const profileId = Number(localStorage.getItem("currentProfileId") || 0);
-
-    //lay learnProfileID tu trang SelectedProfilePage.tsx
-      const [searchParams] = useSearchParams();
-      const profileIdStr = searchParams.get("profileId");
-      const profileId = profileIdStr ? Number(profileIdStr) : undefined;
+      //lấy profileID từ localStorage
+      const profileId = getProfileId();
+// ✅ gọi API lấy profile
+  useEffect(() => {
+    console.log("Đã gọi đến api getProfile")
+    if (!profileId) return;
+    (async () => {
+      try {
+        const data = await getProfile(profileId);
+        setProfile(data);
+      } catch (e) {
+        console.error("Lỗi tải profile:", e);
+      }
+    })();
+  }, [profileId]);
 
 useEffect(() => {
     if (!profileId) return;
@@ -39,7 +51,7 @@ useEffect(() => {
           lessonCount: 100,                        // hoặc tổng item lesson nếu muốn
           progress: { done: l.percentComplete, total: 100 },
           status: l.status,
-          // mascot: có thể gán theo grade/lesson nếu muốn
+          mascot:l.mascot
         }));
         setUnits(mapped);
       } catch (e: any) {
@@ -74,6 +86,15 @@ const handleContinue = (unit: Unit) => {
       {/* Header: select lớp */}
       <header className="hp__header">
          <FancyClassSelect value={grade} onChange={setGrade} />
+         <div className="hp_account">
+          <div className="hp_account_avatar">
+            <img src={profile?.avatarUrl ??
+                "https://res.cloudinary.com/dxhhluk84/image/upload/v1759137636/unit1_color_noBG_awzhqe.png"} alt="avatar" />
+          </div>
+          <div>
+            <p>{profile?.nickName ?? "Đang tải..."}</p>
+          </div>
+         </div>
       </header>
 
       <hr className="hp__divider" />

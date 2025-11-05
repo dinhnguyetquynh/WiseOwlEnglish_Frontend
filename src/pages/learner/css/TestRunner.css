@@ -1,0 +1,120 @@
+/* test-only.css */
+.test-layout { display:flex; flex-direction:column; gap:12px; }
+.test-bar { 
+    display:flex; 
+    justify-content:center; 
+    gap:24px; 
+    align-items:center; 
+}
+.test-body { display:grid; grid-template-columns: 160px 1fr; gap:20px; }
+.test-index{
+    margin-bottom: 20px;
+    margin-left: 50px;
+}
+.test-index p{
+    font-size: 18px;
+    font-weight: bold;
+}
+.test-sidenav { display:grid; grid-template-columns: repeat(2, 64px); gap:10px; }
+.test-qbtn { height:48px; border-radius:12px; border:2px solid #bbb; background:#fff; }
+.test-qbtn.is-current { border-color:#2196f3; }
+.test-qbtn.is-answered { border-color:#4caf50; }
+.test-main .test-card { 
+    /* border:3px solid #2196f3;  */
+    border-radius:16px; 
+    padding:20px; 
+}
+.test-actions { display:flex; justify-content:space-between; margin-top:16px; }
+
+/* Layout cũ giữ nguyên ... */
+
+/* ===== Timer ===== */
+.test-timer{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  /* hình chữ nhật bo góc + viền nổi bật */
+  padding: 8px 16px;
+  border: 3px solid #e84e6f;
+  border-radius: 14px;
+  background:white;
+
+  /* số to + canh đều */
+  font-weight: 700;
+  font-size: clamp(18px, 2.6vw, 26px);
+  color: #2196f3;
+  line-height: 1;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;     /* số có độ rộng bằng nhau */
+  font-feature-settings: "tnum" 1;        /* fallback */
+
+  /* hiệu ứng nổi khối nhẹ */
+  box-shadow:
+    inset 0 -2px 0 rgba(33,150,243,.08),
+    0 4px 12px rgba(33,150,243,.12);
+}
+
+.test-timer__icon{
+  font-size: 1.1em;      /* hơi lớn hơn chữ */
+  margin-right: 2px;
+}
+
+.test-timer__colon{
+  width: 0.9em;          /* chừa chỗ cố định cho dấu : */
+  text-align: center;
+  animation: timerBlink 1s steps(1, end) infinite;
+  opacity: .9;
+}
+
+/* khi sắp hết giờ: đổi màu + rung nhẹ */
+.test-timer.is-low{
+  border-color: #ff6b6b;
+  box-shadow:
+    inset 0 -2px 0 rgba(255,107,107,.1),
+    0 4px 14px rgba(255,107,107,.18);
+}
+.test-timer__hh,
+.test-timer__mm,
+.test-timer__ss {
+  width: 2ch; /* độ rộng cố định cho mỗi phần số */
+  text-align: center;
+}
+
+.test-timer.is-low .test-timer__mm,
+.test-timer.is-low .test-timer__ss,
+.test-timer.is-low .test-timer__colon{
+  color: #d84343;
+}
+
+@keyframes timerBlink{
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: .25; }
+}
+/* --- CSS cho Câu hỏi Nhập Text (PWW) --- */
+.pg-input-area {
+ margin: 24px auto 0;
+ max-width: 400px;
+}
+
+.pg-text-input {
+ width: 100%;
+ font-size: 20px;
+ padding: 14px 18px;
+ border: 2px solid #ced4da;
+ border-radius: 12px;
+ text-align: center;
+ font-weight: 600;
+ letter-spacing: 0.5px;
+ box-sizing: border-box; /* Đảm bảo padding không làm vỡ layout */
+}
+.pg-text-input:focus {
+ /* Dùng màu tím từ theme của bạn */
+ border-color: #8b5cf6; 
+ box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+ outline: none;
+}
+.pg-text-input:disabled {
+ background-color: #f1f3f5;
+}

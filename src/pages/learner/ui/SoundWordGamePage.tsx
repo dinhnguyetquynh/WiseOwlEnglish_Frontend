@@ -98,7 +98,8 @@ export default function SoundWordGamePage() {
     } else {
         //chuyển qua trang kết quả
         gotoResult(navigate, {
-          from: "sound-word",       // <— TÊN GAME THỐNG NHẤT
+          from: "sound-word",  
+          gameType:"vocab",     // <— TÊN GAME THỐNG NHẤT
           unitId,                   // giữ nguyên
           total,
           correct: correctCount,    // map từ state nội bộ -> schema chuẩn

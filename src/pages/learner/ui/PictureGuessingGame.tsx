@@ -67,23 +67,13 @@ export default function PictureGuessingGamePage() {
     if (next >= total) {
       // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
               gotoResult(navigate, {
-                from: "picture-guessing",       
+                from: "picture-guessing",  
+                gameType:"vocab",     
                 unitId,                   
                 total,
                 correct: correctCount,    
                 points: earned,           
               });
-      // navigate("/game-result", {
-      //   state: {
-      //     from: "picture-guessing",
-      //     unitId,
-      //     total,
-      //     correct: correctCount,
-      //     points: earned,
-      //   },
-      //   replace: true,
-      // });
-      // return;
     }
     setIdx(next);
     setShowResult(null);
@@ -147,7 +137,7 @@ export default function PictureGuessingGamePage() {
 
       <div className="pg-options pg-options--grid">
         {current.options
-          .slice()
+          .slice()//tao ban sao
           .sort((a, b) => a.position - b.position)
           .map((opt) => {
             const isSelected = selectedId === opt.id;

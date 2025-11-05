@@ -2,9 +2,20 @@
 
 import type { NavigateFunction } from "react-router-dom";
 
+export type GameType = "vocab" | "sentence" | "grammar";
+
+export type GameName =  
+| "sound-word"  
+| "picture-guessing"  
+| "picture-sentence"  
+| "word-to-sentence"  
+| "sentence-hidden"
+| "picture-match-word"
+| "word-writing";
 export type GameResultPayload = {
   /** Tên game để điều hướng chơi lại (vd: "sound-word", "picture-guessing") */
-  from: string;
+  from: GameName;
+  gameType : GameType;
   unitId?: string | number;
   total: number;
   correct: number;

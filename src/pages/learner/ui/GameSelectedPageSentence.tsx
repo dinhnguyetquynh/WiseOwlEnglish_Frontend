@@ -23,7 +23,7 @@ type MenuState = {
   unitTitle?: string;
   title?: string;
 };
-export default function GameSelectPage() {
+export default function GameSelectedPageSentence() {
   const nav = useNavigate();
   const { unitId = "" } = useParams();       // /games/select/:unitId?
   const [sp] = useSearchParams();
@@ -34,46 +34,35 @@ export default function GameSelectPage() {
   // ✅ chỉ cần thêm 1 object nữa là có game mới
   const GAMES: Array<Omit<GameCardProps, "onClick"> & { onClick: () => void }> = [
     {
-      title: "Nhìn Hình Chọn Chữ",
-      description: "Luyện trí nhớ và nhận biết mặt chữ. Nhìn hình và chọn từ đúng!",
+      title: "Điền từ còn thiếu trong câu",
+      description: "Luyện khả năng viết",
       ctaLabel: "CHƠI NGAY!",
       icon: <ImageIcon />,
       accent: "green",
       onClick: () => {
-        resolvedUnitId ? nav(`/games/picture-guessing/${resolvedUnitId}`) : nav(`/games/picture-guessing`);
+        resolvedUnitId ? nav(`/games/sentence-word-hidden/${resolvedUnitId}`) : nav(`/games/sentence-word-hidden`);
       },
     },
     {
-      title: "Nghe & Chọn Chữ",
-      description: "Nghe âm thanh và chọn chữ phù hợp để tăng cường kỹ năng nghe.",
+      title: "Nhìn hình chọn câu",
+      description: "Luyện khả ghi nhớ",
       ctaLabel: "CHƠI NGAY!",
-      icon: <HeadphoneIcon />,
-      accent: "purple",
+      icon: <ImageIcon />,
+      accent: "green",
       onClick: () => {
-        resolvedUnitId ? nav(`/games/sound-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
+        resolvedUnitId ? nav(`/games/picture-sentence/${resolvedUnitId}`) : nav(`/games/picture-sentence`);
       },
     },
     {
-      title: "Nhìn hình và viết từ vựng",
-      description: "Rèn luyện viết từ vựng",
+      title: "Sắp xếp từ thành câu",
+      description: "Luyện khả năng nhớ và viết câu",
       ctaLabel: "CHƠI NGAY!",
-      icon: <HeadphoneIcon />,
-      accent: "purple",
+      icon: <ImageIcon />,
+      accent: "green",
       onClick: () => {
-        resolvedUnitId ? nav(`/games/picture-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
-      },      
-    },
-    {
-      title: "Nối hình và từ vựng ",
-      description: "Rèn luyện trí nhớ từ vựng",
-      ctaLabel: "CHƠI NGAY!",
-      icon: <HeadphoneIcon />,
-      accent: "purple",
-      onClick: () => {
-        resolvedUnitId ? nav(`/games/picture-match-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
-      },      
+        resolvedUnitId ? nav(`/games/word-to-sentence/${resolvedUnitId}`) : nav(`/games/word-to-sentence`);
+      },
     }
-
   ];
 
   const savedStateStr: MenuState | undefined = (() => {
@@ -98,7 +87,7 @@ export default function GameSelectPage() {
       <button className="gs-back-btn" onClick={handleBack}>
         ← Trở lại trang trước
       </button>
-        <p>Trang chủ &gt; Menu bài học &gt; Ôn tập từ vựng </p>
+        <p>Trang chủ &gt; Menu bài học &gt; Ôn tập câu </p>
         <h1 className="gs-title"><span>🌟</span> Sẵn Sàng Học Chưa? <span>🌟</span></h1>
         <p className="gs-subtitle">Chọn trò chơi bạn muốn chinh phục hôm nay!</p>
       </header>

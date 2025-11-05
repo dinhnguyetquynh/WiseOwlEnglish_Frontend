@@ -1,0 +1,18 @@
+.test-page {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background-color: #f9fafc; /* màu nền nhẹ để phân biệt vùng test */
+}
+
+.test-container {
+  width: 100%;
+  max-width: 960px; /* cố định chiều rộng khung trung tâm */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  box-sizing: border-box;
+}

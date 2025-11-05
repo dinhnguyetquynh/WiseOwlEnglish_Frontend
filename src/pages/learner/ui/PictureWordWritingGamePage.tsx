@@ -1,32 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+// src/pages/game/PictureWordWritingGamePage.tsx
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPictureSentenceGames, type PictureSentenceQuesRes } from "../../../api/game";
+import { getPictureWordGames, type PictureWordRes } from "../../../api/game";
 import { gotoResult } from "../../../utils/gameResult";
-import "../css/PictureSentenceGame.css";
+import "../css/PictureWordWriting.css"; // tận dụng css hiện có (class giống nhau)
 
-export default function PictureSentenceGamePage() {
+export default function PictureWordWritingGamePage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [games, setGames] = useState<PictureSentenceQuesRes[]>([]);// mảng câu hỏi lấy dc từ api
+  const [games, setGames] = useState<PictureWordRes[]>([]);
 
-  const [idx, setIdx] = useState(0);//chỉ số câu hiện tại
-  const [selectedOptId, setSelectedOptId] = useState<number | null>(null);//id option mà người chơi đang chọn
-  const [judge, setJudge] = useState<null | "correct" | "wrong">(null);//trạng thái đã chấm
-  const [earned, setEarned] = useState(0); //tổng điểm kiếm được trong lượt chơi
-  const [correctCount, setCorrectCount] = useState(0); // số câu đúng. 
+  const [idx, setIdx] = useState(0);
+  const [inputText, setInputText] = useState("");
+  const [judge, setJudge] = useState<null | "correct" | "wrong">(null);
+  const [earned, setEarned] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
 
   const total = games.length;
   const current = games[idx];
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
+        console.log("Đã vào được trang word-writing");
         setLoading(true);
-        const data = await getPictureSentenceGames(Number(unitId));
+        const data = await getPictureWordGames(Number(unitId));
         if (!alive) return;
         data.sort((a, b) => a.position - b.position);
         setGames(data);
@@ -37,25 +40,43 @@ export default function PictureSentenceGamePage() {
         setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [unitId]);
 
   useEffect(() => {
-    setSelectedOptId(null);
+    // reset input & judge when moving to a new question
+    setInputText("");
     setJudge(null);
+    // focus input when new question loads
+    setTimeout(() => inputRef.current?.focus(), 50);
   }, [idx]);
 
   const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
 
-  const correctAnswerText =
-    current?.options.find((o) => o.isCorrect)?.sentenceAnswer ?? "";
+  // normalize function: trim, lowercase, remove diacritics (for robustness)
+  function normalizeAnswer(s = "") {
+    return s
+      .trim()
+      .toLowerCase()
+      // remove diacritics (accents)
+      .normalize?.("NFD")
+      .replace(/\p{Diacritic}/gu, "") ?? s.trim().toLowerCase();
+  }
+
+  const correctAnswerText = current?.optsRes?.find((o) => o.isCorrect)?.answerText ?? current?.optsRes?.[0]?.answerText ?? "";
 
   function handleCheck() {
-    if (!current || selectedOptId == null) return;
-    const isRight = !!current.options.find((o) => o.id === selectedOptId)?.isCorrect;
+    if (!current) return;
+    const user = normalizeAnswer(inputText);
+    const correct = normalizeAnswer(correctAnswerText);
+
+    const isRight = user.length > 0 && user === correct;
+
     if (isRight) {
       setCorrectCount((x) => x + 1);
-      setEarned((x) => x + (current.rewardPoint ?? 0));
+      setEarned((x) => x + (current.rewardCore ?? 0));
       setJudge("correct");
     } else {
       setJudge("wrong");
@@ -68,8 +89,23 @@ export default function PictureSentenceGamePage() {
       setIdx((x) => x + 1);
     } else {
       gotoResult(navigate, {
-        from: "picture-sentence",
-        gameType:"sentence",
+        from: "picture-word",
+        unitId,
+        total,
+        correct: correctCount,
+        points: earned,
+      });
+    }
+  }
+
+  function handleSkip() {
+    // skip to next (but if last, finish)
+    if (idx + 1 < total) {
+      setIdx((x) => Math.min(total - 1, x + 1));
+    } else {
+      gotoResult(navigate, {
+        from: "word-writing",
+        gameType:"vocab",
         unitId,
         total,
         correct: correctCount,
@@ -94,45 +130,43 @@ export default function PictureSentenceGamePage() {
         </div>
       </div>
 
-      <h1 className="psg__title">{current.sentenceQues}</h1>
+      <h1 className="psg__title">Viết từ mô tả hình</h1>
 
       <div className={`psg__image-box ${judge === "correct" ? "ok" : ""} ${judge === "wrong" ? "no" : ""}`}>
-        <img src={current.imageUrl} alt="question" />
+        <img src={current.imgURL} alt="question" />
       </div>
 
-      <div className="psg__options">
-        {current.options
-          .slice()
-          .sort((a, b) => a.position - b.position)
-          .map((opt) => {
-            const isSelected = selectedOptId === opt.id;
-            const judged = judge !== null;
-            const isRight = opt.isCorrect;
-            return (
-              <button
-                key={opt.id}
-                className={
-                  "psg__opt" +
-                  (isSelected ? " selected" : "") +
-                  (judged && isRight ? " correct" : "") +
-                  (judged && isSelected && !isRight ? " wrong" : "")
-                }
-                disabled={judged}
-                onClick={() => setSelectedOptId(opt.id)}
-              >
-                {opt.sentenceAnswer}
-              </button>
-            );
-          })}
+      <div className="psg__write-area">
+        <label htmlFor="pw-input" className="visually-hidden">Nhập từ</label>
+        <input
+          id="pw-input"
+          ref={inputRef}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && inputText.trim().length > 0 && judge === null) {
+              handleCheck();
+            }
+            if (e.key === "Enter" && judge !== null) {
+              nextOrFinish();
+            }
+          }}
+          placeholder="Gõ từ vựng vào đây..."
+          className="psg__text-input"
+          disabled={judge !== null}
+          autoComplete="off"
+          autoFocus
+        />
+        <div className="psg__hint">Nhập chính xác từ (không phân biệt hoa thường)</div>
       </div>
 
       {/* Footer khi CHƯA kiểm tra */}
       {judge === null && (
         <div className="psg__actions">
-          <button className="psg__ghost" onClick={() => setIdx((x) => Math.min(total - 1, x + 1))}>Bỏ qua</button>
+          <button className="psg__ghost" onClick={handleSkip}>Bỏ qua</button>
           <button
             className="psg__primary"
-            disabled={selectedOptId == null}
+            disabled={inputText.trim().length === 0}
             onClick={handleCheck}
           >
             KIỂM TRA
@@ -140,7 +174,7 @@ export default function PictureSentenceGamePage() {
         </div>
       )}
 
-      {/* === FEEDBACK BANNER DÍNH ĐÁY, GIỐNG SOUND WORD === */}
+      {/* Feedback banner */}
       {judge !== null && (
         <div className={`psg__feedback ${judge === "correct" ? "psg__feedback--ok" : "psg__feedback--bad"}`}>
           <div className="psg__feedback-inner">
@@ -148,13 +182,11 @@ export default function PictureSentenceGamePage() {
               <div className={judge === "correct" ? "psg__fb-icon ok" : "psg__fb-icon bad"} aria-hidden />
               <div className="psg__fb-text">
                 <div className="psg__fb-title">
-                  {judge === "correct" ? "Đáp án đúng" : "Đáp án đúng:"}
+                  {judge === "correct" ? "Chính xác" : "Đáp án đúng:"}
                 </div>
                 <div className="psg__fb-answer">{correctAnswerText}</div>
                 {judge === "correct" && (
-                  <div className="psg__fb-reward">
-                    Bạn nhận được <b>+{current.rewardPoint ?? 0}</b> điểm thưởng
-                  </div>
+                  <div className="psg__fb-reward">Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng</div>
                 )}
               </div>
             </div>

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import "../css/SelectProfilePage.css";
 import { getListLearnerProfile, type LearnerProfileRes } from "../../../api/learnerProfile";
 import { useNavigate } from "react-router-dom";
+import { saveProfileId } from "../../../store/storage";
 
 type Profile = { id: number; name: string; avatar: string; color: string };
  const DEFAULT_AVATAR ="https://res.cloudinary.com/demo/image/upload/v1699999999/default_avatar.png";
@@ -67,7 +68,8 @@ export default function SelectProfilePage() {
         disabled={!selectedId}
         onClick={()=>{
           if(selectedId){
-            navigate(`/learn?profileId=${selectedId}`);
+            saveProfileId(selectedId);
+            navigate(`/learn`);
           }
         }}
         >

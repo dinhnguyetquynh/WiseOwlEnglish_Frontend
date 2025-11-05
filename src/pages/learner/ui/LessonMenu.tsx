@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../css/LessonMenu.css";
-import type { JSX } from "react";
+import { useEffect, type JSX } from "react";
 
 type LessonMenuItem = {
   key: string;
@@ -21,31 +21,44 @@ export default function LessonMenu() {
   const { unitId = "u1" } = useParams();
   const location = useLocation();
   const state = (location.state ?? {}) as MenuState;
+
+
   const [sp] = useSearchParams();
 
   // Ưu tiên state; nếu F5 mất state, lấy từ query; nếu vẫn thiếu thì fallback chữ "BÀI HỌC"
   const unitName = state.unitName ?? sp.get("unitName") ?? "";
   const unitTitle = state.unitTitle ?? sp.get("unitTitle") ?? "";
   const titleFromStateOrQuery = state.title ?? sp.get("title") ?? "";
+ 
+
 
   const headerText =
     (unitName && unitTitle && `${unitName}: ${unitTitle}`) ||
     titleFromStateOrQuery ||
     "BÀI HỌC";
+  const reviewTo = `/games/select/${unitId}`;
 
   const items: LessonMenuItem[] = [
     { key: "learn-vocab",    label: "HỌC TỪ VỰNG",   icon: <span className="lm__icon-emoji">📖</span>, gradientClass: "lm__btn--yellow", to: `/learn/units/${unitId}/vocab/learn` },
     { key: "review-vocab",   label: "ÔN TỪ VỰNG",    icon: <span className="lm__icon-emoji">↻</span>, gradientClass: "lm__btn--green",  to: `/learn/units/${unitId}/vocab/review` },
     { key: "learn-sentence", label: "HỌC CÂU",       icon: <span className="lm__icon-emoji">💬</span>, gradientClass: "lm__btn--pink",  to: `/learn/units/${unitId}/sentence/learn` },
     { key: "review-sentence",label: "ÔN CÂU",        icon: <span className="lm__icon-emoji">✏️</span>, gradientClass: "lm__btn--lime",  to: `/learn/units/${unitId}/sentence/review` },
-    { key: "test",           label: "KIỂM TRA",      icon: <span className="lm__icon-emoji">📋</span>, gradientClass: "lm__btn--blue",  to: `/learn/units/${unitId}/test` },
+    { key: "test",           label: "KIỂM TRA",      icon: <span className="lm__icon-emoji">📋</span>, gradientClass: "lm__btn--blue",  to: `/learn/units/${unitId}/testlist` },
   ];
+
+  useEffect(() => {
+  if (state && (state.unitName || state.unitTitle || state.title)) {
+    localStorage.setItem("lessonMenuState", JSON.stringify(state));
+    console.log("Du lieu da luu:" + state.unitName)
+  }
+}, [state]);
+
 
   return (
     <div className="lm">
       {/* Header full width */}
       <header className="lm__header">
-        <button className="lm__back" onClick={() => navigate(-1)}>←</button>
+        <button className="lm__back" onClick={() => navigate("/learn")}>←</button>
         <div className="lm__title-inline">{headerText}</div>
       </header>
 
@@ -55,7 +68,13 @@ export default function LessonMenu() {
           <button
             key={it.key}
             className={`lm__btn ${it.gradientClass}`}
-            onClick={() => navigate(it.to)}
+            onClick={() => navigate(it.to,{
+              state: {
+                  title: headerText,
+                  unitName,
+                  unitTitle,
+                },
+            })}
           >
             <span className="lm__icon">{it.icon}</span>
             <span className="lm__label">{it.label}</span>

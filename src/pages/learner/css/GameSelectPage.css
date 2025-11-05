@@ -4,6 +4,31 @@
 .gs-list{ display:grid; gap:18px; }
 .gs-footer{ text-align:center; color:#9ca3af; margin-top:22px; font-weight:600; }
 
-@media (max-width:640px){
-  .gs-title{ font-size:28px; }
+.gs-back-btn {
+  display: inline-block;
+  background: #fbfbfb;
+  color: #111827;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.gs-back-btn:hover {
+  background: #d1d5db;
+  transform: translateX(-3px);
+}
+
+@media (max-width: 640px) {
+  .gs-title {
+    font-size: 28px;
+  }
+
+  .gs-back-btn {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
 }
