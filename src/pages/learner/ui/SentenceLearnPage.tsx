@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { fetchSentenceByLesson, type SentenceDTORes} from "../../../api/learn";
 import "../css/VocabLearnPage.css";
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
@@ -78,9 +80,28 @@ export default function SentenceLearnPage() {
   const onPrev = () => {
     setIdx((i) => Math.max(0, i - 1));
   };
-  const onNext = () => {
-    if (idx < total - 1) setIdx((i) => i + 1);
-    else navigate(-1); // xong bài → quay lại menu (tuỳ bạn chỉnh hướng)
+  const onNext = async () => {
+    const learnerProfileId = Number(getProfileId());
+    const myPayload: LessonProgressReq = {
+    learnerProfileId,
+    lessonId: Number(unitId),
+    itemType: "SENTENCE", // Phải là chuỗi khớp với Enum
+    itemRefId: Number(current.id)
+    };
+
+    try {
+        await markItemAsCompleted(myPayload);
+        console.log("FE: Đã cập nhật tiến độ học câu thành công!");
+        if (idx < total - 1) setIdx((i) => i + 1);
+        else navigate(-1); // xong bài → quay lại menu (tuỳ bạn chỉnh hướng)
+    } catch (error) {
+        if (error instanceof Error) {
+            console.error(error.message); 
+        } else {
+            console.error("Một lỗi không xác định đã xảy ra:", error);
+        }
+    }
+       
   };
 
   const playNormal = () => {

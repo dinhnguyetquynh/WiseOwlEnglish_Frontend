@@ -33,7 +33,7 @@ export default function UnitCard({
         <div className="uc__progress">
           <div className="uc__progress-bar" style={{ width: `${pct}%` }} />
           <div className="uc__progress-text">
-            {unit.progress.done} / {unit.progress.total}
+            {unit.progress.done}%
           </div>
         </div>
 

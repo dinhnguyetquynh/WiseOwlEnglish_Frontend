@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getPictureWordGames, type PictureWordRes } from "../../../api/game";
 import { gotoResult } from "../../../utils/gameResult";
 import "../css/PictureWordWriting.css"; // tận dụng css hiện có (class giống nhau)
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 export default function PictureWordWritingGamePage() {
   const navigate = useNavigate();
@@ -83,36 +85,71 @@ export default function PictureWordWritingGamePage() {
     }
   }
 
-  function nextOrFinish() {
-    if (idx + 1 < total) {
-      setJudge(null);
-      setIdx((x) => x + 1);
-    } else {
-      gotoResult(navigate, {
-        from: "picture-word",
-        unitId,
-        total,
-        correct: correctCount,
-        points: earned,
-      });
-    }
+  async function nextOrFinish() {
+    // if (idx + 1 < total) {
+    //   setJudge(null);
+    //   setIdx((x) => x + 1);
+    // } else {
+    //   gotoResult(navigate, {
+    //     from: "picture-word",
+    //     unitId,
+    //     total,
+    //     correct: correctCount,
+    //     points: earned,
+    //   });
+    // }
+     const learnerProfileId = Number(getProfileId());
+            const myPayload: LessonProgressReq = {
+            learnerProfileId,
+            lessonId: Number(unitId),
+            itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
+            itemRefId: Number(current.id)
+            };
+        
+            try {
+                await markItemAsCompleted(myPayload);
+                console.log("FE: Đã cập nhật thành công!");
+                const next = idx + 1;
+                if (next >= total) {
+          // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
+                  gotoResult(navigate, {
+                    from: "word-writing",  
+                    gameType:"vocab",     
+                    unitId,                   
+                    total,
+                    correct: correctCount,    
+                    points: earned,           
+                  });
+                }else {
+                // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
+                  setIdx(next);
+                }
+            } catch (error) {
+                console.error("Lỗi khi đang lưu tiến độ:", error);
+                if (error instanceof Error) {
+                    console.error(error.message); 
+                } else {
+                    console.error("Một lỗi không xác định đã xảy ra:", error);
+                }
+            }
   }
 
-  function handleSkip() {
-    // skip to next (but if last, finish)
-    if (idx + 1 < total) {
-      setIdx((x) => Math.min(total - 1, x + 1));
-    } else {
-      gotoResult(navigate, {
-        from: "word-writing",
-        gameType:"vocab",
-        unitId,
-        total,
-        correct: correctCount,
-        points: earned,
-      });
-    }
-  }
+      function handleSkip() {
+          // skip to next (but if last, finish)
+          if (idx + 1 < total) {
+            setIdx((x) => Math.min(total - 1, x + 1));
+          } else {
+            gotoResult(navigate, {
+              from: "word-writing",
+              gameType:"vocab",
+              unitId,
+              total,
+              correct: correctCount,
+              points: earned,
+            });
+          }
+              
+      }
 
   if (loading) return <div className="psg__wrap"><div className="psg__loader">Đang tải...</div></div>;
   if (error) return <div className="psg__wrap"><div className="psg__error">{error}</div></div>;

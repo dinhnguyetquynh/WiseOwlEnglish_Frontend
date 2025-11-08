@@ -7,6 +7,8 @@ import {
   type SoundWordQuestionRes,
 } from "../../../api/game";
 import { gotoResult } from "../../../utils/gameResult";
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 export default function SoundWordGamePage() {
   const navigate = useNavigate();
@@ -82,30 +84,74 @@ export default function SoundWordGamePage() {
     }
   };
 
-  const goNext = () => {
-    if (idx + 1 < total) {
-      setIdx((i) => i + 1);
-      setSelected(null);
-      setChecked(null);
-      // preload âm thanh tiếp theo
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-          audioRef.current.src = questions[idx + 1]?.urlSound || "";
-        }
-      }, 0);
-    } else {
-        //chuyển qua trang kết quả
-        gotoResult(navigate, {
-          from: "sound-word",  
-          gameType:"vocab",     // <— TÊN GAME THỐNG NHẤT
-          unitId,                   // giữ nguyên
-          total,
-          correct: correctCount,    // map từ state nội bộ -> schema chuẩn
-          points: score,            // map từ state nội bộ -> schema chuẩn
-        });
-    }
+  const goNext = async () => {
+    // if (idx + 1 < total) {
+    //   setIdx((i) => i + 1);
+    //   setSelected(null);
+    //   setChecked(null);
+    //   // preload âm thanh tiếp theo
+    //   setTimeout(() => {
+    //     if (audioRef.current) {
+    //       audioRef.current.pause();
+    //       audioRef.current.currentTime = 0;
+    //       audioRef.current.src = questions[idx + 1]?.urlSound || "";
+    //     }
+    //   }, 0);
+    // } else {
+    //     //chuyển qua trang kết quả
+    //     gotoResult(navigate, {
+    //       from: "sound-word",  
+    //       gameType:"vocab",     // <— TÊN GAME THỐNG NHẤT
+    //       unitId,                   // giữ nguyên
+    //       total,
+    //       correct: correctCount,    // map từ state nội bộ -> schema chuẩn
+    //       points: score,            // map từ state nội bộ -> schema chuẩn
+    //     });
+    // }
+            const learnerProfileId = Number(getProfileId());
+            const myPayload: LessonProgressReq = {
+            learnerProfileId,
+            lessonId: Number(unitId),
+            itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
+            itemRefId: Number(q.id)
+            };
+        
+            try {
+                await markItemAsCompleted(myPayload);
+                console.log("FE: Đã cập nhật thành công!");
+                const next = idx + 1;
+                if (next >= total) {
+          // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
+                  gotoResult(navigate, {
+                    from: "sound-word",  
+                    gameType:"vocab",     
+                    unitId,                   
+                    total,
+                    correct: correctCount,    
+                    points: score,           
+                  });
+                }else {
+                // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
+                    setIdx(next);
+                    setSelected(null);
+                    setChecked(null);
+                    // preload âm thanh tiếp theo
+                    setTimeout(() => {
+                      if (audioRef.current) {
+                        audioRef.current.pause();
+                        audioRef.current.currentTime = 0;
+                        audioRef.current.src = questions[idx + 1]?.urlSound || "";
+                      }
+                    }, 0);
+                  }
+            } catch (error) {
+                console.error("Lỗi khi đang lưu tiến độ:", error);
+                if (error instanceof Error) {
+                    console.error(error.message); 
+                } else {
+                    console.error("Một lỗi không xác định đã xảy ra:", error);
+                }
+            }
   };
 
   const handleSkip = () => {

@@ -5,6 +5,7 @@ import "../css/TestRunner.css"
 import { submitTest } from "../../../api/test";
 import { getProfileId } from "../../../store/storage";
 import { useNavigate } from "react-router-dom";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 export type SelValue =
   | { type: "option"; value: number | null }                       // chọn 1
@@ -55,7 +56,40 @@ export default function TestRunner({ test }: { test: TestRes }) {
   function go(i: number) {
     setIdx(Math.min(Math.max(0, i), questions.length - 1));
   }
-  const next = () => go(idx + 1);
+  const next = async () => {
+        // Lấy câu hỏi *hiện tại* (TRƯỚC KHI TĂNG IDX)
+        const currentQuestion = questions[idx];
+        const currentAnswer = selected[currentQuestion.id];
+
+        // 1. GỌI API (nếu đã trả lời)
+        if (currentAnswer != null) {
+                   const learnerProfileId = Number(getProfileId());
+                   const myPayload: LessonProgressReq = {
+                   learnerProfileId,
+                   lessonId: Number(test.lessonId),
+                   itemType: "TEST_QUESTION", // Phải là chuỗi khớp với Enum
+                   itemRefId: Number(currentQuestion.id)
+                   };
+               
+                   try {
+                       await markItemAsCompleted(myPayload);
+                       console.log("FE: Đã cập nhật thành công!");
+                        // 2. CHUYỂN CÂU (ngay lập tức)
+                        go(idx + 1);
+                   } catch (error) {
+                       console.error("Lỗi khi đang lưu tiến độ:", error);
+                       if (error instanceof Error) {
+                           console.error(error.message); 
+                       } else {
+                           console.error("Một lỗi không xác định đã xảy ra:", error);
+                       }
+                   }
+              }else{
+                  go(idx + 1);
+              }
+
+      
+    };
   const prev = () => go(idx - 1);
 
 async function handleSubmit() {
@@ -87,7 +121,7 @@ async function handleSubmit() {
   };
 
   try {
-    const res = await submitTest(test.id, payload);//bị báo lỗi
+    const res = await submitTest(test.id, payload);
     navigate("/learn/test-result", { state: res }); 
   } catch (err) {
     console.error("Lỗi khi nộp bài:", err);

@@ -4,6 +4,8 @@ import { gotoResult } from "../../../utils/gameResult";
 import "../css/WordToSentenceGame.css"; // Đổi tên file CSS
 // Import các DTO từ file API của bạn
 import { getWordToSentenceGames, type WordToSentenceRes, type WordToSentenceOptsRes } from "../../../api/game";
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 // Định nghĩa kiểu dữ liệu cho token để dễ quản lý trạng thái
 interface Token extends WordToSentenceOptsRes {
@@ -149,19 +151,53 @@ export default function WordToSentenceGamePage() {
 }, [current, selectedTokens]);
 
     // --- 4. Chuyển câu hoặc Hoàn thành ---
-    const nextOrFinish = useCallback(() => {
-        if (idx + 1 < total) {
-            setIdx((x) => x + 1); // useEffect sẽ reset trạng thái
-        } else {
-            gotoResult(navigate, {
-                from: "word-to-sentence",
-                gameType:"sentence",
-                unitId: lessonId,
-                total,
-                correct: correctCount,
-                points: earned,
-            });
-        }
+    const nextOrFinish = useCallback(async () => {
+        // if (idx + 1 < total) {
+        //     setIdx((x) => x + 1); // useEffect sẽ reset trạng thái
+        // } else {
+        //     gotoResult(navigate, {
+        //         from: "word-to-sentence",
+        //         gameType:"sentence",
+        //         unitId: lessonId,
+        //         total,
+        //         correct: correctCount,
+        //         points: earned,
+        //     });
+        // }
+        const learnerProfileId = Number(getProfileId());
+                const myPayload: LessonProgressReq = {
+                learnerProfileId,
+                lessonId: Number(lessonId),
+                itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
+                itemRefId: Number(current.id)
+                };
+            
+                try {
+                    await markItemAsCompleted(myPayload);
+                    console.log("FE: Đã cập nhật thành công!");
+                    const next = idx + 1;
+                    if (next >= total) {
+              // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
+                      gotoResult(navigate, {
+                        from: "word-to-sentence",  
+                        gameType:"sentence",     
+                        unitId: lessonId,                   
+                        total,
+                        correct: correctCount,    
+                        points: earned,           
+                      });
+                    }else {
+                    // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
+                    setIdx(next);
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi đang lưu tiến độ:", error);
+                    if (error instanceof Error) {
+                        console.error(error.message); 
+                    } else {
+                        console.error("Một lỗi không xác định đã xảy ra:", error);
+                    }
+                }
     }, [idx, total, navigate, lessonId, correctCount, earned]);
     
 

@@ -4,6 +4,8 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import "../css/PictureGuessingGame.css";
 import { getPictureGuessingGame, type PictureGuessingGameRes } from "../../../api/game";
 import { gotoResult } from "../../../utils/gameResult";
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
 
 
@@ -62,9 +64,21 @@ export default function PictureGuessingGamePage() {
     }
   }
 
-  function gotoNext() {
-    const next = idx + 1;
-    if (next >= total) {
+  async function gotoNext() {
+
+     const learnerProfileId = Number(getProfileId());
+        const myPayload: LessonProgressReq = {
+        learnerProfileId,
+        lessonId: Number(unitId),
+        itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
+        itemRefId: Number(current.id)
+        };
+    
+        try {
+            await markItemAsCompleted(myPayload);
+            console.log("FE: Đã cập nhật thành công!");
+            const next = idx + 1;
+            if (next >= total) {
       // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
               gotoResult(navigate, {
                 from: "picture-guessing",  
@@ -74,10 +88,20 @@ export default function PictureGuessingGamePage() {
                 correct: correctCount,    
                 points: earned,           
               });
-    }
-    setIdx(next);
-    setShowResult(null);
-    setSelectedId(null);
+            }else {
+            // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
+            setIdx(next);
+            setShowResult(null);
+            setSelectedId(null);
+            }
+        } catch (error) {
+            console.error("Lỗi khi đang lưu tiến độ:", error);
+            if (error instanceof Error) {
+                console.error(error.message); 
+            } else {
+                console.error("Một lỗi không xác định đã xảy ra:", error);
+            }
+        }
   }
 
   if (loading) {

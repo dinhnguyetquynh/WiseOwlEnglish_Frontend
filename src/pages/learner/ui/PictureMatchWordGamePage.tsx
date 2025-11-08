@@ -8,6 +8,8 @@ import "../css/PictureMatchWord.css"; // hoặc dùng chung css file
 // Nếu bạn chưa thêm API helper, uncomment hàm getPictureMatchWordGames và thay axiosClient tương ứng.
 import type { PictureMatchWordRes } from "../../../type/game";
 import { getPictureMatchWordGames } from "../../../api/game";
+import { getProfileId } from "../../../store/storage";
+import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
  function shuffleArray<T>(array: T[]): T[] {
   // Tạo bản sao để tránh thay đổi trực tiếp mảng gốc (immutable)
   const newArray = [...array];
@@ -95,25 +97,6 @@ const { leftOptions, rightOptions } = useMemo(() => {
     }
   }
 
- 
-//   if (imageSide) {
-//     const right = bySide[imageSide];
-//     const left = current.optRes.filter((o) => (o.side ?? "").toString().toLowerCase() !== imageSide);
-//     return { leftOptions: left, rightOptions: right };
-//   }
-
-//   const rightByImg = current.optRes.filter((o) => !!o.imgUrl);
-//   const leftByImg = current.optRes.filter((o) => !o.imgUrl);
-
-//   if (rightByImg.length && leftByImg.length) {
-//     return { leftOptions: leftByImg, rightOptions: rightByImg };
-//   }
-
-//   const half = Math.ceil(current.optRes.length / 2);
-//   return {
-//     leftOptions: current.optRes.slice(0, half),
-//     rightOptions: current.optRes.slice(half),
-//   };
         let determinedLeftOptions: typeof current.optRes = [];
         let determinedRightOptions: typeof current.optRes = [];
 
@@ -215,19 +198,54 @@ function tryMatch() {
     setPaired((p) => ({ ...p, [firstLeft.id]: -1 }));
   }
 
-  function nextOrFinish() {
-    if (idx + 1 < total) {
-      setIdx((x) => x + 1);
-    } else {
-      gotoResult(navigate, {
-        from: "picture-match-word",
-        gameType: "vocab",
-        unitId,
-        total,
-        correct: correctCount,
-        points: earned,
-      });
-    }
+  async function nextOrFinish() {
+         const learnerProfileId = Number(getProfileId());
+            const myPayload: LessonProgressReq = {
+            learnerProfileId,
+            lessonId: Number(unitId),
+            itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
+            itemRefId: Number(current.id)
+            };
+
+             try {
+                        await markItemAsCompleted(myPayload);
+                        console.log("FE: Đã cập nhật thành công!");
+                        const next = idx + 1;
+                        if (next >= total) {
+                  // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
+                          gotoResult(navigate, {
+                            from: "picture-match-word",  
+                            gameType:"vocab",     
+                            unitId,                   
+                            total,
+                            correct: correctCount,    
+                            points: earned,           
+                          });
+                        }else {
+                        // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
+                            setIdx(next);
+                        }
+                    } catch (error) {
+                        console.error("Lỗi khi đang lưu tiến độ:", error);
+                        if (error instanceof Error) {
+                            console.error(error.message); 
+                        } else {
+                            console.error("Một lỗi không xác định đã xảy ra:", error);
+                        }
+                    }
+        
+    // if (idx + 1 < total) {
+    //   setIdx((x) => x + 1);
+    // } else {
+    //   gotoResult(navigate, {
+    //     from: "picture-match-word",
+    //     gameType: "vocab",
+    //     unitId,
+    //     total,
+    //     correct: correctCount,
+    //     points: earned,
+    //   });
+    // }
   }
 
   if (loading)
