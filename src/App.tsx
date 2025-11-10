@@ -28,6 +28,7 @@ import PictureMatchWordGamePage from './pages/learner/ui/PictureMatchWordGamePag
 import GameSelectedPageSentence from './pages/learner/ui/GameSelectedPageSentence';
 import SentenceHiddenGamePage from './pages/learner/ui/SentenceHiddenGamePage';
 import WordToSentenceGamePage from './pages/learner/ui/WordToSentenceGamePage';
+import AdminLessonListPage from './pages/admin/AdminLessonListPage';
 
 function App() {
 
@@ -73,7 +74,8 @@ function App() {
             <Route path="/learn/units/:lessonId/testlist" element={<LessonTestsPage/>}/>
             <Route path="/learn/units/:testId/test" element={<TestPage/>}/>
             <Route path="/learn/test-result" element={<TestResultPage/>}/>
-
+            
+            <Route path="/admin/lessons" element={<AdminLessonListPage />} />
         </Route>
         
       </Routes>

@@ -53,6 +53,33 @@ export default function TestRunner({ test }: { test: TestRes }) {
     [selected]
   );
 
+// == HÀM MỚI ĐỂ LƯU TIẾN ĐỘ ==
+ async function saveCurrentQuestionProgress() {
+    const currentQuestion = questions[idx];
+    const learnerProfileId = Number(getProfileId());
+    const myPayload: LessonProgressReq = {
+        learnerProfileId,
+        lessonId: Number(test.lessonId),
+        itemType: "TEST_QUESTION", // Phải là chuỗi khớp với Enum
+        itemRefId: Number(currentQuestion.id)
+    };
+
+    try {
+        await markItemAsCompleted(myPayload);
+        console.log("FE: Đã cập nhật thành công!");
+    } catch (error) {
+        console.error("Lỗi khi đang lưu tiến độ:", error);
+        if (error instanceof Error) {
+            console.error(error.message);
+        } else {
+            console.error("Một lỗi không xác định đã xảy ra:", error);
+        }
+        // Ghi chú: Kể cả khi lưu lỗi, chúng ta có thể vẫn muốn
+        // cho phép người dùng tiếp tục (không chặn nộp bài)
+    }
+}
+
+
   function go(i: number) {
     setIdx(Math.min(Math.max(0, i), questions.length - 1));
   }
@@ -61,34 +88,38 @@ export default function TestRunner({ test }: { test: TestRes }) {
         const currentQuestion = questions[idx];
         const currentAnswer = selected[currentQuestion.id];
 
-        // 1. GỌI API (nếu đã trả lời)
-        if (currentAnswer != null) {
-                   const learnerProfileId = Number(getProfileId());
-                   const myPayload: LessonProgressReq = {
-                   learnerProfileId,
-                   lessonId: Number(test.lessonId),
-                   itemType: "TEST_QUESTION", // Phải là chuỗi khớp với Enum
-                   itemRefId: Number(currentQuestion.id)
-                   };
+        // // 1. GỌI API (nếu đã trả lời)
+        // if (currentAnswer != null) {
+                  //  const learnerProfileId = Number(getProfileId());
+                  //  const myPayload: LessonProgressReq = {
+                  //  learnerProfileId,
+                  //  lessonId: Number(test.lessonId),
+                  //  itemType: "TEST_QUESTION", // Phải là chuỗi khớp với Enum
+                  //  itemRefId: Number(currentQuestion.id)
+                  //  };
                
-                   try {
-                       await markItemAsCompleted(myPayload);
-                       console.log("FE: Đã cập nhật thành công!");
-                        // 2. CHUYỂN CÂU (ngay lập tức)
-                        go(idx + 1);
-                   } catch (error) {
-                       console.error("Lỗi khi đang lưu tiến độ:", error);
-                       if (error instanceof Error) {
-                           console.error(error.message); 
-                       } else {
-                           console.error("Một lỗi không xác định đã xảy ra:", error);
-                       }
-                   }
-              }else{
-                  go(idx + 1);
-              }
+                  //  try {
+                  //      await markItemAsCompleted(myPayload);
+                  //      console.log("FE: Đã cập nhật thành công!");
+                  //       // 2. CHUYỂN CÂU (ngay lập tức)
+                  //       go(idx + 1);
+                  //  } catch (error) {
+                  //      console.error("Lỗi khi đang lưu tiến độ:", error);
+                  //      if (error instanceof Error) {
+                  //          console.error(error.message); 
+                  //      } else {
+                  //          console.error("Một lỗi không xác định đã xảy ra:", error);
+                  //      }
+                  //  }   
+                  
+                  if(currentAnswer!=null){
+                    await saveCurrentQuestionProgress();
+                    // 2. CHUYỂN CÂU (như cũ)
+                    go(idx + 1);
+                  }else {
+                    go(idx + 1);
+                  }
 
-      
     };
   const prev = () => go(idx - 1);
 
@@ -129,6 +160,16 @@ async function handleSubmit() {
   }
 
 }
+
+  // == HÀM MỚI ĐỂ XỬ LÝ NỘP BÀI ==
+  async function handleFinalSubmit() {
+      // 1. Lưu tiến độ câu cuối cùng
+      await saveCurrentQuestionProgress();
+
+      // 2. Nộp bài (gọi hàm handleSubmit gốc của bạn)
+      await handleSubmit();
+  }
+
 
   const pad = (n: number) => n.toString().padStart(2, "0");
 
@@ -192,7 +233,7 @@ const isLow = remain <= 60;
                 TIẾP THEO
               </button>
             ) : (
-              <button onClick={handleSubmit} className="pg-btn pg-btn--success">
+              <button onClick={handleFinalSubmit} className="pg-btn pg-btn--success">
                 NỘP BÀI
               </button>
             )}

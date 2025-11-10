@@ -212,3 +212,67 @@ export async function getPictureMatchWordGames(lessonId: number): Promise<Pictur
 }
 
 
+export type GameResByLesson = {
+  id: number;
+  title: string;
+  gameType: string; // Tên của enum, vd "PICTURE_WORD_MATCHING"
+  difficulty: number;
+};
+
+export async function getGamesForReview(
+  lessonId: number, 
+  category: "vocab" | "sentence"
+): Promise<GameResByLesson[]> {
+    try {
+        const res = await axiosClient.get<GameResByLesson[]>(
+            `/api/games/review-list`,
+            { params: { lessonId, category } }
+        );
+        // Sắp xếp theo độ khó (hoặc tiêu đề) nếu cần
+        res.data.sort((a, b) => a.difficulty - b.difficulty || a.title.localeCompare(b.title));
+        return res.data;
+    } catch (error: any) {
+        let message = "Không tải được danh sách game ôn tập";
+        if (error.response?.data?.message) {
+          message = error.response.data.message;
+        }
+        throw new Error(message);
+    }
+}
+
+// 1. DTO Gửi lên BE
+export type GameAnswerReq = {
+  profileId: number;
+  gameId: number;
+  gameQuestionId: number;
+  optionId?: number | null; // Cho game chọn 1
+  textInput?: string;       // Cho game điền từ
+  pairs?: { leftOptionId: number; rightOptionId: number }[]; // Cho game nối
+  sequence?: number[];      // Cho game sắp xếp
+};
+
+// 2. DTO Nhận về từ BE
+export type GameAnswerRes = {
+  isCorrect: boolean;
+  correctAnswerText: string;
+  rewardEarned: number;
+};
+
+// ... (Các hàm API cũ: getGamesForReview, getPictureGuessingGame, ...)
+
+// 👇 --- THÊM HÀM API MỚI --- 👇
+export async function submitGameAnswer(payload: GameAnswerReq): Promise<GameAnswerRes> {
+    try {
+        const res = await axiosClient.post<GameAnswerRes>(
+            `/api/games/submit-answer`,
+            payload
+        );
+        return res.data;
+    } catch (error: any) {
+        let message = "Không nộp được câu trả lời";
+        if (error.response?.data?.message) {
+          message = error.response.data.message;
+        }
+        throw new Error(message);
+    }
+}

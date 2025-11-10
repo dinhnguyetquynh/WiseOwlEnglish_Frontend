@@ -11,6 +11,7 @@
 .gc-icon{
   width:56px;height:56px;border-radius:12px;display:grid;place-items:center;
   background:#f1f5f9;border:1px solid #e5e7eb;color:#64748b;flex-shrink:0;
+  overflow: hidden;
 }
 .gc-text{}
 .gc-title{ font-size:20px;font-weight:800;color:#16a34a;margin:0 0 2px 0; }
@@ -30,3 +31,8 @@
 
 .gc-disabled{ opacity:.65; }
 .gc-disabled .gc-cta{ cursor:not-allowed; filter:grayscale(0.2); }
+.gs-game-icon {
+  width: 34px;  /* Kích thước mong muốn, vd: 34px */
+  height: 34px; /* Kích thước mong muốn, vd: 34px */
+  object-fit: contain; /* Đảm bảo ảnh vừa vặn, không bị méo */
+}

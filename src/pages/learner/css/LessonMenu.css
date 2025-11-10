@@ -98,3 +98,27 @@
 .lm__btn--pink   { background: linear-gradient(135deg, #f472b6, #fb7185); }
 .lm__btn--lime   { background: linear-gradient(135deg, #84cc16, #22c55e); }
 .lm__btn--blue   { background: linear-gradient(135deg, #38bdf8, #0ea5e9); }
+
+/* 👇 --- THÊM CSS CHO NÚT BỊ KHÓA --- 👇 */
+.lm__btn:disabled {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db); /* Màu xám */
+  color: #9ca3af; /* Chữ mờ */
+  cursor: not-allowed; /* Biểu tượng cấm */
+  box-shadow: 0 4px 0 rgba(0,0,0,0.05); /* Bóng mờ */
+  filter: grayscale(0.5); /* Hơi xám màu icon */
+  transform: none;
+}
+
+.lm__btn:disabled:active {
+  transform: none; /* Không lún xuống khi bị khóa */
+}
+
+.lm__btn:disabled .lm__icon {
+  background: rgba(0,0,0,0.05);
+  box-shadow: none;
+}
+
+.lm__btn:disabled .lm__icon-emoji {
+  filter: grayscale(1);
+  opacity: 0.6;
+}

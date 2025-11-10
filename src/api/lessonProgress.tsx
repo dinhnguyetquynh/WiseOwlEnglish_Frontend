@@ -35,3 +35,32 @@ export async function markItemAsCompleted(payload: LessonProgressReq): Promise<v
         throw new Error(message);
     }
 }
+
+export type LessonLockStatusRes = {
+    vocabLearned: boolean;
+    vocabGamesDone: boolean;     // 👈 Sửa tên
+    sentenceLearned: boolean;
+    sentenceGamesDone: boolean;  // 👈 Thêm
+    allTestsDone: boolean;
+};
+
+export async function getLessonLockStatus(lessonId: number, profileId: number): Promise<LessonLockStatusRes> {
+    try {
+        // Dùng axiosClient.get
+        // Truyền tham số vào 'params', axios sẽ tự động
+        // chuyển nó thành /lock-status?lessonId=...&profileId=...
+        const res = await axiosClient.get<LessonLockStatusRes>(
+            `/api/lesson-progress/lock-status`, 
+            {
+                params: { lessonId, profileId } 
+            }
+        );
+        return res.data;
+    } catch (error: any) {
+        let message = "Không tải được trạng thái bài học";
+        if (error.response?.data?.message) {
+            message = error.response.data.message;
+        }
+        throw new Error(message);
+    }
+}
