@@ -60,14 +60,7 @@ export default function PictureGuessingGamePage() {
   const canCheck = selectedId !== null && showResult === null;
 
   async function handleCheck() {
-    // if (!current || selectedId === null) return;
-    // const selected = current.options.find((o) => o.id === selectedId);
-    // const isCorrect = !!selected?.correct;
-    // setShowResult(isCorrect ? "correct" : "wrong");
-    // if (isCorrect) {
-    //   setCorrectCount((c) => c + 1);
-    //   setEarned((p) => p + (current.reward ?? 0));
-    // }
+
     if (!canCheck || !current || !profileId) {
         if (!profileId) setError("Lỗi: Không tìm thấy Profile ID.");
         return;
@@ -104,12 +97,18 @@ export default function PictureGuessingGamePage() {
             })
         ]);
 
+        // ---- 🕵️ DEBUGGING MẠNH NHẤT LÀ Ở ĐÂY 🕵️ ----
+        // Log toàn bộ đối tượng ra để xem cấu trúc thật của nó
+        console.log("ĐỐI TƯỢNG BE TRẢ VỀ:", answerResult);
+
         // 3. Dùng kết quả chấm điểm (answerResult) để cập nhật UI
         if (answerResult.isCorrect) {
+            console.log("ket qua cua dap an la: "+answerResult.isCorrect+answerResult.correctAnswerText+answerResult.rewardEarned);
             setShowResult("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
         } else {
+            console.log("ket qua sai roi"+answerResult.isCorrect+answerResult.correctAnswerText+answerResult.rewardEarned);
             setShowResult("wrong");
         }
         setCorrectAnswerText(answerResult.correctAnswerText); // Lưu đáp án đúng
@@ -122,43 +121,6 @@ export default function PictureGuessingGamePage() {
   }
 
   async function gotoNext() {
-
-    //  const learnerProfileId = Number(getProfileId());
-    //     const myPayload: LessonProgressReq = {
-    //     learnerProfileId,
-    //     lessonId: Number(unitId),
-    //     itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
-    //     itemRefId: Number(current.id)
-    //     };
-    
-    //     try {
-    //         await markItemAsCompleted(myPayload);
-    //         console.log("FE: Đã cập nhật thành công!");
-    //         const next = idx + 1;
-    //         if (next >= total) {
-    //   // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
-    //           gotoResult(navigate, {
-    //             from: "picture-guessing",  
-    //             gameType:"vocab",     
-    //             unitId,                   
-    //             total,
-    //             correct: correctCount,    
-    //             points: earned,           
-    //           });
-    //         }else {
-    //         // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
-    //         setIdx(next);
-    //         setShowResult(null);
-    //         setSelectedId(null);
-    //         }
-    //     } catch (error) {
-    //         console.error("Lỗi khi đang lưu tiến độ:", error);
-    //         if (error instanceof Error) {
-    //             console.error(error.message); 
-    //         } else {
-    //             console.error("Một lỗi không xác định đã xảy ra:", error);
-    //         }
-    //     }
     const next = idx + 1;
     if (next >= total) {
       gotoResult(navigate, {
@@ -233,50 +195,44 @@ export default function PictureGuessingGamePage() {
       </div>
 
       <div className="pg-options pg-options--grid">
-        {/* {current.options
-          .slice()//tao ban sao
-          .sort((a, b) => a.position - b.position)
-          .map((opt) => {
-            const isSelected = selectedId === opt.id;
-            const wrongSelected = showResult === "wrong" && isSelected;
-            const showCorrect = showResult !== null && opt.correct;
-            const classes = ["pg-option"];
-            if (isSelected && showResult === null) classes.push("pg-option--active");
-            if (wrongSelected) classes.push("pg-option--wrong");
-            if (showCorrect) classes.push("pg-option--correct");
-            return (
-              <button
-                key={opt.id}
-                onClick={() => setSelectedId(opt.id)}
-                disabled={showResult !== null}
-                className={classes.join(" ")}
-              >
-                {opt.optionText}
-              </button>
-            );
-          })} */}
           {current.options
           .slice()
           .sort((a, b) => a.position - b.position)
           .map((opt) => {
-            const isSelected = selectedId === opt.id;
-            const judged = showResult !== null;
+            const isSelected = selectedId === opt.id; //kiểm tra xem option này đã dc chọn chưa
+            const judged = showResult !== null; 
             
             let cls = "pg-option";
-            if (isSelected && !judged) cls += " pg-option--active";
-            
-            if (judged) {
-                // Khi đã chấm
-                const isCorrectAnswer = normalize(opt.optionText) === normalize(correctAnswerText);
-                
+
+            if (!judged) {
+                // ---- 1. TRƯỚC KHI CHẤM ----
+                // Chỉ highlight nút đang được chọn
                 if (isSelected) {
-                    // Đây là cái người dùng chọn
-                    cls += (showResult === "correct") ? " pg-option--correct" : " pg-option--wrong";
-                } else if (isCorrectAnswer) {
-                    // Đây là đáp án đúng (mà người dùng không chọn)
-                    cls += " pg-option--correct";
+                cls += " pg-option--active";
                 }
-            }
+                } else {
+                // ---- 2. SAU KHI CHẤM ----
+                // Xác định xem nút (opt) này có phải là đáp án đúng không
+                const isThisOptionTheCorrectAnswer = normalize(opt.optionText) === normalize(correctAnswerText);
+
+                if (showResult === "correct") {
+                // Người dùng trả lời ĐÚNG
+                // Chỉ cần highlight nút họ chọn (vì nó đúng) màu xanh
+                if (isSelected) {
+                cls += " pg-option--correct";
+                }
+                } else {
+                // Người dùng trả lời SAI
+                // Highlight nút họ chọn là "sai" (màu đỏ)
+                if (isSelected) {
+                cls += " pg-option--wrong";
+                }
+                // Và highlight nút đúng là "đúng" (màu xanh)
+                if (isThisOptionTheCorrectAnswer) {
+                cls += " pg-option--correct";
+                }
+                }
+                }
             
             return (
               <button
@@ -293,7 +249,6 @@ export default function PictureGuessingGamePage() {
 
       <div className="pg-actions">
         <button onClick={gotoNext} className="pg-btn pg-btn--ghost">Bỏ qua</button>
-        {/* <button onClick={handleCheck} disabled={!canCheck} className={`pg-btn pg-btn--primary ${!canCheck ? "pg-btn--disabled" : ""}`}>KIỂM TRA</button> */}
         <button 
             onClick={handleCheck} 
             disabled={!canCheck} // 👈 Dùng state canCheck
@@ -310,11 +265,8 @@ export default function PictureGuessingGamePage() {
             <div>
               <div className="pg-result__title">{showResult === "wrong" ? "Đáp án đúng:" : "Đáp án đúng"}</div>
               <div className="pg-result__desc">
-                {/* {correctOption?.optionText} */}{correctAnswerText}
-                {/* {showResult === "correct" && current.reward ? (
-                  <span className="pg-reward">+{current.reward} điểm thưởng</span>
-                ) : null} */}
-                {showResult === "correct" && (
+               {correctAnswerText}
+               {showResult === "correct" && (
                   <span className="pg-reward">+{earned - (correctCount - 1) * current.reward} điểm thưởng</span>
                 )}
               </div>
