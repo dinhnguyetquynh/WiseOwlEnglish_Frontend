@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LearnerLayout from './layouts/LearnerLayout';
 import HomePage from './pages/learner/HomePage';
 import PracticePage from './pages/learner/PracticePage';
@@ -28,56 +28,58 @@ import PictureMatchWordGamePage from './pages/learner/ui/PictureMatchWordGamePag
 import GameSelectedPageSentence from './pages/learner/ui/GameSelectedPageSentence';
 import SentenceHiddenGamePage from './pages/learner/ui/SentenceHiddenGamePage';
 import WordToSentenceGamePage from './pages/learner/ui/WordToSentenceGamePage';
-import AdminLessonListPage from './pages/admin/AdminLessonListPage';
+import AdminPage from './pages/admin/pages/AdminPage';
+
 
 function App() {
 
   return (
-      <BrowserRouter>
+    <BrowserRouter>
       <Routes>
-           {/* PUBLIC */}
-        <Route element={<PublicRoute />}> 
-            <Route path="/" element={<WelcomePage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage/>} />
-            <Route path="/select-profile" element={<SelectProfilePage/>}/>
-            <Route path="/create-profile" element={<CreateLearnerProfilePage/>} />
-            <Route path="/verify-otp" element={<VerifyOtpPage />} />
+        {/* PUBLIC */}
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<WelcomePage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/select-profile" element={<SelectProfilePage />} />
+          <Route path="/create-profile" element={<CreateLearnerProfilePage />} />
+          <Route path="/verify-otp" element={<VerifyOtpPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Route>
-      
-        {/* Tất cả route của learner đều nằm trong LearnerLayout */}
-         {/* PROTECTED */}
-        <Route element={<ProtectedRoute />}>
-            <Route path="/learn" element={<LearnerLayout />}>
-                <Route index element={<HomePage />} />
-                <Route path="units/:unitId" element={<LessonMenu />} />
-                <Route path="practice" element={<PracticePage />} />
-                <Route path="rank" element={<RankPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-            </Route>
-            <Route path="/learn/units/:unitId/vocab/learn"  element={<VocabLearnPage />} /> 
-            <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage/>}/>
-            <Route path ="/learn/units/:unitId/vocab/review" element={<GameSelectPage/>}/>
-            <Route path ="/learn/units/:unitId/sentence/review" element={<GameSelectedPageSentence/>}/>
-            
-            {/*Game tu vung */}
-            <Route path="/games/picture-guessing/:unitId" element={<PictureGuessingGamePage />} />
-            <Route path="/games/sound-word/:unitId" element={<SoundWordGamePage />} />
-            <Route path="/games/picture-word/:unitId" element={<PictureWordWritingGamePage/>}/>
-            <Route path="/games/picture-match-word/:unitId" element={<PictureMatchWordGamePage/>}/>
-            {/*Game cau */}
-            <Route path="/games/picture-sentence/:unitId" element={<PictureSentenceGamePage/>}/>
-            <Route path="/games/sentence-word-hidden/:unitId" element={<SentenceHiddenGamePage/>}/>
-            <Route path="/games/word-to-sentence/:unitId" element={<WordToSentenceGamePage/>}/>
 
-            <Route path="/game-result" element={<GameResultPage />} />
-            <Route path="/learn/units/:lessonId/testlist" element={<LessonTestsPage/>}/>
-            <Route path="/learn/units/:testId/test" element={<TestPage/>}/>
-            <Route path="/learn/test-result" element={<TestResultPage/>}/>
-            
-            <Route path="/admin/lessons" element={<AdminLessonListPage />} />
+        {/* Tất cả route của learner đều nằm trong LearnerLayout */}
+        {/* PROTECTED */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/learn" element={<LearnerLayout />}>
+            <Route index element={<HomePage />} />
+            <Route path="units/:unitId" element={<LessonMenu />} />
+            <Route path="practice" element={<PracticePage />} />
+            <Route path="rank" element={<RankPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+          </Route>
+          <Route path="/learn/units/:unitId/vocab/learn" element={<VocabLearnPage />} />
+          <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage />} />
+          <Route path="/learn/units/:unitId/vocab/review" element={<GameSelectPage />} />
+          <Route path="/learn/units/:unitId/sentence/review" element={<GameSelectedPageSentence />} />
+
+          {/*Game tu vung */}
+          <Route path="/games/picture-guessing/:unitId" element={<PictureGuessingGamePage />} />
+          <Route path="/games/sound-word/:unitId" element={<SoundWordGamePage />} />
+          <Route path="/games/picture-word/:unitId" element={<PictureWordWritingGamePage />} />
+          <Route path="/games/picture-match-word/:unitId" element={<PictureMatchWordGamePage />} />
+          {/*Game cau */}
+          <Route path="/games/picture-sentence/:unitId" element={<PictureSentenceGamePage />} />
+          <Route path="/games/sentence-word-hidden/:unitId" element={<SentenceHiddenGamePage />} />
+          <Route path="/games/word-to-sentence/:unitId" element={<WordToSentenceGamePage />} />
+
+          <Route path="/game-result" element={<GameResultPage />} />
+          <Route path="/learn/units/:lessonId/testlist" element={<LessonTestsPage />} />
+          <Route path="/learn/units/:testId/test" element={<TestPage />} />
+          <Route path="/learn/test-result" element={<TestResultPage />} />
+
+
         </Route>
-        
+
       </Routes>
     </BrowserRouter>
   )

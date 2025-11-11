@@ -34,7 +34,7 @@ export default function RegisterPage() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       newErrors.email = "Email không hợp lệ";
     }
-      
+
 
     if (!pw) newErrors.pw = "Mật khẩu không được để trống";
     else if (pw.length < 8 || pw.length > 100) newErrors.pw = "Mật khẩu phải từ 8 đến 100 ký tự";
@@ -55,7 +55,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:8080/api/auth/register", {
+      const res = await fetch("http://localhost:8081/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -96,7 +96,7 @@ export default function RegisterPage() {
   return (
     <div className="reg__screen">
       <div className="reg__container">
-         <div className="lp__logo">
+        <div className="lp__logo">
           <img
             alt="mascot"
             src="https://res.cloudinary.com/dxhhluk84/image/upload/v1759569444/Owl_Ava_qpagsn.png"

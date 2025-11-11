@@ -1,8 +1,10 @@
+
+import type { RoleAccount } from "../hooks/useHome";
 import axiosClient from "./axiosClient";
 import { tokenService } from "./tokenService";
 
 export type LoginRequest = { email: string; password: string };
-export type LoginRes = { accessToken: string; refreshToken: string;  hasProfiles:boolean; profileCount: number};
+export type LoginRes = { accessToken: string; refreshToken: string; hasProfiles: boolean; profileCount: number, roleAccount: RoleAccount };
 
 export async function loginApi(payload: LoginRequest): Promise<LoginRes> {
   tokenService.clear();
@@ -27,7 +29,7 @@ export async function loginApi(payload: LoginRequest): Promise<LoginRes> {
 
 // Logout (chỉ xóa token FE)
 export async function logoutApi() {
-  tokenService.clear(); 
+  tokenService.clear();
   window.location.href = "/login";
 }
 

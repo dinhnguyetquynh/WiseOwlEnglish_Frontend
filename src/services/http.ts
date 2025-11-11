@@ -1,5 +1,5 @@
 // src/services/http.ts
-export const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
+export const API_BASE = "http://localhost:8081";
 
 export async function http<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {

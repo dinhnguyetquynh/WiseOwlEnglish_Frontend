@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link, replace, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginApi } from "../../../api/auth";
 import "../css/LoginPage.css";
+import { useHomeContext } from "../../../context/AuthContext";
+
 
 export default function LoginPage() {
   const nav = useNavigate();
-
+  const { setRoleAccountState } = useHomeContext();
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -23,12 +25,19 @@ export default function LoginPage() {
       const data = await loginApi({ email, password: pw });
       // localStorage.setItem("accessToken", data.accessToken);
       // localStorage.setItem("refreshToken", data.refreshToken);
-      
-      if(data.profileCount===0){
-        nav("/create-profile",{replace:true});
-      }else{
-        nav("/select-profile",{replace:true});
+      setRoleAccountState(data.roleAccount);
+
+      if (data.roleAccount === "ADMIN") {
+        // 1️⃣ Ưu tiên ADMIN vào trang admin
+        nav("/admin", { replace: true });
+      } else if (data.profileCount === 0) {
+        // 2️⃣ Người chưa có hồ sơ
+        nav("/create-profile", { replace: true });
+      } else {
+        // 3️⃣ Các role khác (ví dụ: LEARNER)
+        nav("/select-profile", { replace: true });
       }
+
     } catch (ex: any) {
       setErr(ex?.message ?? "Đăng nhập thất bại");
     } finally {

@@ -100,7 +100,7 @@ export default function VerifyOtpPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8080/api/auth/verify-otp", {
+      const res = await fetch("http://localhost:8081/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -115,7 +115,7 @@ export default function VerifyOtpPage() {
           const data = (await res.json()) as VerifyOtpRes & { error?: string };
           if (data?.message) message = data.message;
           if (data?.error) message = data.error;
-        } catch {}
+        } catch { }
         setServerErr(message);
         return;
       }
@@ -143,7 +143,7 @@ export default function VerifyOtpPage() {
     if (!canResend) return;
 
     try {
-      const res = await fetch("http://localhost:8080/api/auth/resend-otp", {
+      const res = await fetch("http://localhost:8081/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
@@ -155,7 +155,7 @@ export default function VerifyOtpPage() {
           const data = await res.json();
           if (data?.message) message = data.message;
           if (data?.error) message = data.error;
-        } catch {}
+        } catch { }
         setServerErr(message);
         return;
       }
