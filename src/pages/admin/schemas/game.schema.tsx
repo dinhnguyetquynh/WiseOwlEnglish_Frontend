@@ -11,7 +11,8 @@ export const GameTypeEnum = z.enum([
     "SENTENCE_HIDDEN_WORD",
     "WORD_TO_SENTENCE"
 ]);
-
+// --- Mảng các loại game (API /types-by-grade trả về) ---
+export const GameTypesByGradeSchema = z.array(GameTypeEnum);
 // --- Schema cho từng game ---
 export const GameSchema = z.object({
     gameId: z.number(),
@@ -28,7 +29,7 @@ export const LessonSchema = z.object({
 
 // --- Schema tổng cho danh sách lessons ---
 export const LessonsSchema = z.array(LessonSchema);
-
+export type GameTypesByGrade = z.infer<typeof GameTypesByGradeSchema>;
 // --- Interface TypeScript infer ra từ Zod ---
 export type Game = z.infer<typeof GameSchema>;
 export type Lesson = z.infer<typeof LessonSchema>;
