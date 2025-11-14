@@ -6,7 +6,7 @@ export type LessonBriefRes = {
   lessonName: string;
   orderIndex: number;
   percentComplete: number; // 0..100
-  status: "ACTIVE" | "COMPLETE";
+  status: "ACTIVE" | "COMPLETE"| "LOCKED";
   mascot : string;
 };
 
@@ -48,67 +48,6 @@ export type SentenceDTORes ={
   sentence_vi: string;
   mediaAssets : MediaAssetDTORes[];
 }
-
-
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
-
-// function getAccessToken() {
-//   const t = localStorage.getItem("accessToken");
-//   if (!t) throw new Error("NOT_AUTHENTICATED");
-//   return t;
-// }
-
-// export async function fetchLessonsForHomePage(profileId: number): Promise<LessonsByClassRes> {
-//   const token = getAccessToken();
-//   const url = `${BASE_URL}/api/learn/lessons/home-page?profileId=${profileId}`;
-//   const res = await fetch(url, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-//   if (!res.ok) {
-//     let msg = "Không lấy được danh sách bài học";
-//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
-//     throw new Error(msg);
-//   }
-//   return res.json();
-// }
-
-
-
-
-
-// // Lấy danh sách từ vựng theo lessonId
-// export async function fetchVocabulariesByLesson(lessonId: string | number): Promise<VocabularyDTORes[]> {
-//   const token = getAccessToken();
-//   const url = `${BASE_URL}/api/vocabularies/${lessonId}`;
-//   const res = await fetch(url, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-//   if (!res.ok) {
-//     let msg = "Không lấy được danh sách từ vựng";
-//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
-//     throw new Error(msg);
-//   }
-//   return res.json();
-// }
-
-
-
-// // Lấy danh sách cau theo lessonId
-// export async function fetchSentenceByLesson(lessonId: string | number): Promise<SentenceDTORes[]> {
-//   const token = getAccessToken();
-//   const url = `${BASE_URL}/api/sentences/${lessonId}`;
-//   const res = await fetch(url, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-//   if (!res.ok) {
-//     let msg = "Không lấy được danh sách cau";
-//     try { const data = await res.json(); msg = data?.message ?? data?.error ?? msg; } catch {}
-//     throw new Error(msg);
-//   }
-//   return res.json();
-// }
 
 
 // --- Helper chung để lấy message lỗi từ BE ---
@@ -158,3 +97,25 @@ export async function fetchSentenceByLesson(lessonId: string | number): Promise<
     throw new Error(getErrMsg(e, "Không lấy được danh sách câu"));
   }
 }
+
+/**
+ * Lấy danh sách bài học và tiến độ của user cho một LỚP CỤ THỂ.
+ * @param profileId ID của người học
+ * @param gradeOrderIndex Lớp muốn xem (1, 2, 3...)
+ */
+    export async function fetchLessonsByGradeForProfile(
+      profileId: number,
+      gradeOrderIndex: number
+    ): Promise<LessonsByClassRes> {
+      try {
+        const res = await axiosClient.get<LessonsByClassRes>(
+          `/api/learn/lessons/by-grade-for-profile`,
+          {
+            params: { profileId, gradeOrderIndex }, // Gửi 2 params
+          }
+        );
+        return res.data;
+      } catch (e: any) {
+        throw new Error(getErrMsg(e, "Không lấy được danh sách bài học cho lớp này"));
+      }
+    }

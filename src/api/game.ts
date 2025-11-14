@@ -20,6 +20,7 @@ export type PictureGuessingGameRes = {
 // ==== Types từ BE ====
 export type SoundWordOptionRes = {
   id: number;
+ 
   gameQuestionId: number;
   optionText: string;
   isCorrect: boolean;
@@ -28,6 +29,7 @@ export type SoundWordOptionRes = {
 
 export type SoundWordQuestionRes = {
   id: number;
+   gameId: number;
   position: number;
   urlSound: string;
   rewardPoint: number;

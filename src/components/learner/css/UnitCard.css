@@ -46,10 +46,14 @@
   cursor: pointer;
 }
 .uc--locked .uc__cta {
-  background: #fff; 
+  /* background: #fff; 
   color: #38bdf8; 
   border: 1px solid #e5e7eb;
-  /* cursor: not-allowed; */
+  cursor: not-allowed; */
+  background: #e5e7eb; /* Màu xám */
+  color: #9ca3af;    /* Chữ xám */
+  border-color: #d1d5db;
+  cursor: not-allowed;
 }
 
 /* right part */

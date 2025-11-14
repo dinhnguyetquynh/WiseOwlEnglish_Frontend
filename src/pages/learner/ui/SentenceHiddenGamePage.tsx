@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { gotoResult } from "../../../utils/gameResult";
 import "../css/SentenceHiddenGame.css"; // Đổi tên file CSS
-import { getSentenceHiddenGames, type SentenceHiddenRes } from "../../../api/game";
+import { getSentenceHiddenGames, submitGameAnswer, type GameAnswerReq, type SentenceHiddenRes } from "../../../api/game";
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
@@ -14,7 +14,7 @@ export default function SentenceHiddenGamePage() {
   const navigate = useNavigate();
   // Giả sử unitId trong route của bạn chính là lessonId
   const { unitId: lessonId = "" } = useParams(); 
-
+  const profileId = getProfileId(); // 👈 Lấy profileId
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [games, setGames] = useState<SentenceHiddenRes[]>([]);// Mảng câu hỏi
@@ -25,14 +25,13 @@ export default function SentenceHiddenGamePage() {
   const [earned, setEarned] = useState(0); // Tổng điểm kiếm được
   const [correctCount, setCorrectCount] = useState(0); // Số câu đúng. 
 
+  // State mới
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [correctAnswerText, setCorrectAnswerText] = useState("");
+
   const total = games.length;
   const current = games[idx];
 
-  // Lấy câu trả lời đúng từ dữ liệu (chỉ có 1 phần tử trong optRes)
-  const correctAnswer = useMemo(() => {
-    // Chỉ lấy từ đầu tiên, giả định chỉ có 1 đáp án
-    return current?.optRes?.[0]?.answerText || current?.hiddenWord || "";
-  }, [current]);
 
   // --- 1. Fetch Dữ liệu ---
   useEffect(() => {
@@ -59,91 +58,99 @@ export default function SentenceHiddenGamePage() {
   useEffect(() => {
     setUserInput("");
     setJudge(null);
+    setCorrectAnswerText("");
   }, [idx]);
 
   // Tính toán phần trăm tiến độ
   const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
 
   // --- 3. Xử lý Kiểm tra ---
-  const handleCheck = useCallback(() => {
-    if (!current || !userInput.trim()) return;
-
-    // Chuẩn hóa và so sánh: loại bỏ khoảng trắng dư thừa, chuyển về chữ thường để so sánh không phân biệt hoa/thường (tùy theo yêu cầu game)
-    const normalizedInput = userInput.trim().toLowerCase();
-    const normalizedCorrectAnswer = correctAnswer.trim().toLowerCase();
-    
-    // Logic chấm điểm
-    const isRight = normalizedInput === normalizedCorrectAnswer;
-
-    if (isRight) {
-      setCorrectCount((x) => x + 1);
-      setEarned((x) => x + (current.rewardCore ?? 0));
-      setJudge("correct");
-    } else {
-      setJudge("wrong");
+const handleCheck = useCallback(async () => {
+    if (!current || !userInput.trim() || !profileId || isSubmitting) {
+       if (!profileId) setError("Lỗi: Không tìm thấy Profile ID.");
+       return;
     }
-  }, [current, userInput, correctAnswer]);
+    
+    setIsSubmitting(true);
+
+    const answerPayload: GameAnswerReq = {
+        profileId: profileId,
+        gameId: current.gameId,
+        gameQuestionId: current.id,
+        textInput: userInput.trim() // 👈 Gửi textInput
+    };
+
+    const progressPayload: LessonProgressReq = {
+        learnerProfileId: profileId,
+        lessonId: Number(lessonId),
+        itemType: "GAME_QUESTION",
+        itemRefId: Number(current.id)
+    };
+    
+    try {
+        const [answerResult] = await Promise.all([
+            submitGameAnswer(answerPayload),
+            markItemAsCompleted(progressPayload).catch(e => {
+                console.error("Lỗi ngầm khi lưu tiến độ:", e.message);
+            })
+        ]);
+
+        if (answerResult.isCorrect) {
+            setJudge("correct");
+            setCorrectCount((c) => c + 1);
+            setEarned((p) => p + answerResult.rewardEarned);
+        } else {
+            setJudge("wrong");
+        }
+        setCorrectAnswerText(answerResult.correctAnswerText); 
+
+    } catch (err: any) {
+        setError(err.message || "Lỗi khi nộp câu trả lời");
+    } finally {
+        setIsSubmitting(false);
+    }
+  }, [current, userInput, profileId, isSubmitting, lessonId]);
 
   // --- 4. Chuyển câu hoặc Hoàn thành ---
-  const nextOrFinish = useCallback(async () => {
-    // if (idx + 1 < total) {
-    //   setJudge(null);
-    //   setIdx((x) => x + 1);
-    // } else {
-    //   // Chuyển hướng đến trang kết quả
-    //   gotoResult(navigate, {
-    //     from: "sentence-hidden",
-    //     gameType:"sentence",
-    //     unitId: lessonId,
-    //     total,
-    //     correct: correctCount,
-    //     points: earned,
-    //   });
-    // }
-  const learnerProfileId = Number(getProfileId());
-          const myPayload: LessonProgressReq = {
-          learnerProfileId,
-          lessonId:Number(lessonId),
-          itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
-          itemRefId: Number(current.id)
-          };
-      
-          try {
-              await markItemAsCompleted(myPayload);
-              console.log("FE: Đã cập nhật thành công!");
-              const next = idx + 1;
-              if (next >= total) {
-        // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
-                gotoResult(navigate, {
-                  from: "sentence-hidden",  
-                  gameType:"sentence",     
-                  unitId: lessonId,                   
-                  total,
-                  correct: correctCount,    
-                  points: earned,           
-                });
-              }else {
-              // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
-              setIdx(next);
-              setJudge(null);
-              }
-          } catch (error) {
-              console.error("Lỗi khi đang lưu tiến độ:", error);
-              if (error instanceof Error) {
-                  console.error(error.message); 
-              } else {
-                  console.error("Một lỗi không xác định đã xảy ra:", error);
-              }
-          }
+ const nextOrFinish = useCallback(async () => {
+    const next = idx + 1;
+    if (next >= total) {
+      gotoResult(navigate, {
+        from: "sentence-hidden",
+        gameType:"sentence",
+        unitId: lessonId,
+        total,
+        correct: correctCount,
+        points: earned,
+      });
+    } else {
+      setIdx(next);
+      // State khác đã được reset trong useEffect[idx]
+    }
   }, [idx, total, navigate, lessonId, correctCount, earned]);
-  
+
+  async function handleSkip() {
+      const next = idx + 1;
+      if (next >= total) {
+        gotoResult(navigate, {
+          from: "sentence-hidden",
+          gameType:"sentence",
+          unitId: lessonId,
+          total,
+          correct: correctCount,
+          points: earned,
+        });
+      } else {
+         setIdx(next);
+      }
+  }
   // --- 5. Hàm render câu hỏi với ô input ---
   const renderQuestionText = useMemo(() => {
     if (!current) return null;
     
     // Dữ liệu API: questionText chứa dấu gạch dưới (ví dụ: "I am a _____.")
     // Lấy từ cần điền (để biết độ dài ô input nếu cần)
-    const wordToHide = current.hiddenWord || correctAnswer; 
+    const wordToHide = current.hiddenWord || correctAnswerText || "____"; 
     
     // Thay thế dấu gạch dưới (hoặc từ placeholder) bằng ô input
     const parts = current.questionText.split("___"); // Giả sử từ bị khuyết được đánh dấu bằng "_____"
@@ -154,7 +161,7 @@ export default function SentenceHiddenGamePage() {
 
     return (
       <div className="shg__question-text">
-        {parts[0]}
+        {parts[0]} {/* Phần 1: "This is a " */}
         <input 
           type="text" 
           className={`shg__input ${judge === "correct" ? "correct" : ""} ${judge === "wrong" ? "wrong" : ""}`}
@@ -173,11 +180,11 @@ export default function SentenceHiddenGamePage() {
                 nextOrFinish();
             }
           }}
-        />
+        />{/*  Ô input được chèn vào giữa */}
         {parts.slice(1).join("_____")} {/* nối lại phần còn lại */}
       </div>
     );
-  }, [current, userInput, judge, handleCheck, nextOrFinish, correctAnswer]);
+  }, [current, userInput, judge, handleCheck, nextOrFinish, correctAnswerText]);
 
 
   if (loading) return <div className="shg__wrap"><div className="shg__loader">Đang tải...</div></div>;
@@ -214,17 +221,17 @@ export default function SentenceHiddenGamePage() {
         <div className="shg__actions">
           <button 
             className="shg__ghost" 
-            onClick={() => setIdx((x) => Math.min(total - 1, x + 1))}
+            onClick={handleSkip}
             disabled={idx + 1 >= total} // Chỉ cho phép bỏ qua nếu không phải câu cuối
           >
             Bỏ qua
           </button>
           <button
             className="shg__primary"
-            disabled={!userInput.trim()} // Vô hiệu hóa nếu input rỗng
+            disabled={!userInput.trim()|| isSubmitting} // Vô hiệu hóa nếu input rỗng
             onClick={handleCheck}
           >
-            KIỂM TRA
+            {isSubmitting ? "Đang chấm..." : "KIỂM TRA"}
           </button>
         </div>
       )}
@@ -239,7 +246,7 @@ export default function SentenceHiddenGamePage() {
                 <div className="shg__fb-title">
                   {judge === "correct" ? "Tuyệt vời! Đáp án đúng" : "Đáp án đúng:"}
                 </div>
-                <div className="shg__fb-answer">{correctAnswer}</div>
+                <div className="shg__fb-answer">{correctAnswerText}</div>
                 {judge === "correct" && (
                   <div className="shg__fb-reward">
                     Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng

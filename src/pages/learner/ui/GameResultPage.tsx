@@ -4,6 +4,7 @@ import "../css/GameResultPage.css";
 import { clearSavedResult, loadSavedResult, type GameResultPayload } from "../../../utils/gameResult";
 
 
+
 export default function GameResultPage() {
   const nav = useNavigate();
   // const { state } = useLocation() as { state?: GameResultState };

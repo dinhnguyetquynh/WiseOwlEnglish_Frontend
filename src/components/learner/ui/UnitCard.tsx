@@ -1,7 +1,7 @@
 import "../css/UnitCard.css";
 
 // KHÔNG có "LOCKED" nữa
-export type UnitStatus = "ACTIVE" | "COMPLETE";
+export type UnitStatus = "ACTIVE" | "COMPLETE"| "LOCKED";
 
 export type Unit = {
   id: string;
@@ -23,9 +23,10 @@ export default function UnitCard({
 }) {
   const pct = Math.round((unit.progress.done / Math.max(1, unit.progress.total)) * 100);
   const isDone = unit.status === "COMPLETE";
-
+  const isLocked = unit.status === "LOCKED";
+  const statusClass = isLocked ? "uc--locked" : (isDone ? "uc--done" : "uc--active");
   return (
-    <article className={"uc " + (isDone ? "uc--done" : "uc--active")}>
+    <article className={"uc " + (statusClass)}>
       <div className="uc__left">
         <h3 className="uc__title">{unit.title}</h3>
 
@@ -38,8 +39,8 @@ export default function UnitCard({
         </div>
 
         {/* CTA — KHÔNG bao giờ disabled */}
-        <button className="uc__cta" onClick={() => onContinue?.(unit)}>
-          {isDone ? "HỌC LẠI" : "HỌC BÀI NÀY"}
+        <button className="uc__cta" onClick={() => onContinue?.(unit)} disabled={isLocked}>
+         {isLocked ? "BỊ KHÓA" : (isDone ? "HỌC LẠI" : "HỌC BÀI NÀY")}
         </button>
       </div>
 

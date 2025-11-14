@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { gotoResult } from "../../../utils/gameResult";
 import "../css/WordToSentenceGame.css"; // Đổi tên file CSS
 // Import các DTO từ file API của bạn
-import { getWordToSentenceGames, type WordToSentenceRes, type WordToSentenceOptsRes } from "../../../api/game";
+import { getWordToSentenceGames, type WordToSentenceRes, type WordToSentenceOptsRes, type GameAnswerReq, submitGameAnswer } from "../../../api/game";
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
@@ -15,6 +15,7 @@ interface Token extends WordToSentenceOptsRes {
 export default function WordToSentenceGamePage() {
     const navigate = useNavigate();
     const { unitId: lessonId = "" } = useParams(); 
+    const profileId = getProfileId(); // 👈 Lấy profileId
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +28,10 @@ export default function WordToSentenceGamePage() {
     const [judge, setJudge] = useState<null | "correct" | "wrong">(null);// Trạng thái đã chấm
     const [earned, setEarned] = useState(0); // Tổng điểm kiếm được
     const [correctCount, setCorrectCount] = useState(0); // Số câu đúng. 
+
+    // State mới
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [correctAnswerText, setCorrectAnswerText] = useState("");
 
     const total = games.length;
     const current = games[idx];
@@ -47,6 +52,7 @@ export default function WordToSentenceGamePage() {
             setSelectedTokens([]);
         }
         setJudge(null);
+        setCorrectAnswerText("");
     }, [idx, current]);
 
 
@@ -89,115 +95,74 @@ export default function WordToSentenceGamePage() {
         setAvailableTokens(prev => [...prev, token]);
     }, [judge]);
 
-    // --- 3. Xử lý Kiểm tra ---
-    // const handleCheck = useCallback(() => {
-    //     if (!current || selectedTokens.length === 0) return;
 
-    //     // Xây dựng câu trả lời của người chơi
-    //     const playerSentence = selectedTokens.map(t => t.answerText).join('');
-        
-    //     // Chuẩn hóa và so sánh với câu gốc từ BE
-    //     // Logic so sánh: loại bỏ khoảng trắng dư thừa, đảm bảo dấu câu dính liền với từ trước đó
-    //     const normalizedPlayer = playerSentence
-    //         .replace(/\s+/g, ' ') // Thay nhiều khoảng trắng thành 1
-    //         .trim()
-    //         .toLowerCase(); 
-
-    //     const normalizedCorrect = current.questionText
-    //         .replace(/\s+/g, ' ') 
-    //         .trim()
-    //         .toLowerCase();
-
-    //     // So sánh trực tiếp chuỗi đã được chuẩn hóa
-    //     const isRight = normalizedPlayer === normalizedCorrect;
-        
-    //     if (isRight) {
-    //         setCorrectCount((x) => x + 1);
-    //         setEarned((x) => x + (current.rewardCore ?? 0));
-    //         setJudge("correct");
-    //     } else {
-    //         setJudge("wrong");
-    //     }
-    // }, [current, selectedTokens]);
 
     // --- 3. Xử lý Kiểm tra (Đã Sửa) ---
-    const handleCheck = useCallback(() => {
-    if (!current || selectedTokens.length === 0) return;
+   const handleCheck = useCallback(async () => {
+        if (!current || selectedTokens.length === 0 || !profileId || isSubmitting) {
+             if (!profileId) setError("Lỗi: Không tìm thấy Profile ID.");
+             return;
+        }
 
-    // BƯỚC 1: Xây dựng câu trả lời của người chơi BẰNG CÁCH NỐI CÁC TOKEN BẰNG KHOẢNG TRẮNG
-    // Giả định rằng mỗi token (kể cả dấu câu) được cách nhau bằng một khoảng trắng.
-    // Dữ liệu mẫu của bạn ("It", "is", "red", "?") nối bằng " " sẽ ra "It is red ?" (giống hệt questionText)
-    const playerSentence = selectedTokens.map(t => t.answerText).join(' ');
-    
-    // BƯỚC 2: Chuẩn hóa (chỉ cần chuyển về chữ thường và cắt khoảng trắng đầu cuối)
+        setIsSubmitting(true);
 
-    // Chuỗi đáp án gốc từ BE
-    const correctSentence = current.questionText;
+        //  Gửi mảng các ID theo đúng thứ tự
+        const sequenceIds = selectedTokens.map(t => t.id); 
 
-    // So sánh: Loại bỏ khoảng trắng thừa đầu/cuối và chuyển về chữ thường để tránh sai sót
-    const normalizedPlayer = playerSentence.trim().toLowerCase(); 
-    const normalizedCorrect = correctSentence.trim().toLowerCase();
+        const answerPayload: GameAnswerReq = {
+            profileId: profileId,
+            gameId: current.gameId,
+            gameQuestionId: current.id,
+            sequence: sequenceIds // 👈 Gửi sequence
+        };
 
-    // Logic so sánh cuối cùng
-    const isRight = normalizedPlayer === normalizedCorrect;
-    
-    if (isRight) {
-        setCorrectCount((x) => x + 1);
-        setEarned((x) => x + (current.rewardCore ?? 0));
-        setJudge("correct");
-    } else {
-        setJudge("wrong");
-    }
-}, [current, selectedTokens]);
+        const progressPayload: LessonProgressReq = {
+            learnerProfileId: profileId,
+            lessonId: Number(lessonId),
+            itemType: "GAME_QUESTION",
+            itemRefId: Number(current.id)
+        };
+        
+        try {
+            const [answerResult] = await Promise.all([
+                submitGameAnswer(answerPayload),
+                markItemAsCompleted(progressPayload).catch(e => {
+                    console.error("Lỗi ngầm khi lưu tiến độ:", e.message);
+                })
+            ]);
+
+            if (answerResult.isCorrect) {
+                setJudge("correct");
+                setCorrectCount((x) => x + 1);
+                setEarned((x) => x + (answerResult.rewardEarned ?? 0));
+            } else {
+                setJudge("wrong");
+            }
+            setCorrectAnswerText(answerResult.correctAnswerText); 
+
+        } catch (err: any) {
+            setError(err.message || "Lỗi khi nộp câu trả lời");
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [current, selectedTokens, profileId, isSubmitting, lessonId]);
 
     // --- 4. Chuyển câu hoặc Hoàn thành ---
     const nextOrFinish = useCallback(async () => {
-        // if (idx + 1 < total) {
-        //     setIdx((x) => x + 1); // useEffect sẽ reset trạng thái
-        // } else {
-        //     gotoResult(navigate, {
-        //         from: "word-to-sentence",
-        //         gameType:"sentence",
-        //         unitId: lessonId,
-        //         total,
-        //         correct: correctCount,
-        //         points: earned,
-        //     });
-        // }
-        const learnerProfileId = Number(getProfileId());
-                const myPayload: LessonProgressReq = {
-                learnerProfileId,
-                lessonId: Number(lessonId),
-                itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
-                itemRefId: Number(current.id)
-                };
-            
-                try {
-                    await markItemAsCompleted(myPayload);
-                    console.log("FE: Đã cập nhật thành công!");
-                    const next = idx + 1;
-                    if (next >= total) {
-              // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
-                      gotoResult(navigate, {
-                        from: "word-to-sentence",  
-                        gameType:"sentence",     
-                        unitId: lessonId,                   
-                        total,
-                        correct: correctCount,    
-                        points: earned,           
-                      });
-                    }else {
-                    // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
-                    setIdx(next);
-                    }
-                } catch (error) {
-                    console.error("Lỗi khi đang lưu tiến độ:", error);
-                    if (error instanceof Error) {
-                        console.error(error.message); 
-                    } else {
-                        console.error("Một lỗi không xác định đã xảy ra:", error);
-                    }
-                }
+        const next = idx + 1;
+        if (next >= total) {
+            gotoResult(navigate, {
+                from: "word-to-sentence",
+                gameType:"sentence",
+                unitId: lessonId,
+                total,
+                correct: correctCount,
+                points: earned,
+            });
+        } else {
+            setIdx(next);
+            // State khác đã reset trong useEffect[idx]
+        }
     }, [idx, total, navigate, lessonId, correctCount, earned]);
     
 
@@ -233,7 +198,7 @@ export default function WordToSentenceGamePage() {
                             key={token.key}
                             className="wtsg__token selected"
                             onClick={() => handleUnselectToken(token)}
-                            disabled={judge !== null}
+                            disabled={judge !== null|| isSubmitting}
                         >
                             {token.answerText}
                         </button>
@@ -248,7 +213,7 @@ export default function WordToSentenceGamePage() {
                         key={token.key}
                         className="wtsg__token available"
                         onClick={() => handleSelectToken(token)}
-                        disabled={judge !== null}
+                        disabled={judge !== null|| isSubmitting}
                     >
                         {token.answerText}
                     </button>
@@ -261,25 +226,19 @@ export default function WordToSentenceGamePage() {
                     <button 
                         className="wtsg__ghost" 
                         onClick={() => {
-                            // Logic gợi ý/undo đơn giản: trả lại hết về word bank
-                            setSelectedTokens([]);
-                            const tokens: Token[] = current.opts.map((opt, index) => ({
-                                ...opt,
-                                key: `${opt.id}-${index}-${Math.random()}`,
-                            }));
-                            const shuffledTokens = [...tokens].sort(() => Math.random() - 0.5);
-                            setAvailableTokens(shuffledTokens);
+                           handleUnselectToken(selectedTokens[selectedTokens.length - 1]);
+                            
                         }}
-                        disabled={selectedTokens.length === 0}
+                        disabled={selectedTokens.length === 0|| isSubmitting}
                     >
                         Hoàn tác
                     </button>
                     <button
                         className="wtsg__primary"
-                        disabled={selectedTokens.length === 0}
+                        disabled={selectedTokens.length === 0|| isSubmitting}
                         onClick={handleCheck}
                     >
-                        KIỂM TRA
+                        {isSubmitting ? "Đang chấm..." : "KIỂM TRA"}
                     </button>
                 </div>
             )}
@@ -295,7 +254,7 @@ export default function WordToSentenceGamePage() {
                                     {judge === "correct" ? "Tuyệt vời! Đáp án đúng" : "Đáp án đúng:"}
                                 </div>
                                 {/* Hiển thị câu đúng từ BE */}
-                                <div className="wtsg__fb-answer">{current.questionText}</div> 
+                                <div className="wtsg__fb-answer">{correctAnswerText}</div> 
                                 {judge === "correct" && (
                                     <div className="wtsg__fb-reward">
                                         Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng

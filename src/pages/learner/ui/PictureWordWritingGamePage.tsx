@@ -1,7 +1,7 @@
 // src/pages/game/PictureWordWritingGamePage.tsx
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPictureWordGames, type PictureWordRes } from "../../../api/game";
+import { getPictureWordGames, submitGameAnswer, type GameAnswerReq, type PictureWordRes } from "../../../api/game";
 import { gotoResult } from "../../../utils/gameResult";
 import "../css/PictureWordWriting.css"; // tận dụng css hiện có (class giống nhau)
 import { getProfileId } from "../../../store/storage";
@@ -10,6 +10,7 @@ import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lesson
 export default function PictureWordWritingGamePage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
+  const profileId = getProfileId(); // 👈 Lấy profileId
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,6 +21,10 @@ export default function PictureWordWritingGamePage() {
   const [judge, setJudge] = useState<null | "correct" | "wrong">(null);
   const [earned, setEarned] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+
+  // State mới
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [correctAnswerText, setCorrectAnswerText] = useState(""); // 👈 Thêm
 
   const total = games.length;
   const current = games[idx];
@@ -48,10 +53,9 @@ export default function PictureWordWritingGamePage() {
   }, [unitId]);
 
   useEffect(() => {
-    // reset input & judge when moving to a new question
     setInputText("");
     setJudge(null);
-    // focus input when new question loads
+    setCorrectAnswerText("");
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [idx]);
 
@@ -67,73 +71,71 @@ export default function PictureWordWritingGamePage() {
       .replace(/\p{Diacritic}/gu, "") ?? s.trim().toLowerCase();
   }
 
-  const correctAnswerText = current?.optsRes?.find((o) => o.isCorrect)?.answerText ?? current?.optsRes?.[0]?.answerText ?? "";
+  
 
-  function handleCheck() {
-    if (!current) return;
-    const user = normalizeAnswer(inputText);
-    const correct = normalizeAnswer(correctAnswerText);
+async function handleCheck() {
+    if (!current || !inputText.trim() || !profileId || isSubmitting) {
+        if (!profileId) setError("Lỗi: Không tìm thấy Profile ID.");
+        return;
+    }
 
-    const isRight = user.length > 0 && user === correct;
+    setIsSubmitting(true);
 
-    if (isRight) {
-      setCorrectCount((x) => x + 1);
-      setEarned((x) => x + (current.rewardCore ?? 0));
-      setJudge("correct");
-    } else {
-      setJudge("wrong");
+    const answerPayload: GameAnswerReq = {
+        profileId: profileId,
+        gameId: current.gameId,
+        gameQuestionId: current.id,
+        textInput: inputText.trim() // 👈 Gửi textInput
+    };
+
+    const progressPayload: LessonProgressReq = {
+        learnerProfileId: profileId,
+        lessonId: Number(unitId),
+        itemType: "GAME_QUESTION",
+        itemRefId: Number(current.id)
+    };
+
+    try {
+        const [answerResult] = await Promise.all([
+            submitGameAnswer(answerPayload),
+            markItemAsCompleted(progressPayload).catch(e => {
+                console.error("Lỗi ngầm khi lưu tiến độ:", e.message);
+            })
+        ]);
+
+        if (answerResult.isCorrect) {
+            setJudge("correct");
+            setCorrectCount((c) => c + 1);
+            setEarned((p) => p + answerResult.rewardEarned);
+        } else {
+            setJudge("wrong");
+        }
+        // API trả về đáp án đúng (có thể đã chuẩn hóa)
+        setCorrectAnswerText(answerResult.correctAnswerText); 
+
+    } catch (err: any) {
+        setError(err.message || "Lỗi khi nộp câu trả lời");
+    } finally {
+        setIsSubmitting(false);
     }
   }
 
   async function nextOrFinish() {
-    // if (idx + 1 < total) {
-    //   setJudge(null);
-    //   setIdx((x) => x + 1);
-    // } else {
-    //   gotoResult(navigate, {
-    //     from: "picture-word",
-    //     unitId,
-    //     total,
-    //     correct: correctCount,
-    //     points: earned,
-    //   });
-    // }
-     const learnerProfileId = Number(getProfileId());
-            const myPayload: LessonProgressReq = {
-            learnerProfileId,
-            lessonId: Number(unitId),
-            itemType: "GAME_QUESTION", // Phải là chuỗi khớp với Enum
-            itemRefId: Number(current.id)
-            };
-        
-            try {
-                await markItemAsCompleted(myPayload);
-                console.log("FE: Đã cập nhật thành công!");
-                const next = idx + 1;
-                if (next >= total) {
-          // ➜ HOÀN TẤT: điều hướng sang trang kết quả và truyền dữ liệu
-                  gotoResult(navigate, {
-                    from: "word-writing",  
-                    gameType:"vocab",     
-                    unitId,                   
-                    total,
-                    correct: correctCount,    
-                    points: earned,           
-                  });
-                }else {
-                // ➜ CHƯA HOÀN TẤT: Chuyển sang câu tiếp theo
-                  setIdx(next);
-                }
-            } catch (error) {
-                console.error("Lỗi khi đang lưu tiến độ:", error);
-                if (error instanceof Error) {
-                    console.error(error.message); 
-                } else {
-                    console.error("Một lỗi không xác định đã xảy ra:", error);
-                }
-            }
+    const next = idx + 1;
+    if (next >= total) {
+      gotoResult(navigate, {
+        from: "word-writing", // 👈 Sửa 'from'
+        gameType:"vocab",
+        unitId,
+        total,
+        correct: correctCount,
+        points: earned,
+      });
+    } else {
+      setIdx(next);
+      // State khác đã được reset trong useEffect[idx]
+    }
   }
-
       function handleSkip() {
           // skip to next (but if last, finish)
           if (idx + 1 < total) {
@@ -203,10 +205,10 @@ export default function PictureWordWritingGamePage() {
           <button className="psg__ghost" onClick={handleSkip}>Bỏ qua</button>
           <button
             className="psg__primary"
-            disabled={inputText.trim().length === 0}
+            disabled={inputText.trim().length === 0|| isSubmitting}
             onClick={handleCheck}
           >
-            KIỂM TRA
+            {isSubmitting ? "Đang chấm..." : "KIỂM TRA"}
           </button>
         </div>
       )}
