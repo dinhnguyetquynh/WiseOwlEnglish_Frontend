@@ -1,0 +1,256 @@
+/* src/pages/learner/css/LessonProgressDetailPage.css */
+:root {
+  --lpd-border: #e5e7eb;
+  --lpd-bg: #f9fafb;
+  --lpd-text-primary: #111827;
+  --lpd-text-secondary: #6b7280;
+  --lpd-blue: #3b82f6;
+  --lpd-red: #ef4444;
+}
+
+.lpd-wrapper {
+  padding: 16px;
+  background-color: var(--lpd-bg);
+  min-height: 100%;
+}
+
+/* --- Header --- */
+.lpd-header {
+  margin-bottom: 24px;
+}
+.lpd-back-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lpd-text-secondary);
+  text-decoration: none;
+}
+.lpd-back-link:hover {
+  text-decoration: underline;
+}
+.lpd-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--lpd-text-primary);
+  margin: 4px 0 0 0;
+}
+
+/* --- Loading / Error --- */
+.lpd-loading,
+.lpd-error,
+.lpd-no-data {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: var(--lpd-text-secondary);
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--lpd-border);
+}
+.lpd-error {
+  color: var(--lpd-red);
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+/* Thêm style cho thông báo "Không có mục nào sai" */
+.lpd-no-data-item {
+  font-size: 14px;
+  color: var(--lpd-text-secondary);
+  padding: 12px 24px;
+  font-style: italic;
+  text-align: center;
+}
+
+
+/* --- Grid Layout --- */
+.lpd-grid {
+  display: grid;
+  /* grid-template-columns: 1fr 1fr; */
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+@media (max-width: 960px) {
+  .lpd-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Card chung --- */
+.lpd-card {
+  background: #fff;
+  border: 1px solid var(--lpd-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+.lpd-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--lpd-text-primary);
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--lpd-border);
+}
+
+/* --- Cột Ôn tập --- */
+.lpd-sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lpd-text-secondary);
+  text-transform: uppercase;
+  margin: 20px 24px 12px;
+}
+.lpd-review-list {
+  display: flex;
+  flex-direction: column;
+}
+.lpd-review-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 24px;
+}
+.lpd-review-item + .lpd-review-item {
+  border-top: 1px dashed var(--lpd-border);
+}
+/* CSS cho tên từ vựng/câu */
+.lpd-item-en {
+  font-weight: 600;
+  color: var(--lpd-text-primary);
+}
+/* CSS cho nghĩa (nếu có) */
+.lpd-item-vi {
+  font-size: 14px;
+  color: var(--lpd-text-secondary);
+}
+/* CSS cho số lần sai */
+.lpd-item-count {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lpd-red);
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  margin-left: auto; /* 👈 THÊM: Tự động đẩy về bên phải */
+  flex-shrink: 0; /* Đảm bảo không bị co lại */
+}
+
+/* --- Cột Lịch sử Test --- */
+.lpd-tests-list {
+  padding: 24px;
+  display: grid;
+  gap: 28px;
+}
+.lpd-test-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+/* Biểu đồ cột CSS */
+.lpd-chart-wrap {
+  display: flex;
+  gap: 12px;
+}
+.lpd-chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--lpd-text-secondary);
+  height: 120px;
+  padding-bottom: 20px; /* bù cho label x */
+}
+.lpd-chart {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  height: 120px; /* Chiều cao cố định cho trục Y */
+  border-left: 2px solid var(--lpd-border);
+  border-bottom: 2px solid var(--lpd-border);
+  padding: 0 12px;
+  align-items: flex-end; /* Đẩy các cột xuống đáy (OK) */
+  margin-bottom: 24px; /* 👈 THÊM: Tạo không gian cho nhãn bên dưới */
+}
+.lpd-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end; /* 👈 THAY BẰNG DÒNG NÀY */
+  position: relative;
+}
+.lpd-chart-bar {
+  width: 100%;
+  max-width: 40px;
+  background-color: var(--lpd-blue);
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: height 0.3s ease-out;
+}
+.lpd-chart-score {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lpd-blue);
+}
+.lpd-chart-label {
+  font-size: 12px;
+  color: var(--lpd-text-secondary);
+  white-space: nowrap;
+  position: absolute;     /* Định vị tuyệt đối... */
+  bottom: -22px;          /* ...nằm bên DƯỚI đáy của cột 22px */
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* --- Cột Ôn tập (Layout 2 cột) --- */
+.lpd-review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 👈 Chia 2 cột */
+  gap: 0; /* 👈 SỬA: Tắt gap của grid, chúng ta sẽ dùng padding */
+  padding: 0 24px 20px 24px;
+}
+.lpd-review-grid > div:first-child {
+  /* Cột bên trái */
+  border-right: 1px solid var(--lpd-border);
+  padding-right: 24px; /* Khoảng cách từ chữ đến đường kẻ */
+}
+.lpd-review-grid > div:last-child {
+  /* Cột bên phải */
+  padding-left: 24px; /* Khoảng cách từ đường kẻ đến chữ */
+}
+.lpd-sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lpd-text-secondary);
+  text-transform: uppercase;
+  margin: 20px 0 12px 0; /* 👈 Bỏ margin 2 bên */
+}
+
+.lpd-review-list {
+  display: flex;
+  flex-direction: column;
+}
+.lpd-review-item {
+  display: flex;
+  /* justify-content: space-between; */
+  align-items: flex-start;
+  gap: 16px;
+  padding: 12px 0; /* 👈 Bỏ padding 2 bên */
+}
+.lpd-review-item > div:first-child {
+  flex-grow: 1; /* Cho phép phần text (en/vi) co giãn */
+}
+
+/* ... (Các CSS cũ cho item-en, item-vi, item-count giữ nguyên) ... */
+
+/* Responsive: Nếu màn hình quá nhỏ, quay về 1 cột */
+@media (max-width: 768px) {
+  .lpd-review-grid {
+    grid-template-columns: 1fr;
+  }
+}

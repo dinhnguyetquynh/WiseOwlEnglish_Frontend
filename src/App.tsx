@@ -30,6 +30,7 @@ import SentenceHiddenGamePage from './pages/learner/ui/SentenceHiddenGamePage';
 import WordToSentenceGamePage from './pages/learner/ui/WordToSentenceGamePage';
 import AdminPage from './pages/admin/pages/AdminPage';
 import GradeProgress from './pages/learner/ui/GradeProgress';
+import LessonProgressDetailPage from './pages/learner/ui/LessonProgressDetailPage';
 
 
 
@@ -57,6 +58,7 @@ function App() {
             <Route path="units/:unitId" element={<LessonMenu />} />
             <Route path="practice" element={<PracticePage />} />
             <Route path="progress" element={<GradeProgress/>}/>
+            <Route path="progress/lesson/:lessonId" element={<LessonProgressDetailPage />} />
             <Route path="rank" element={<RankPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>

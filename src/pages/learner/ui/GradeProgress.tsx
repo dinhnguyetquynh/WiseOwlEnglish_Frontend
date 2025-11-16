@@ -192,7 +192,7 @@ export default function GradeProgress() {
 
                   {/* Hành động */}
                   <Link
-                    to={`/learn/units/${lesson.lessonId}`}
+                    to={`/learn/progress/lesson/${lesson.lessonId}`}
                     className="pr-action-link"
                     data-label="Hành động"
                   >
