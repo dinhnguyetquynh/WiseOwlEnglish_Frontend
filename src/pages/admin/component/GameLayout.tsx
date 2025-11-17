@@ -12,11 +12,14 @@ import { KeyboardArrowDown as ArrowDownIcon } from "@mui/icons-material";
 import { useHomeContext } from "../../../context/AuthContext";
 import { useEffect, useState } from "react";
 import { getLessonsGameByGrade } from "../../../api/admin";
-import type { Lesson } from "../schemas/game.schema";
+import type { GameTypeEnum, Lesson } from "../schemas/game.schema";
 import LessonDetail from "./LessonDetail";
+import CreateGameScreen from "./CreateGameScreen";
 
 export default function GameLayout() {
     const { selectedClass, setSelectedClass, setLessons, lessons } = useHomeContext();
+    const [creatingGameType, setCreatingGameType] = useState<GameTypeEnum | null>(null);
+    const [creatingLessonId, setCreatingLessonId] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -71,7 +74,21 @@ export default function GameLayout() {
             </Select>
         </Box>
     );
-
+    if (creatingGameType && creatingLessonId) {
+        return (
+            <>
+                {renderHeader}
+                <CreateGameScreen
+                    gameType={creatingGameType}
+                    lessonId={creatingLessonId}
+                    onBack={() => {
+                        setCreatingGameType(null);
+                        setCreatingLessonId(null);
+                    }}
+                />
+            </>
+        );
+    }
     // --- Trang chi tiết ---
     if (selectedLesson) {
         return (
@@ -80,7 +97,12 @@ export default function GameLayout() {
                 <LessonDetail
                     lessonId={selectedLesson.lessonId}
                     onBack={() => setSelectedLesson(null)}
+                    onCreateGame={(type, id) => {
+                        setCreatingGameType(type as GameTypeEnum);
+                        setCreatingLessonId(id);
+                    }}
                 />
+
             </>
         );
     }

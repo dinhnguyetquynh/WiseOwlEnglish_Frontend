@@ -25,10 +25,13 @@ import { useHomeContext } from "../../../context/AuthContext";
 export default function LessonDetail({
     lessonId,
     onBack,
+    onCreateGame,
 }: {
     lessonId: number;
     onBack: () => void;
+    onCreateGame: (gameType: string, lessonId: number) => void; // MỚI
 }) {
+
     const { selectedClass } = useHomeContext(); // ✅ lấy lớp học hiện tại
     const [lesson, setLesson] = useState<LessonDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -62,7 +65,7 @@ export default function LessonDetail({
         if (!selectedClass) return;
         try {
             setLoadingTypes(true);
-            const types = await getTypesByGrade(Number(selectedClass));
+            const types = await getTypesByGrade(Number(selectedClass), lessonId);
             setGameTypes(types);
         } catch {
             setGameTypes([]);
@@ -158,6 +161,7 @@ export default function LessonDetail({
                                     onClick={() => {
                                         console.log("Tạo game:", type);
                                         setMenuAnchor(null);
+                                        onCreateGame(type, lessonId); // Gửi enum + id bài học lên
                                     }}
                                 >
                                     <QuizIcon fontSize="small" sx={{ mr: 1 }} />
