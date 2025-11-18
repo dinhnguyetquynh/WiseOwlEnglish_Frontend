@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Box, AppBar, Toolbar, Typography, Drawer,
     List, ListItem, ListItemButton, ListItemIcon,
@@ -16,6 +16,7 @@ import {
 } from "@mui/icons-material";
 import GameLayout from "../component/GameLayout";
 import LessonLayout from "../component/LessonLayout";
+import { useHomeContext } from "../../../context/AuthContext";
 
 type Game = { vocab: string[]; sentence: string[] };
 type Unit = { id: string; title: string; games: Game | null };
@@ -26,7 +27,14 @@ const drawerWidth = 240;
 // --- Component chính ---
 export default function AdminPageMUI() {
     const [activeItem, setActiveItem] = useState("game");
+    const { setSelectedClass } = useHomeContext();
 
+    useEffect(() => {
+        // Chỉ reset khi chuyển sang màn Lesson
+        if (activeItem === "lesson") {
+            setSelectedClass("1");
+        }
+    }, [activeItem, setSelectedClass]);
     return (
         <Box sx={{ display: "flex" }}>
             <AdminHeader />

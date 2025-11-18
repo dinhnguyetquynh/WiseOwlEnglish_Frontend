@@ -3,13 +3,16 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { HomeProvider } from './context/AuthContext.tsx'
-
+import { SnackbarProvider } from "notistack";
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <HomeProvider>
-      <App />
-    </HomeProvider>
+    <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "top", horizontal: "right" }}>
+      <HomeProvider>
+        <App />
+      </HomeProvider>
+    </SnackbarProvider>
+
 
   </StrictMode>,
 )

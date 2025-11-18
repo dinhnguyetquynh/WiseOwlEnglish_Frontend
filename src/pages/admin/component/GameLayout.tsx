@@ -16,6 +16,7 @@ import type { GameTypeEnum, Lesson } from "../schemas/game.schema";
 import LessonDetail from "./LessonDetail";
 import CreateGameScreen from "./CreateGameScreen";
 
+
 export default function GameLayout() {
     const { selectedClass, setSelectedClass, setLessons, lessons } = useHomeContext();
     const [creatingGameType, setCreatingGameType] = useState<GameTypeEnum | null>(null);
