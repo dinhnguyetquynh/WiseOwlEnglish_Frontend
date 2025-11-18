@@ -9,6 +9,7 @@ export const useHome = () => {
     const [roleAccount, setRoleAccountState] = useState<RoleAccount | null>(null);
     const [selectedClass, setSelectedClass] = useState("1");
     const [lessonData, setLessonData] = useState<LessonRes[]>([]);
+    const [orderIndexList, setOrderIndexList] = useState<number[]>([]);
 
     return {
         lessons,
@@ -18,7 +19,7 @@ export const useHome = () => {
         selectedClass,
         setSelectedClass,
         lessonData,
-        setLessonData
+        setLessonData, orderIndexList, setOrderIndexList
 
     };
 };

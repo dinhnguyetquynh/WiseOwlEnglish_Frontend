@@ -169,3 +169,64 @@ export async function createLesson(payload: CreateLessonReq): Promise<CreateLess
 
 
 
+
+export const VocabResSchema = z.object({
+    id: z.number().int().nonnegative(),
+    orderIndex: z.number().int().nonnegative(),
+    term_en: z.string(),
+    phonetic: z.string().nullable().optional(),
+    partOfSpeech: z.string().nullable().optional(),
+});
+
+export const SentenceAdminResSchema = z.object({
+    id: z.number().int().nonnegative(),
+    orderIndex: z.number().int().nonnegative(),
+    sen_en: z.string(),
+});
+
+export const LessonDetailSchema = z.object({
+    vocabResList: z.array(VocabResSchema),
+    sentenceResList: z.array(SentenceAdminResSchema),
+});
+
+/**
+ * TypeScript types inferred from Zod
+ */
+export type VocabRes = z.infer<typeof VocabResSchema>;
+export type SentenceAdminRes = z.infer<typeof SentenceAdminResSchema>;
+export type LessonDetails = z.infer<typeof LessonDetailSchema>;
+
+export async function getLessonDetail(lessonId: number): Promise<LessonDetails> {
+    const res = await axiosClient.get(`/api/lesson-admin/detail/${lessonId}`);
+    // validate + cast
+    return res.data;
+}
+
+
+
+export const uploadAudio = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await axiosClient.post("/api/uploads/lesson/audio", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+    return res.data.url; // server trả về URL audio
+};
+export const uploadVocabImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await axiosClient.post("/api/uploads/lesson/img", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return res.data.url; // server trả về URL ảnh
+};
+export const createVocab = async (payload: any) => {
+    const res = await axiosClient.post("/api/vocab-admin/create", payload);
+    return res.data.url;
+};

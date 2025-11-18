@@ -7,6 +7,7 @@ import {
     Grid,
     Select,
     MenuItem,
+    CircularProgress,
 } from "@mui/material";
 import { KeyboardArrowDown as ArrowDownIcon } from "@mui/icons-material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -29,11 +30,11 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
     const [orderIndex, setOrderIndex] = useState<number>(1);
     const [mascotFile, setMascotFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [loading, setLoading] = useState(false);
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         setMascotFile(file);
         setPreviewUrl(URL.createObjectURL(file));
     };
@@ -41,8 +42,9 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
     // Submit có upload ảnh + gửi dữ liệu về parent
     const handleSubmit = async () => {
         try {
-            let mascotUrl: string | null = null;
+            setLoading(true);
 
+            let mascotUrl: string | null = null;
             if (mascotFile) {
                 mascotUrl = await uploadMascot(mascotFile);
             }
@@ -65,8 +67,12 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
         } catch (err) {
             enqueueSnackbar("Lỗi tạo bài học!", { variant: "error" });
             console.error(err);
+
+        } finally {
+            setLoading(false);
         }
     };
+
 
 
     return (
@@ -208,7 +214,12 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                     sx={{ width: 140, bgcolor: "#4CAF50", fontWeight: 600 }}
                     onClick={handleSubmit}
                 >
-                    Tạo bài học
+                    {loading ? (
+                        <CircularProgress size={22} sx={{ color: "white" }} />
+                    ) : (
+                        "Tạo bài học"
+                    )}
+
                 </Button>
             </Box>
         </Box>

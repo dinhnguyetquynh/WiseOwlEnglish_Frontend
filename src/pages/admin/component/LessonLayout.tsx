@@ -6,17 +6,19 @@ import { getListLesson, type LessonRes } from "../../../api/admin";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CreateNewLesson from "./LessionComponent/CreateNewLession";
+import LessonDetail from "./LessionComponent/LessonDetail";
 
 
 export default function LessonLayout() {
     const {
         selectedClass,
         setSelectedClass,
-        lessonData, setLessonData
+        lessonData, setLessonData, setOrderIndexList
     } = useHomeContext();
 
 
 
+    const [selectedLesson, setSelectedLesson] = useState<LessonRes | null>(null);
 
     const [isCreating, setIsCreating] = useState(false);
 
@@ -26,10 +28,17 @@ export default function LessonLayout() {
         try {
             const res = await getListLesson(Number(selectedClass));
             setLessonData(res);
+
+            // Lưu mảng orderIndex
+            const list = res.map(item => item.orderIndex);
+            setOrderIndexList(list);
+
+            console.log("orderIndexList =", list);
         } catch (err) {
             console.error(err);
         }
     };
+
 
     // Gọi khi đổi lớp
     useEffect(() => {
@@ -49,6 +58,14 @@ export default function LessonLayout() {
         );
     }
 
+    if (selectedLesson) {
+        return (
+            <LessonDetail
+                lesson={selectedLesson}
+                onBack={() => setSelectedLesson(null)}
+            />
+        );
+    }
 
 
     return (
@@ -116,6 +133,8 @@ export default function LessonLayout() {
             {Array.isArray(lessonData) &&
                 lessonData.map((item) => (
                     <Card
+                        onClick={() => setSelectedLesson(item)}
+
                         key={item.id}
                         sx={{
                             p: 2,
