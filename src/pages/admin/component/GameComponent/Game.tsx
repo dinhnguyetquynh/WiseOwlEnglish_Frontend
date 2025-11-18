@@ -220,9 +220,6 @@ const Game = forwardRef<GameHandle, GameProps>(({
         const questionPayloads: QuestionPayload[] = questions.map((q, index) => {
             const position = index + 1;
             const rewardCore = Number(q.maxScore) || 0;
-            const choiceCount = q.choices.length;
-            const isSingleChoiceGame =
-                choiceCount === 1 && !isPicture4Game;
 
             // Xác định promptType và promptRefId
             let promptType = q.contentType; // IMAGE, VOICE, TEXT
@@ -276,7 +273,6 @@ const Game = forwardRef<GameHandle, GameProps>(({
             let optionReqs: OptionReq[] = [];
             // Xác định đáp án đúng cho từng game type
 
-
             if (isPicture4Game) {
                 // Tạo 8 option: 4 IMAGE + 4 VOCAB
                 optionReqs = q.choices.flatMap((choice, i) => {
@@ -302,19 +298,28 @@ const Game = forwardRef<GameHandle, GameProps>(({
                         },
                     ];
                 });
-
             } else {
-                // Mặc định: option đầu tiên là đúng
+                // Build optionReqs từ choices cho các game khác
+                optionReqs = q.choices
+                    .filter((c) => c.trim() !== "")
+                    .map((choice, i) => {
+                        const optionId = getOptionIdByTerm(choice);
+                        return {
+                            contentType: "VOCAB",
+                            contentRefId: optionId || 0,
+                            correct: false, // Sẽ được set sau
+                            position: i + 1,
+                        };
+                    });
+
+                // Xác định đáp án đúng: sử dụng correctIndex nếu có, nếu không thì mặc định là index 0
                 if (optionReqs.length > 0) {
-                    optionReqs[0].correct = true;
-                    for (let i = 1; i < optionReqs.length; i++) {
-                        optionReqs[i].correct = false;
-                    }
-                }
-                // Nếu có nhiều lựa chọn → sử dụng correctIndex (checkbox)
-                else if (optionReqs.length > 1) {
+                    const correctIdx = q.correctIndex !== undefined && q.correctIndex >= 0
+                        ? q.correctIndex
+                        : 0; // Mặc định là option đầu tiên
+
                     optionReqs.forEach((opt, idx) => {
-                        opt.correct = idx === q.correctIndex;
+                        opt.correct = idx === correctIdx;
                     });
                 }
             }
@@ -429,7 +434,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                 setQuestions(updated);
                             }}
                         >
-                            {[1, 2, 3].map((v) => (
+                            {[1, 2, 3, 4, 5].map((v) => (
                                 <MenuItem key={v} value={String(v)}>
                                     {v}
                                 </MenuItem>
@@ -441,6 +446,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                     {!isSentenceHiddenGame && (
                         <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
                             <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <Typography fontWeight="medium">Loại câu hỏi: </Typography>
                                 <Typography fontWeight="bold">{q.contentType}</Typography>
                             </Box>
 
@@ -609,9 +615,11 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                     </Select>
 
 
-                                    {!isPicture4Game && q.choices.length > 1 && (
-
+                                    {!isPicture4Game && q.choices.length === 4 && (
                                         <Box sx={{ display: "flex", alignItems: "center" }}>
+                                            <Typography variant="body2" sx={{ mr: 1 }}>
+                                                Đúng
+                                            </Typography>
                                             <input
                                                 type="checkbox"
                                                 checked={q.correctIndex === i}
@@ -629,7 +637,6 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                                     setQuestions(updated);
                                                 }}
                                             />
-
                                         </Box>
                                     )}
 

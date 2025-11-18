@@ -24,7 +24,10 @@ export default function GameLayout() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
-
+    const fetchLessons = async () => {
+        const data = await getLessonsGameByGrade(Number(selectedClass));
+        setLessons(data);
+    };
     useEffect(() => {
         if (!selectedClass) return;
         const fetchData = async () => {
@@ -96,7 +99,10 @@ export default function GameLayout() {
                 {renderHeader}
                 <LessonDetail
                     lessonId={selectedLesson.lessonId}
-                    onBack={() => setSelectedLesson(null)}
+                    onBack={() => {
+                        fetchLessons();        // ← Reload ngay tại parent
+                        setSelectedLesson(null);
+                    }}
                     onCreateGame={(type, id) => {
                         setCreatingGameType(type as GameTypeEnum);
                         setCreatingLessonId(id);

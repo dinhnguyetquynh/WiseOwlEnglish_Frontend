@@ -111,7 +111,7 @@ export default function LessonDetail({
                     onClick={onBack}
                     sx={{ textTransform: "none" }}
                 >
-                    ← Quay lại
+                    ← Quay lại OK
                 </Button>
 
                 <Typography
