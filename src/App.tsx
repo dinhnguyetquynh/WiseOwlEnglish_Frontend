@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import LearnerLayout from './layouts/LearnerLayout';
 import HomePage from './pages/learner/HomePage';
 import PracticePage from './pages/learner/PracticePage';
-import RankPage from './pages/learner/RankPage';
+
 import ProfilePage from './pages/learner/ProfilePage';
 import LessonMenu from './pages/learner/ui/LessonMenu';
 import WelcomePage from './pages/auth/ui/WelcomePage';
@@ -31,6 +31,8 @@ import WordToSentenceGamePage from './pages/learner/ui/WordToSentenceGamePage';
 import AdminPage from './pages/admin/pages/AdminPage';
 import GradeProgress from './pages/learner/ui/GradeProgress';
 import LessonProgressDetailPage from './pages/learner/ui/LessonProgressDetailPage';
+import PronunciationPracticePage from './pages/learner/ui/PronunciationPracticePage';
+import RankPage from './pages/learner/ui/RankPage';
 
 
 
@@ -61,11 +63,13 @@ function App() {
             <Route path="progress/lesson/:lessonId" element={<LessonProgressDetailPage />} />
             <Route path="rank" element={<RankPage />} />
             <Route path="profile" element={<ProfilePage />} />
+           
           </Route>
           <Route path="/learn/units/:unitId/vocab/learn" element={<VocabLearnPage />} />
           <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage />} />
           <Route path="/learn/units/:unitId/vocab/review" element={<GameSelectPage />} />
           <Route path="/learn/units/:unitId/sentence/review" element={<GameSelectedPageSentence />} />
+           <Route path="/learn/units/:unitId/vocab/pronounce" element={<PronunciationPracticePage />} />
 
           {/*Game tu vung */}
           <Route path="/games/picture-guessing/:unitId" element={<PictureGuessingGamePage />} />

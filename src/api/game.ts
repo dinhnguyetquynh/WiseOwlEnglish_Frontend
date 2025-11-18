@@ -278,3 +278,44 @@ export async function submitGameAnswer(payload: GameAnswerReq): Promise<GameAnsw
         throw new Error(message);
     }
 }
+
+// ... (các import và type cũ)
+
+// 1. DTO Nhận về từ BE (thêm type mới)
+export type PronounceGradeResponse = {
+  grade: "ACCURATE" | "ALMOST" | "INACCURATE";
+  score: number;
+  feedback: string;
+};
+export async function gradePronunciationApi(
+  audioBlob: Blob,
+  correctText: string
+): Promise<PronounceGradeResponse> {
+  
+  // Phải dùng FormData để gửi file
+  const formData = new FormData();
+  
+  // Tên file có thể tùy ý, nhưng nên có định dạng, ví dụ .webm
+  formData.append("audio", audioBlob, "pronunciation.webm"); 
+  formData.append("correctText", correctText);
+
+  try {
+    const res = await axiosClient.post<PronounceGradeResponse>(
+      `/api/pronounce/grade`,
+      formData,
+      {
+        // Báo cho axios biết đây là multipart/form-data
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return res.data;
+  } catch (error: any) {
+    let message = "Không thể chấm điểm phát âm";
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
+  }
+}

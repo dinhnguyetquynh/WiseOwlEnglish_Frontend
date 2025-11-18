@@ -1,0 +1,251 @@
+/* src/pages/learner/css/PronunciationPracticePage.css */
+
+/* === Bố cục trang chung === */
+.pp-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px 16px 120px; /* Thêm padding dưới để footer không che */
+  color: #2d2d2d;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Thanh tiến độ (Giống Figma) === */
+.pp-top {
+  display: grid;
+  grid-template-columns: 32px 1fr 40px;
+  align-items: center;
+  gap: 8px;
+}
+.pp-exit {
+  border: none; background: transparent; font-size: 20px;
+  line-height: 1; cursor: pointer; opacity: .7;
+}
+.pp-progress-wrap {
+  height: 14px; background: #e5e7eb; border-radius: 8px;
+  overflow: hidden;
+}
+.pp-progress-bar {
+  height: 100%; background: #4caf50; border-radius: 8px;
+  transition: width .25s ease;
+}
+.pp-progress-text {
+  font-size: 14px; font-weight: 600; color: #6b7280;
+}
+
+.pp-header {
+  font-weight: 700; color: #333;
+  margin: 18px 0 8px;
+  text-align: center;
+  font-size: 20px;
+}
+
+/* Loading/Error */
+.pp-loader, .pp-error, .pp-empty {
+  margin: 24px 0; text-align: center;
+}
+.pp-error { color: #d32f2f; }
+
+/* === Card nội dung (Theo Figma) === */
+.pp-card-wrap {
+  flex: 1; /* Quan trọng: Đẩy footer xuống dưới */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Căn giữa card theo chiều dọc */
+  margin-top: 10px;
+}
+
+.pp-card {
+  border: 2px solid #a5f3fc; /* Viền xanh nhạt */
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.pp-image-box {
+  width: 100%;
+  min-height: 200px; /* Đổi thành min-height để không bị đè */
+  background: #f1fdff; /* Nền xanh nhạt cho ảnh */
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px; /* Khoảng cách tới nút loa */
+  padding: 10px;
+}
+.pp-image {
+  max-width: 100%;
+  max-height: 200px; /* Giới hạn chiều cao ảnh */
+  object-fit: contain;
+}
+.pp-image-placeholder { color: #6b7280; }
+
+.pp-speaker {
+  border: none; background: #e0f7fa;
+  width: 56px; height: 56px; border-radius: 50%;
+  cursor: pointer; display: grid; place-items: center;
+}
+.pp-icon-speaker {
+  width: 28px; height: 28px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230097a7'%3E%3Cpath d='M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z'/%3E%3C/svg%3E") center no-repeat;
+}
+
+.pp-word {
+  font-size: 32px; color: #111827;
+  font-weight: 800; text-align: center;
+  margin-top: 10px;
+}
+.pp-phonetic {
+  text-align: center; color: #6b7280;
+  margin-top: -2px; font-size: 18px;
+}
+.pp-meaning {
+  text-align: center; font-size: 20px;
+  color: #4b5563; margin-top: 4px;
+}
+
+
+/* === Footer (Nút Bỏ qua / Mic) - ĐÃ SỬA === */
+.pp-footer-actions {
+  /* Bỏ position: fixed */
+  width: 100%;
+  max-width: 500px; /* Giới hạn chiều rộng nút */
+  margin: 24px auto 0 auto; /* Căn giữa và tạo khoảng cách */
+  display: flex;
+  flex-direction: column; /* Xếp chồng 2 nút */
+  align-items: center;
+  gap: 16px; /* Khoảng cách giữa 2 nút */
+}
+
+/* Nút chung */
+.pp-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color .2s, color .2s, opacity .2s;
+}
+.pp-btn:disabled {
+  opacity: 0.6; cursor: not-allowed;
+}
+
+/* Nút Bỏ qua (theo Figma) */
+.pp-btn--skip {
+  background: transparent;
+  color: #b0b0b0; /* Màu xám nhạt */
+  font-weight: bold;
+}
+.pp-btn--skip:hover:not(:disabled) { 
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Nút Mic (theo Figma) */
+.pp-btn--mic {
+  width: 100%; /* Chiếm 100% .pp-footer-actions */
+  background: #1cb0f6; /* Màu xanh dương */
+  color: white;
+  min-height: 50px;
+  box-shadow: 0 4px 0 #0c85c2;
+}
+.pp-btn--mic:active:not(:disabled) { 
+  transform: translateY(2px); 
+  box-shadow: 0 2px 0 #0c85c2; 
+}
+
+.pp-btn--mic.is-recording {
+  background: #ef4444; /* Đỏ khi đang ghi */
+  box-shadow: 0 4px 0 #b91c1c;
+}
+
+.pp-icon-mic {
+  width: 20px; height: 20px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1.2-9.1c0-.66.54-1.2 1.2-1.2.66 0 1.2.54 1.2 1.2l-.01 6.2c0 .66-.53 1.2-1.19 1.2-.66 0-1.2-.54-1.2-1.2V4.9zm6.5 6.1c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z'/%3E%3C/svg%3E") center no-repeat;
+}
+
+/* === Feedback Banner (Dính đáy) - Giữ nguyên === */
+.pp-feedback {
+  position: fixed;
+  left: 0; bottom: 0; width: 100%;
+  padding: 20px 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+.pp-feedback-inner {
+  width: min(900px, 92vw);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+.pp-fb-left { /* ... */ }
+.pp-fb-text { /* ... */ }
+.pp-fb-title { font-weight: 800; font-size: 18px; }
+.pp-fb-right { 
+  display: flex; /* 👈 SỬA LẠI: Dùng flex để xếp 2 nút */
+  align-items: center;
+  gap: 12px; /* 👈 THÊM: Khoảng cách giữa 2 nút */
+ }
+ /* 🔽 THÊM: Style cơ bản cho nút Phát âm lại */
+.pp-btn--retry {
+  background: transparent;
+  color: #6b7280; /* Màu xám chữ */
+  border: 2px solid #e5e7eb; /* Viền xám nhạt */
+  box-shadow: none;
+}
+.pp-btn--retry:hover:not(:disabled) {
+  background: #f3f4f6; /* Nền xám nhẹ khi hover */
+  border-color: #d1d5db;
+}
+
+/* Màu sắc cho feedback */
+.pp-feedback--ok { background: #dcfce7; }
+.pp-feedback--ok .pp-fb-title { color: #166534; }
+.pp-feedback--ok .pp-btn { background: #22c55e; color: white; box-shadow: 0 4px 0 #15803d; }
+/* 🔽 THÊM: Ghi đè màu nút Retry cho trường hợp OK */
+.pp-feedback--ok .pp-btn--retry {
+  background: transparent;
+  color: #166534; /* Dùng màu chữ của title */
+  border: 2px solid #22c55e; /* Dùng màu nền của nút chính */
+  box-shadow: none;
+}
+.pp-feedback--ok .pp-btn--retry:hover:not(:disabled) {
+  background: #bbf7d0; /* Màu xanh lá nhạt hơn */
+}
+
+.pp-feedback--almost { background: #fefce8; }
+.pp-feedback--almost .pp-fb-title { color: #854d0e; }
+.pp-feedback--almost .pp-btn { background: #f59e0b; color: white; box-shadow: 0 4px 0 #b45309; }
+.pp-feedback--almost .pp-btn--retry {
+  background: transparent;
+  color: #854d0e;
+  border: 2px solid #f59e0b;
+  box-shadow: none;
+}
+.pp-feedback--almost .pp-btn--retry:hover:not(:disabled) {
+  background: #fef9c3;
+}
+
+.pp-feedback--bad { background: #fef2f2; }
+.pp-feedback--bad .pp-fb-title { color: #991b1b; }
+.pp-feedback--bad .pp-btn { background: #ef4444; color: white; box-shadow: 0 4px 0 #b91c1c; }
+.pp-feedback--bad .pp-btn--retry {
+  background: transparent;
+  color: #991b1b;
+  border: 2px solid #ef4444;
+  box-shadow: none;
+}
+.pp-feedback--bad .pp-btn--retry:hover:not(:disabled) {
+  background: #fee2e2;
+}

@@ -116,8 +116,12 @@ export default function LessonMenu() {
     const unlockReviewSentence = status.sentenceLearned; // 4. Mở sau khi Học Câu
     const unlockTest = status.sentenceGamesDone; // 5. Mở sau khi Ôn Câu
 
+    // 👇 Thêm điều kiện cho nút mới (giống hệt unlockReviewVocab)
+    const unlockPronounceVocab = status.vocabLearned;
+
     return [
       { key: "learn-vocab",    label: "HỌC TỪ VỰNG",   icon: <span className="lm__icon-emoji">📖</span>, gradientClass: "lm__btn--yellow", to: `/learn/units/${unitId}/vocab/learn`, disabled: !unlockLearnVocab },
+      { key: "pronounce-vocab", label: "LUYỆN PHÁT ÂM", icon: <span className="lm__icon-emoji">🎙️</span>, gradientClass: "lm__btn--blue",  to: `/learn/units/${unitId}/vocab/pronounce`, disabled: !unlockPronounceVocab },
       { key: "review-vocab",   label: "ÔN TỪ VỰNG",    icon: <span className="lm__icon-emoji">↻</span>, gradientClass: "lm__btn--green",  to: `/learn/units/${unitId}/vocab/review`, disabled: !unlockReviewVocab },
       { key: "learn-sentence", label: "HỌC CÂU",       icon: <span className="lm__icon-emoji">💬</span>, gradientClass: "lm__btn--pink",  to: `/learn/units/${unitId}/sentence/learn`, disabled: !unlockLearnSentence },
       { key: "review-sentence",label: "ÔN CÂU",        icon: <span className="lm__icon-emoji">✏️</span>, gradientClass: "lm__btn--lime",  to: `/learn/units/${unitId}/sentence/review`, disabled: !unlockReviewSentence },

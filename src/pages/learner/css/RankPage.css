@@ -1,0 +1,180 @@
+/* src/pages/learner/css/RankPage.css */
+:root {
+  --rank-1-bg: #e0f9d3;
+  --rank-1-border: #9dcd8a;
+  --rank-1-text: #2f6a15;
+  --rank-trophy: #ffc900;
+  --rank-silver: #a8b2c1;
+  --rank-bronze: #d18c52;
+  --rank-score: #1c73a5;
+  --rank-user-bg: #fff;
+  --rank-user-border: #e5e7eb;
+}
+
+.rank-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  position: relative;
+}
+
+/* Header */
+.rank-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.rank-trophy-icon {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+.rank-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #333;
+  margin: 8px 0;
+}
+.rank-subtitle {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+  text-align: center;
+}
+
+/* User Profile (Top Right) */
+.rank-user-profile {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--rank-user-bg);
+  border: 1px solid var(--rank-user-border);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+.rank-user-profile__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.rank-user-profile__name {
+  font-weight: 600;
+  color: #333;
+}
+
+/* List */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Item */
+.rank-item {
+  display: grid;
+  grid-template-columns: 40px 52px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+.rank-position {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6b7280;
+  text-align: center;
+}
+.rank-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.rank-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+.rank-score {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--rank-score);
+}
+
+/* Top 3 styles */
+.rank-item.rank-1,
+.rank-item.rank-2,
+.rank-item.rank-3 {
+  background: var(--rank-1-bg);
+  border: 1px solid var(--rank-1-border);
+  box-shadow: 0 4px 10px rgba(157, 205, 138, 0.3);
+}
+.rank-item.rank-1 .rank-position,
+.rank-item.rank-2 .rank-position,
+.rank-item.rank-3 .rank-position {
+  font-size: 26px; /* Icon to, chữ ẩn */
+  color: transparent;
+  position: relative;
+}
+.rank-item.rank-1 .rank-position::before {
+  content: "🏆";
+  color: var(--rank-trophy);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.rank-item.rank-2 .rank-position::before {
+  content: "🥈";
+  color: var(--rank-silver);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.rank-item.rank-3 .rank-position::before {
+  content: "🥉";
+  color: var(--rank-bronze);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.rank-item.rank-1 .rank-name,
+.rank-item.rank-1 .rank-score {
+  color: var(--rank-1-text);
+  font-weight: 800;
+}
+
+/* User's rank (nếu ở ngoài Top N) */
+.rank-item--user {
+  margin-top: 16px;
+  border-top: 2px dashed #3b82f6;
+  border-bottom: 2px dashed #3b82f6;
+  background: #eff6ff;
+}
+
+/* States */
+.rank-loading,
+.rank-error {
+  text-align: center;
+  padding: 40px;
+  color: #6b7280;
+}
+.rank-error {
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+}
