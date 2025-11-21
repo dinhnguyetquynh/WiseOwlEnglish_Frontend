@@ -1,0 +1,46 @@
+/* src/components/learner/css/Breadcrumbs.css */
+.breadcrumbs {
+  padding: 12px 0;
+  font-size: 14px;
+  color: #6b7280; /* Màu xám */
+  font-weight: 500;
+}
+
+.breadcrumbs ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+}
+
+/* Dấu phân cách (>) */
+.breadcrumb-separator {
+  margin: 0 8px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* Link có thể bấm được */
+.breadcrumb-link {
+  color: #16a34a; /* Màu xanh thương hiệu */
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.breadcrumb-link:hover {
+  color: #15803d;
+  text-decoration: underline;
+}
+
+/* Trang hiện tại (không bấm được) */
+.breadcrumb-current {
+  color: #374151; /* Màu chữ đậm hơn chút */
+  cursor: default;
+}

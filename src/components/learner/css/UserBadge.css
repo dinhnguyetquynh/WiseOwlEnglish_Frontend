@@ -1,0 +1,66 @@
+/* src/components/learner/css/UserBadge.css */
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 8px; /* padding trái nhỏ hơn để avatar sát lề */
+  background: #fff;
+  border-radius: 99px; /* Pill shape */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: default;
+  max-width: 220px;
+}
+
+.user-badge:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.user-badge__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+  background-color: #f1f5f9;
+}
+
+.user-badge__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.user-badge__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.user-badge__role {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Loading state */
+.user-badge__loading {
+  width: 120px;
+  height: 40px;
+  background: #f3f4f6;
+  border-radius: 20px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

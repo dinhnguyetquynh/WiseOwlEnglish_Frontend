@@ -4,31 +4,6 @@ import GameCard, { type GameCardProps } from "../../../components/learner/ui/Gam
 import "../css/GameSelectPage.css";
 import { getGamesForReview, type GameResByLesson } from "../../../api/game";
 
-/* Icon SVG thuần, có thể thay bằng <img src="..."/> */
-// const ImageIcon = () => (
-//   <svg viewBox="0 0 48 48" width="34" height="34" fill="none" stroke="currentColor" strokeWidth="2">
-//     <rect x="6" y="8" width="36" height="28" rx="6"></rect>
-//     <circle cx="18" cy="20" r="4"></circle>
-//     <path d="M10 30l8-8 7 7 6-6 7 7"></path>
-//   </svg>
-// );
-// const HeadphoneIcon = () => (
-//   <svg viewBox="0 0 48 48" width="34" height="34" fill="none" stroke="currentColor" strokeWidth="2">
-//     <path d="M10 24a14 14 0 0 1 28 0"></path>
-//     <path d="M8 26v8a6 6 0 0 0 6 6h2V26h-2a6 6 0 0 0-6 6"></path>
-//     <path d="M40 26v8a6 6 0 0 1-6 6h-2V26h2a6 6 0 0 1 6 6"></path>
-//   </svg>
-// );
-// const WritingIcon = () => (
-//   <svg viewBox="0 0 48 48" width="34" height="34" fill="none" stroke="currentColor" strokeWidth="2">
-//     <path d="M10 30l8-8 7 7 6-6 7 7"></path>
-//   </svg>
-// );
-// const MatchIcon = () => (
-//   <svg viewBox="0 0 48 48" width="34" height="34" fill="none" stroke="currentColor" strokeWidth="2">
-//      <path d="M10 30l8-8 7 7 6-6 7 7"></path>
-//   </svg>
-// );
 
 type MenuState = {
   unitName?: string;
@@ -158,50 +133,7 @@ export default function GameSelectPage() {
     return () => { isMounted = false; };
   }, [resolvedUnitId]); // Phụ thuộc vào lessonId
   
-  // ✅ chỉ cần thêm 1 object nữa là có game mới
-  // const GAMES: Array<Omit<GameCardProps, "onClick"> & { onClick: () => void }> = [
-  //   {
-  //     title: "Nhìn Hình Chọn Chữ",
-  //     description: "Luyện trí nhớ và nhận biết mặt chữ. Nhìn hình và chọn từ đúng!",
-  //     ctaLabel: "CHƠI NGAY!",
-  //     icon: <ImageIcon />,
-  //     accent: "green",
-  //     onClick: () => {
-  //       resolvedUnitId ? nav(`/games/picture-guessing/${resolvedUnitId}`) : nav(`/games/picture-guessing`);
-  //     },
-  //   },
-  //   {
-  //     title: "Nghe & Chọn Chữ",
-  //     description: "Nghe âm thanh và chọn chữ phù hợp để tăng cường kỹ năng nghe.",
-  //     ctaLabel: "CHƠI NGAY!",
-  //     icon: <HeadphoneIcon />,
-  //     accent: "purple",
-  //     onClick: () => {
-  //       resolvedUnitId ? nav(`/games/sound-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
-  //     },
-  //   },
-  //   {
-  //     title: "Nhìn hình và viết từ vựng",
-  //     description: "Rèn luyện viết từ vựng",
-  //     ctaLabel: "CHƠI NGAY!",
-  //     icon: <HeadphoneIcon />,
-  //     accent: "purple",
-  //     onClick: () => {
-  //       resolvedUnitId ? nav(`/games/picture-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
-  //     },      
-  //   },
-  //   {
-  //     title: "Nối hình và từ vựng ",
-  //     description: "Rèn luyện trí nhớ từ vựng",
-  //     ctaLabel: "CHƠI NGAY!",
-  //     icon: <HeadphoneIcon />,
-  //     accent: "purple",
-  //     onClick: () => {
-  //       resolvedUnitId ? nav(`/games/picture-match-word/${resolvedUnitId}`) : nav(`/games/sound-word`);
-  //     },      
-  //   }
-
-  // ];
+  
 
   const savedStateStr: MenuState | undefined = (() => {
     const raw = localStorage.getItem("lessonMenuState");
@@ -222,10 +154,9 @@ export default function GameSelectPage() {
   return (
     <div className="gs-wrap">
       <header className="gs-header">
-      <button className="gs-back-btn" onClick={handleBack}>
+      {/* <button className="gs-back-btn" onClick={handleBack}>
         ← Trở lại trang trước
-      </button>
-        <p>Trang chủ &gt; Menu bài học &gt; Ôn tập từ vựng </p>
+      </button> */}
         <h1 className="gs-title"><span>🌟</span> Sẵn Sàng Học Chưa? <span>🌟</span></h1>
         <p className="gs-subtitle">Chọn trò chơi bạn muốn chinh phục hôm nay!</p>
       </header>

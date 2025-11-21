@@ -38,9 +38,9 @@ export default function TestPage() {
   return(
     <div className="test-page">
       <div className="test-container">
-        <div>
+        {/* <div>
           <p>Trang chủ &gt; Menu Bài học &gt; Kiểm tra &gt; Test 1  </p>
-        </div>
+        </div> */}
         <TestRunner test={data} />
       </div>
     </div>

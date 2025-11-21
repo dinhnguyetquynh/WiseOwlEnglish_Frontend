@@ -81,7 +81,7 @@ export default function RankPage() {
       {/* Header */}
       <header className="rank-header">
         <img
-          src="https://res.cloudinary.com/dxhhluk84/image/upload/v1763134633/trophy_svlqpp.png"
+          src="https://res.cloudinary.com/dxhhluk84/image/upload/v1763521406/top_hqudo4.png"
           alt="Trophy"
           className="rank-trophy-icon"
         />
@@ -92,7 +92,7 @@ export default function RankPage() {
       </header>
 
       {/* Hồ sơ user (góc trên phải) */}
-      {currentUser && (
+      {/* {currentUser && (
         <div className="rank-user-profile">
           <img
             className="rank-user-profile__avatar"
@@ -101,7 +101,7 @@ export default function RankPage() {
           />
           <span className="rank-user-profile__name">{currentUser.nickName}</span>
         </div>
-      )}
+      )} */}
 
       {/* States */}
       {loading && <div className="rank-loading">Đang tải bảng xếp hạng...</div>}

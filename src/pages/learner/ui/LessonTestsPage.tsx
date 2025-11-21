@@ -7,9 +7,9 @@ export default function LessonTestsPage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{marginLeft:"300px"}}>
+      {/* <div style={{marginLeft:"300px"}}>
         <p>Trang chủ &gt; Menu bài học &gt; Kiểm tra </p>
-      </div>
+      </div> */}
       <TestListByLesson lessonId={Number(lessonId)} />
     </div>
   );

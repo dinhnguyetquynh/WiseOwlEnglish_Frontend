@@ -47,17 +47,7 @@ useEffect(() => {
         const data: LessonsByClassRes = await fetchLessonsForHomePage(profileId);
         setPrimaryGrade(data.gradeOrderIndex);
         setSelectedGrade(data.gradeOrderIndex);
-        // const mapped: Unit[] = data.lessons.map(l => ({
-        //   id: String(l.id),
-        //   title: `${l.unitName}: ${l.lessonName}`, // yêu cầu của bạn
-        //   unitName: l.unitName,
-        //   unitTitle: l.lessonName,
-        //   lessonCount: 100,                        // hoặc tổng item lesson nếu muốn
-        //   progress: { done: l.percentComplete, total: 100 },
-        //   status: l.status,
-        //   mascot:l.mascot
-        // }));
-        // setUnits(mapped);
+
       } catch (e: any) {
         setErr(e?.message ?? "Lỗi tải bài học");
       // } finally {
@@ -99,9 +89,6 @@ useEffect(() => {
           unitTitle: l.lessonName,
           lessonCount: 100,
           progress: { done: l.percentComplete, total: 100 },
-          // SỬA Ở ĐÂY:
-          // Bây giờ chúng ta tin tưởng 100% vào status (LOCKED/ACTIVE/COMPLETE)
-          // mà Backend trả về (do hàm `getLessonsByGradeForProfile` đã xử lý)
           status: isLocked ? "LOCKED" : l.status,
           mascot: l.mascot,
         }));
@@ -142,15 +129,6 @@ const handleContinue = (unit: Unit) => {
       {/* Header: select lớp */}
       <header className="hp__header">
          <FancyClassSelect value={selectedGrade ?? 1} onChange={setSelectedGrade} />
-         <div className="hp_account">
-          <div className="hp_account_avatar">
-            <img src={profile?.avatarUrl ??
-                "https://res.cloudinary.com/dxhhluk84/image/upload/v1759137636/unit1_color_noBG_awzhqe.png"} alt="avatar" />
-          </div>
-          <div>
-            <p>{profile?.nickName ?? "Đang tải..."}</p>
-          </div>
-         </div>
       </header>
 
       <hr className="hp__divider" />

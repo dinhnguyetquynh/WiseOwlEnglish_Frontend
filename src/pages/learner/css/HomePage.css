@@ -47,7 +47,7 @@
   align-items: center;
   justify-content: space-between;   /* 👈 đẩy Select trái, account phải */
   gap: 16px;
-  padding: 10px 14px;
+  padding: 5px 14px;
 }
 
 .hp__title { 

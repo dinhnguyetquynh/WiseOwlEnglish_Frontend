@@ -33,6 +33,7 @@ import GradeProgress from './pages/learner/ui/GradeProgress';
 import LessonProgressDetailPage from './pages/learner/ui/LessonProgressDetailPage';
 import PronunciationPracticePage from './pages/learner/ui/PronunciationPracticePage';
 import RankPage from './pages/learner/ui/RankPage';
+import HeaderLayout from './layouts/HeaderLayout';
 
 
 
@@ -63,8 +64,9 @@ function App() {
             <Route path="progress/lesson/:lessonId" element={<LessonProgressDetailPage />} />
             <Route path="rank" element={<RankPage />} />
             <Route path="profile" element={<ProfilePage />} />
-           
           </Route>
+          
+          <Route element={<HeaderLayout />}>
           <Route path="/learn/units/:unitId/vocab/learn" element={<VocabLearnPage />} />
           <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage />} />
           <Route path="/learn/units/:unitId/vocab/review" element={<GameSelectPage />} />
@@ -85,7 +87,7 @@ function App() {
           <Route path="/learn/units/:lessonId/testlist" element={<LessonTestsPage />} />
           <Route path="/learn/units/:testId/test" element={<TestPage />} />
           <Route path="/learn/test-result" element={<TestResultPage />} />
-
+          </Route>
 
         </Route>
 

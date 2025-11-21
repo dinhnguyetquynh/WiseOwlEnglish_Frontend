@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../components/learner/ui/Sidebar";
 import "../styles/LearnerLayout.css";
 import { useState } from "react";
+import UserBadge from "../components/learner/ui/UserBadge";
 export default function LearnerLayout() {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -19,6 +20,14 @@ export default function LearnerLayout() {
     <div className="layout">
       <Sidebar onLogoutClick={() => setShowConfirm(true)}/>
       <main className="layout__main">
+        <div className="layout__header-bar" style={{
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            // paddingBottom: '10px',
+            marginBottom: '10px'
+          }}>
+            <UserBadge />
+        </div>
         <Outlet />
       </main>
       {showConfirm && (

@@ -1,0 +1,41 @@
+/* src/layouts/HeaderLayout.css */
+
+/* Khung bao ngoài cùng: Chịu trách nhiệm màu nền và đường kẻ dưới */
+.header-bar-wrapper {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb; /* Đường kẻ xám nhẹ */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); /* Bóng mờ rất nhẹ tạo độ nổi */
+  width: 100%;
+}
+
+/* Container nội dung: Giới hạn chiều rộng và căn giữa */
+.header-bar-content {
+  max-width: 1100px; /* Giới hạn chiều rộng bằng với các trang nội dung */
+  margin: 0 auto;    /* Căn giữa container */
+  padding: 12px 24px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Đẩy 2 phần tử ra 2 đầu của container này */
+}
+
+/* Style cho Logo/Brand name */
+.header-brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.2s;
+}
+
+.header-brand:hover {
+  opacity: 0.8;
+}
+
+.header-brand-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: #16a34a; /* Màu xanh lá chủ đạo */
+  letter-spacing: 0.5px;
+  font-family: system-ui, -apple-system, sans-serif;
+}
