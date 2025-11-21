@@ -3,7 +3,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getLessonDetail, type LessonDetails, type LessonRes } from "../../../../api/admin";
 import { useEffect, useState } from "react";
 import { useHomeContext } from "../../../../context/AuthContext";
-import AddVocabModal from "./AddVocabModal";
+import AddContentModal from "./AddVocabModal";
+
 
 interface LessonDetailProps {
     lesson: LessonRes;
@@ -11,12 +12,13 @@ interface LessonDetailProps {
 }
 
 export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
-    const {
-        selectedClass,
-    } = useHomeContext();
+    const { selectedClass } = useHomeContext();
+
     const [detail, setDetail] = useState<LessonDetails | null>(null);
     const [loading, setLoading] = useState(false);
-    const [openAddVocab, setOpenAddVocab] = useState(false);
+
+    const [openModal, setOpenModal] = useState(false);
+    const [modalMode, setModalMode] = useState<"vocab" | "sentence">("vocab");
 
     const fetchDetail = async () => {
         setLoading(true);
@@ -33,7 +35,6 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
     useEffect(() => {
         fetchDetail();
     }, [lesson.id]);
-
 
     if (loading || !detail) {
         return (
@@ -52,10 +53,8 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                 boxShadow: "0 0 0 1px #ddd",
             }}
         >
-
-            {/* SELECT CLASS (READ-ONLY) */}
+            {/* SELECT CLASS */}
             <Box sx={{ mb: 3 }}>
-
                 <Select
                     value={selectedClass}
                     disabled
@@ -93,26 +92,26 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                     <ArrowBackIcon />
                 </Button>
             </Box>
+
             {/* TITLE */}
             <Typography
                 variant="h5"
                 sx={{
                     textAlign: "center",
                     fontWeight: 700,
-                    mb: 4
+                    mb: 4,
                 }}
             >
                 UNIT {lesson.unitNumber}: {lesson.unitName.toUpperCase()}
             </Typography>
 
-            {/* 2 COLUMN WRAPPER */}
+            {/* TWO COLUMN WRAPPER */}
             <Box
                 sx={{
                     display: "flex",
                     gap: 4,
                 }}
             >
-
                 {/* LEFT – VOCAB */}
                 <Box
                     sx={{
@@ -122,7 +121,6 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                         p: 2,
                     }}
                 >
-                    {/* Header */}
                     <Box
                         sx={{
                             display: "flex",
@@ -138,14 +136,15 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                         <Button
                             variant="contained"
                             sx={{ bgcolor: "#4CAF50", fontWeight: 700 }}
-                            onClick={() => setOpenAddVocab(true)}
+                            onClick={() => {
+                                setModalMode("vocab");
+                                setOpenModal(true);
+                            }}
                         >
                             Thêm từ mới
                         </Button>
-
                     </Box>
 
-                    {/* Vocab Items */}
                     {detail.vocabResList.map((v) => (
                         <Box
                             key={v.id}
@@ -159,47 +158,23 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                                 justifyContent: "space-between",
                             }}
                         >
-                            {/* Left content */}
                             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                                 <Typography fontWeight={700}>{v.orderIndex}</Typography>
-
                                 <Typography fontWeight={700}>{v.term_en}</Typography>
-
-                                <Typography sx={{ color: "gray" }}>
-                                    {v.phonetic}
-                                </Typography>
-
-                                <Typography fontStyle="italic">
-                                    ({v.partOfSpeech})
-                                </Typography>
+                                <Typography sx={{ color: "gray" }}>{v.phonetic}</Typography>
+                                <Typography fontStyle="italic">({v.partOfSpeech})</Typography>
                             </Box>
 
-                            {/* Buttons */}
                             <Box sx={{ display: "flex", gap: 1 }}>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: "#ef5350",
-                                        minWidth: 60,
-                                        fontSize: 12,
-                                    }}
-                                >
+                                <Button variant="contained" sx={{ bgcolor: "#ef5350", minWidth: 60, fontSize: 12 }}>
                                     Xoá
                                 </Button>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: "#64b5f6",
-                                        minWidth: 70,
-                                        fontSize: 12,
-                                    }}
-                                >
+                                <Button variant="contained" sx={{ bgcolor: "#64b5f6", minWidth: 70, fontSize: 12 }}>
                                     Chi tiết
                                 </Button>
                             </Box>
                         </Box>
                     ))}
-
                 </Box>
 
                 {/* RIGHT – SENTENCES */}
@@ -211,7 +186,6 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                         p: 2,
                     }}
                 >
-                    {/* Header */}
                     <Box
                         sx={{
                             display: "flex",
@@ -227,12 +201,15 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                         <Button
                             variant="contained"
                             sx={{ bgcolor: "#4CAF50", fontWeight: 700 }}
+                            onClick={() => {
+                                setModalMode("sentence");
+                                setOpenModal(true);
+                            }}
                         >
                             Thêm câu mới
                         </Button>
                     </Box>
 
-                    {/* Sentence Items */}
                     {detail.sentenceResList.map((s) => (
                         <Box
                             key={s.id}
@@ -246,54 +223,35 @@ export default function LessonDetail({ lesson, onBack }: LessonDetailProps) {
                                 justifyContent: "space-between",
                             }}
                         >
-                            {/* Left content */}
                             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                                 <Typography fontWeight={700}>{s.orderIndex}</Typography>
-
                                 <Typography fontWeight={700}>{s.sen_en}</Typography>
                             </Box>
 
-                            {/* Buttons */}
                             <Box sx={{ display: "flex", gap: 1 }}>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: "#ef5350",
-                                        minWidth: 60,
-                                        fontSize: 12,
-                                    }}
-                                >
+                                <Button variant="contained" sx={{ bgcolor: "#ef5350", minWidth: 60, fontSize: 12 }}>
                                     Xoá
                                 </Button>
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        bgcolor: "#64b5f6",
-                                        minWidth: 70,
-                                        fontSize: 12,
-                                    }}
-                                >
+                                <Button variant="contained" sx={{ bgcolor: "#64b5f6", minWidth: 70, fontSize: 12 }}>
                                     Chi tiết
                                 </Button>
                             </Box>
                         </Box>
                     ))}
-
                 </Box>
-
-                <AddVocabModal
-                    open={openAddVocab}
-                    onClose={() => setOpenAddVocab(false)}
-                    lessonId={lesson.id}
-                    onSuccess={() => {
-                        setOpenAddVocab(false);
-                        fetchDetail(); // reload vocab + sentence
-                    }}
-                />
-
-
             </Box>
 
+            {/* MODAL DÙNG CHUNG */}
+            <AddContentModal
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                lessonId={lesson.id}
+                onSuccess={() => {
+                    setOpenModal(false);
+                    fetchDetail();
+                }}
+                mode={modalMode}
+            />
         </Box>
     );
 }

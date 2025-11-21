@@ -230,3 +230,28 @@ export const createVocab = async (payload: any) => {
     const res = await axiosClient.post("/api/vocab-admin/create", payload);
     return res.data.url;
 };
+
+
+export interface CreateSentenceReq {
+    sen_en: string;
+    sen_vn: string;
+    lessonId: number;
+    isForLearning: boolean;
+    urlImg: string;
+    urlAudioNormal: string;
+    durationSecNormal: number;
+    urlAudioSlow: string;
+    durationSecSlow: number;
+}
+
+export async function createSentences(
+    payload: CreateSentenceReq
+): Promise<SentenceAdminRes> {
+
+    const res = await axiosClient.post<SentenceAdminRes>(
+        "/api/sentences/create",
+        payload
+    );
+
+    return res.data;
+}

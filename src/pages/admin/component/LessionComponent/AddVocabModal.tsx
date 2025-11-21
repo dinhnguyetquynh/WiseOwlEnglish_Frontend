@@ -8,33 +8,55 @@ import {
     TextField,
     Button,
     Checkbox,
-    Select,
-    MenuItem,
     CircularProgress,
 } from "@mui/material";
-import { useState } from "react";
-import { createVocab, uploadAudio, uploadVocabImage } from "../../../../api/admin";
 import { enqueueSnackbar } from "notistack";
-import { useHomeContext } from "../../../../context/AuthContext";
+import { useEffect, useState } from "react";
+import { uploadAudio, uploadVocabImage, createVocab, createSentences } from "../../../../api/admin";
 
-interface AddVocabModalProps {
+interface AddContentModalProps {
     open: boolean;
-    lessonId: number;
     onClose: () => void;
-
-    onSuccess: () => void;   // thêm
+    lessonId: number;
+    onSuccess: () => void;
+    mode: "vocab" | "sentence";
 }
 
-export default function AddVocabModal({ open, lessonId, onClose, onSuccess }: AddVocabModalProps) {
-    const [orderIndex, setOrderIndex] = useState("");
-    const [isUsed, setIsUsed] = useState(true);
-    const {
-        orderIndexList
-    } = useHomeContext();
+export default function AddContentModal({
+    open,
+    onClose,
+    lessonId,
+    onSuccess,
+    mode,
+}: AddContentModalProps) {
+    const isVocab = mode === "vocab";
+
+
     const [loading, setLoading] = useState(false);
 
-    const availableOrders = Array.from({ length: 100 }, (_, i) => i + 1)
-        .filter(num => !orderIndexList.includes(num));
+    const [isUsed, setIsUsed] = useState(true);
+
+
+
+
+    useEffect(() => {
+        // Reset tất cả field khi đổi mode
+        setTermEn("");
+        setTermVi("");
+        setPhonetic("");
+        setPartOfSpeech("");
+
+        setIsUsed(true);
+
+        setImageFile(null);
+        setPreviewImage("");
+
+        setAudioNormal(null);
+        setAudioSlow(null);
+
+    }, [mode, open]);
+
+
 
     const [termEn, setTermEn] = useState("");
     const [termVi, setTermVi] = useState("");
@@ -57,273 +79,233 @@ export default function AddVocabModal({ open, lessonId, onClose, onSuccess }: Ad
     };
 
     const handleSubmit = async () => {
-
-        if (!orderIndex || !termEn.trim() || !termVi.trim()) {
+        if (!termEn.trim() || !termVi.trim()) {
             enqueueSnackbar("Vui lòng nhập đầy đủ thông tin", { variant: "warning" });
             return;
         }
-        try {
 
+        try {
             setLoading(true);
+
             let imgUrl = "";
             let audioNormalUrl = "";
             let audioSlowUrl = "";
 
-            if (imageFile) {
-                imgUrl = await uploadVocabImage(imageFile);
+            if (imageFile) imgUrl = await uploadVocabImage(imageFile);
+            if (audioNormal) audioNormalUrl = await uploadAudio(audioNormal);
+            if (audioSlow) audioSlowUrl = await uploadAudio(audioSlow);
+
+            if (isVocab) {
+                await createVocab({
+                    term_en: termEn,
+                    term_vn: termVi,
+                    phonetic,
+                    partOfSpeech,
+                    lessonId,
+                    isForLearning: isUsed,
+                    urlImg: imgUrl,
+                    urlAudioNormal: audioNormalUrl,
+                    durationSecNormal: 2,
+                    urlAudioSlow: audioSlowUrl,
+                    durationSecSlow: 2,
+                });
+            } else {
+                await createSentences({
+                    sen_en: termEn,
+                    sen_vn: termVi,
+                    lessonId,
+                    isForLearning: isUsed,
+                    urlImg: imgUrl,
+                    urlAudioNormal: audioNormalUrl,
+                    durationSecNormal: 2,
+                    urlAudioSlow: audioSlowUrl,
+                    durationSecSlow: 2,
+                });
             }
 
-            if (audioNormal) {
-                audioNormalUrl = await uploadAudio(audioNormal);
-            }
-
-            if (audioSlow) {
-                audioSlowUrl = await uploadAudio(audioSlow);
-            }
-
-            await createVocab({
-                term_en: termEn,
-                term_vn: termVi,
-                phonetic,
-                partOfSpeech,
-                orderIndex: Number(orderIndex),
-                lessonId,
-                isForLearning: isUsed,
-                urlImg: imgUrl,
-                urlAudioNormal: audioNormalUrl,
-                durationSecNormal: 2,
-                urlAudioSlow: audioSlowUrl,
-                durationSecSlow: 2,
+            enqueueSnackbar(isVocab ? "Tạo từ vựng thành công!" : "Tạo câu thành công!", {
+                variant: "success",
             });
 
-            enqueueSnackbar("Tạo từ vựng thành công!", { variant: "success" });
             onSuccess();
             onClose();
         } catch (e) {
-            enqueueSnackbar("Lỗi tạo từ vựng!", { variant: "error" });
             console.error(e);
-        }
-        finally {
+            enqueueSnackbar("Lỗi tạo dữ liệu!", { variant: "error" });
+        } finally {
             setLoading(false);
         }
     };
 
-
-
-
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            maxWidth="md"
-            fullWidth
-            PaperProps={{
-                sx: {
-                    height: "95vh",         // đặt chiều cao manual
-                },
-            }}
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth
+            PaperProps={{ sx: { height: "95vh" } }}
         >
-
             <DialogTitle sx={{ fontWeight: 700, fontSize: 22 }}>
-                Tạo từ vựng mới
+                {isVocab ? "Tạo từ vựng mới" : "Tạo câu mới"}
             </DialogTitle>
 
             <DialogContent>
                 <Box
                     sx={{
                         display: "flex",
-                        gap: 4,
-                        mt: 2,
+                        flexDirection: "column",
+                        gap: 2, // optional: khoảng cách giữa các dòng
                     }}
                 >
-                    {/* LEFT COLUMN */}
-                    <Box sx={{ flex: 1 }}>
-                        {/* Order + checkbox */}
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                            <Box>
-                                <Typography sx={{ mb: 1 }}>Dùng cho bài học</Typography>
-                                <Checkbox
-                                    checked={isUsed}
-                                    onChange={(e) => setIsUsed(e.target.checked)}
-                                />
-                            </Box>
-                        </Box>
-                        <Box sx={{ mt: 2 }}>
-                            <Typography sx={{ mb: 1 }}>Thứ tự từ vựng trong bài học :</Typography>
+                    <Box>
 
-                            <Select
-                                fullWidth
-                                value={orderIndex}
-                                onChange={(e) => setOrderIndex(e.target.value)}
-                                displayEmpty
-                                sx={{ height: 40 }}
-                            >
-                                <MenuItem value="" disabled>
-                                    Chọn thứ tự
-                                </MenuItem>
-
-                                {availableOrders.map(num => (
-                                    <MenuItem key={num} value={num}>
-                                        {num}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </Box>
-
-                        {/* Term EN + VI */}
-                        <Box sx={{ mt: 2 }}>
-                            <Typography sx={{ mb: 1 }}>Từ tiếng anh</Typography>
-                            <TextField
-                                fullWidth
-                                value={termEn}
-                                onChange={(e) => setTermEn(e.target.value)}
-                            />
-                        </Box>
-
-                        <Box sx={{ mt: 2 }}>
-                            <Typography sx={{ mb: 1 }}>Từ tiếng việt</Typography>
-                            <TextField
-                                fullWidth
-                                value={termVi}
-                                onChange={(e) => setTermVi(e.target.value)}
-                            />
-                        </Box>
-
-                        {/* Phonetic + Part of speech */}
                         <Box
                             sx={{
                                 display: "flex",
+                                flexDirection: "row",
                                 gap: 2,
                                 mt: 2,
                             }}
                         >
                             <Box sx={{ flex: 1 }}>
-                                <Typography sx={{ mb: 1 }}>Phiên âm</Typography>
+                                <Typography sx={{ mb: 1 }}>
+                                    {isVocab ? "Từ tiếng Anh" : "Câu tiếng Anh"}
+                                </Typography>
                                 <TextField
                                     fullWidth
-                                    value={phonetic}
-                                    onChange={(e) => setPhonetic(e.target.value)}
+                                    value={termEn}
+                                    onChange={(e) => setTermEn(e.target.value)}
                                 />
                             </Box>
 
                             <Box sx={{ flex: 1 }}>
-                                <Typography sx={{ mb: 1 }}>Loại từ</Typography>
+                                <Typography sx={{ mb: 1 }}>
+                                    {isVocab ? "Từ tiếng Việt" : "Câu tiếng Việt"}
+                                </Typography>
                                 <TextField
                                     fullWidth
-                                    value={partOfSpeech}
-                                    onChange={(e) => setPartOfSpeech(e.target.value)}
+                                    value={termVi}
+                                    onChange={(e) => setTermVi(e.target.value)}
                                 />
                             </Box>
                         </Box>
+                        {/* Chỉ từ vựng mới có phiên âm + loại từ */}
+                        {isVocab && (
+                            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography sx={{ mb: 1 }}>Phiên âm</Typography>
+                                    <TextField fullWidth value={phonetic} onChange={(e) => setPhonetic(e.target.value)} />
+                                </Box>
 
-                        {/* Upload image */}
-                        <Box sx={{ mt: 2 }}>
-                            <Typography sx={{ mb: 1 }}>Chọn ảnh minh hoạ</Typography>
-
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{
-                                    height: 50,
-                                    fontWeight: 700,
-                                }}
-                            >
-                                THÊM ẢNH +
-                                <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
-                            </Button>
-                        </Box>
-
-                        {/* Preview */}
-                        {previewImage && (
-                            <Box sx={{ mt: 2 }}>
-                                <Typography sx={{ mb: 1 }}>Xem trước ảnh minh hoạ</Typography>
-                                <Box
-                                    component="img"
-                                    src={previewImage}
-                                    sx={{
-                                        width: "100%",
-                                        height: 180,
-                                        objectFit: "contain",
-                                        borderRadius: 2,
-                                        border: "1px solid #ccc",
-                                    }}
-                                />
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography sx={{ mb: 1 }}>Loại từ</Typography>
+                                    <TextField fullWidth value={partOfSpeech} onChange={(e) => setPartOfSpeech(e.target.value)} />
+                                </Box>
                             </Box>
                         )}
+
+
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 2,
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    mt: 1,
+                                }}
+                            >
+                                <Checkbox
+                                    checked={isUsed}
+                                    onChange={(e) => setIsUsed(e.target.checked)}
+                                />
+                                <Typography sx={{ mb: 0 }}>Dùng cho bài học</Typography>
+
+                            </Box>
+                        </Box>
+
+
+
+
                     </Box>
 
-                    {/* RIGHT COLUMN - AUDIO */}
-                    <Box sx={{ flex: 1 }}>
-                        {/* NORMAL SPEED */}
-                        <Box>
-                            <Typography sx={{ mb: 1 }}>
-                                Chọn phát âm tốc độ thường
-                            </Typography>
 
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{ height: 50, fontWeight: 700 }}
-                            >
-                                THÊM ÂM THANH +
-                                <input
-                                    type="file"
-                                    accept="audio/*"
-                                    hidden
-                                    onChange={(e) => setAudioNormal(e.target.files?.[0] ?? null)}
-                                />
-                            </Button>
+                    <Box sx={{ display: "flex", gap: 4, mt: 2 }}>
 
-                            {/* Preview */}
-                            {audioNormal && (
-                                <Box sx={{ mt: 1 }}>
-                                    <Typography sx={{ mb: 1 }}>Nghe lại âm thanh:</Typography>
-                                    <audio controls src={URL.createObjectURL(audioNormal)} style={{ width: "100%" }} />
+                        {/* LEFT */}
+                        <Box sx={{ flex: 1 }}>
+
+
+                            <Box sx={{ mt: 2 }}>
+                                <Typography sx={{ mb: 1 }}>Ảnh minh hoạ</Typography>
+                                <Button variant="outlined" component="label" fullWidth sx={{ height: 50, fontWeight: 700 }}>
+                                    THÊM ẢNH +
+                                    <input type="file" hidden accept="image/*" onChange={handleImageUpload} />
+                                </Button>
+                            </Box>
+
+                            {previewImage && (
+                                <Box sx={{ mt: 2 }}>
+                                    <Typography sx={{ mb: 1 }}>Xem trước</Typography>
+                                    <Box
+                                        component="img"
+                                        src={previewImage}
+                                        sx={{
+                                            width: "100%",
+                                            height: 180,
+                                            objectFit: "contain",
+                                            border: "1px solid #ccc",
+                                            borderRadius: 2,
+                                        }}
+                                    />
                                 </Box>
                             )}
                         </Box>
 
-                        {/* SLOW SPEED */}
-                        <Box sx={{ mt: 4 }}>
-                            <Typography sx={{ mb: 1 }}>
-                                Chọn phát âm tốc độ chậm
-                            </Typography>
+                        {/* RIGHT – AUDIO */}
+                        <Box sx={{ flex: 1 }}>
+                            <Box>
+                                <Typography sx={{ mb: 1 }}>Âm thanh tốc độ thường</Typography>
+                                <Button variant="outlined" component="label" fullWidth sx={{ height: 50, fontWeight: 700 }}>
+                                    THÊM ÂM THANH +
+                                    <input type="file" hidden accept="audio/*"
+                                        onChange={(e) => setAudioNormal(e.target.files?.[0] ?? null)} />
+                                </Button>
 
-                            <Button
-                                variant="outlined"
-                                component="label"
-                                fullWidth
-                                sx={{ height: 50, fontWeight: 700 }}
-                            >
-                                THÊM ÂM THANH +
-                                <input
-                                    type="file"
-                                    accept="audio/*"
-                                    hidden
-                                    onChange={(e) => setAudioSlow(e.target.files?.[0] ?? null)}
-                                />
-                            </Button>
+                                {audioNormal && (
+                                    <Box sx={{ mt: 1 }}>
+                                        <Typography sx={{ mb: 1 }}>Preview:</Typography>
+                                        <audio controls src={URL.createObjectURL(audioNormal)} style={{ width: "100%" }} />
+                                    </Box>
+                                )}
+                            </Box>
 
-                            {audioSlow && (
-                                <Box sx={{ mt: 1 }}>
-                                    <Typography sx={{ mb: 1 }}>Nghe lại âm thanh:</Typography>
-                                    <audio controls src={URL.createObjectURL(audioSlow)} style={{ width: "100%" }} />
-                                </Box>
-                            )}
+                            <Box sx={{ mt: 4 }}>
+                                <Typography sx={{ mb: 1 }}>Âm thanh tốc độ chậm</Typography>
+                                <Button variant="outlined" component="label" fullWidth sx={{ height: 50, fontWeight: 700 }}>
+                                    THÊM ÂM THANH +
+                                    <input type="file" hidden accept="audio/*"
+                                        onChange={(e) => setAudioSlow(e.target.files?.[0] ?? null)} />
+                                </Button>
+
+                                {audioSlow && (
+                                    <Box sx={{ mt: 1 }}>
+                                        <Typography sx={{ mb: 1 }}>Preview:</Typography>
+                                        <audio controls src={URL.createObjectURL(audioSlow)} style={{ width: "100%" }} />
+                                    </Box>
+                                )}
+                            </Box>
                         </Box>
+
                     </Box>
                 </Box>
-            </DialogContent>
 
-            {/* FOOTER BUTTONS */}
+            </DialogContent >
+
             <DialogActions sx={{ justifyContent: "center", mt: 2 }}>
-                <Button
-                    onClick={onClose}
-                    variant="outlined"
-                    sx={{ width: 120 }}
-                >
+                <Button onClick={onClose} variant="outlined" sx={{ width: 120 }}>
                     Hủy
                 </Button>
 
@@ -333,13 +315,10 @@ export default function AddVocabModal({ open, lessonId, onClose, onSuccess }: Ad
                     sx={{ width: 160, bgcolor: "#4CAF50", fontWeight: 700 }}
                     disabled={loading}
                 >
-                    {loading ? (
-                        <CircularProgress size={24} sx={{ color: "white" }} />
-                    ) : (
-                        "Tạo từ vựng"
-                    )}
+                    {loading ? <CircularProgress size={24} sx={{ color: "white" }} /> :
+                        isVocab ? "Tạo từ vựng" : "Tạo câu"}
                 </Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 }
