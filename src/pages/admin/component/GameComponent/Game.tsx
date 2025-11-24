@@ -13,10 +13,11 @@ import {
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import type { GameTypeEnum } from "../../schemas/game.schema";
 import type { DataGameRespon } from "../../schemas/dataGameResponse";
-import { createGame, getDataGame } from "../../../../api/admin";
+import { createGame, getDataGame, getGameDetailToUpdate, updateGame } from "../../../../api/admin";
 
 // Type definition for payload
 export type OptionReq = {
+    id?: number;
     contentType: string;
     contentRefId: number;
     correct: boolean;
@@ -24,6 +25,7 @@ export type OptionReq = {
 };
 
 export type QuestionPayload = {
+    id?: number;
     position: number;
     promptType: string;
     promptRefId: number;
@@ -35,10 +37,12 @@ export type QuestionPayload = {
 };
 
 export type GamePayload = {
+    id?: number;
     title: string;
     type: string;
     difficulty: number;
     lessonId: number;
+    active?: boolean;
     correctAudioId?: number;
     wrongAudioId?: number;
     questions: QuestionPayload[];
@@ -47,15 +51,18 @@ export type GamePayload = {
 // TẠO TYPE THỐNG NHẤT CHO QUESTION
 //------------------------------------------------------
 type QuestionState = {
+    id?: number;
+    optionReqIds?: number[];
+    hiddenWord?: string;
     maxScore: string;
     difficulty: string;
     contentType: string;
     content: string;
     preview: null;
     choices: string[];
-    image: string;          // luôn có
-    sound: string;          // luôn có
-    images: string[];       // luôn có
+    image: string;
+    sound: string;
+    images: string[];
     correctIndex: number;
     active: boolean;
 };
@@ -67,6 +74,7 @@ export type GameHandle = {
 type GameProps = {
     gameType: GameTypeEnum;
     lessonId: number;
+    gameId?: number;
     onValidate: (valid: boolean) => void;
     onSaved?: () => void;
 
@@ -75,14 +83,26 @@ type GameProps = {
 const Game = forwardRef<GameHandle, GameProps>(({
     gameType,
     lessonId,
+    gameId,
     onValidate,
     onSaved
 }, ref) => {
+    console.log("Game component nhận gameId:", gameId);
+    useEffect(() => {
+        console.log("Game.tsx → useEffect triggered. gameId =", gameId);
+    }, [gameId, gameType, lessonId]);
     const [gameData, setGameData] = useState<DataGameRespon | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [isActive, setIsActive] = useState(false);
+
+    function getMediaUrlByIdFromBase(base: DataGameRespon, id?: number): string {
+        if (!id) return "";
+        const asset = base.mediaAssets.find(a => a.id === id);
+        return asset?.url || "";
+    }
+
     // === DEFINE FLAGS SỚM (fix lỗi dùng trước khi khai báo)
     const isPicture4Game = gameType === "PICTURE4_WORD4_MATCHING";
     const isImageGame =
@@ -109,6 +129,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
         // update giá trị
         const updated = [...questions];
         updated[index].choices[0] = value;
+        updated[index].hiddenWord = value;
         setQuestions(updated);
 
         // lấy tất cả từ bên trái
@@ -124,6 +145,99 @@ const Game = forwardRef<GameHandle, GameProps>(({
             console.warn("Từ không tồn tại:", notFound);
         }
     };
+
+    useEffect(() => {
+        async function loadAll() {
+            try {
+                setLoading(true);
+                setError(null);
+
+                const base = await getDataGame(gameType, lessonId);
+                setGameData(base);
+
+                // Create mode
+                if (!gameId) {
+                    setTitle("");
+                    setIsActive(true);
+                    setQuestions([createEmptyQuestion()]);
+                    return;
+                }
+
+                const detail = await getGameDetailToUpdate(gameId);
+                setTitle(detail.title);
+                setIsActive(detail.active);
+
+                const mapped = detail.questions.map((question) => {
+                    const baseQuestion = createEmptyQuestion();
+                    const orderedOptionReqs = [...question.optionReqs].sort(
+                        (a, b) => (a.position ?? 0) - (b.position ?? 0)
+                    );
+
+                    const resolveVocab = (refId: number) => {
+                        const vocab = base.options.find((opt) => opt.id === refId);
+                        return vocab?.term_en || "";
+                    };
+
+                    let imageUrl = "";
+                    let soundUrl = "";
+                    if (question.promptType === "IMAGE") {
+                        imageUrl = getMediaUrlByIdFromBase(base, question.promptRefId);
+                    } else if (question.promptType === "AUDIO") {
+                        soundUrl = getMediaUrlByIdFromBase(base, question.promptRefId);
+                    }
+
+                    let images = [...baseQuestion.images];
+                    let choices: string[] = [];
+                    let correctIndex = -1;
+                    let optionIds: number[] = orderedOptionReqs.map((opt) => opt.id);
+                    let hiddenWord = question.hiddenWord || "";
+
+                    if (isPicture4Game) {
+                        const imageOpts = orderedOptionReqs.filter((opt) => opt.contentType === "IMAGE");
+                        const vocabOpts = orderedOptionReqs.filter((opt) => opt.contentType === "VOCAB");
+                        images = imageOpts.map((opt) => getMediaUrlByIdFromBase(base, opt.contentRefId));
+                        choices = vocabOpts.map((opt) => resolveVocab(opt.contentRefId));
+                        images = [...images, "", "", "", ""].slice(0, 4);
+                    } else if (isSentenceHiddenGame) {
+                        choices = [hiddenWord];
+                    } else {
+                        choices = orderedOptionReqs.map((opt) => resolveVocab(opt.contentRefId));
+                        correctIndex = orderedOptionReqs.findIndex((opt) => opt.correct);
+                        if (correctIndex < 0 && choices.length > 0) {
+                            correctIndex = 0;
+                        }
+                    }
+
+                    return {
+                        id: question.id,
+                        optionReqIds: optionIds,
+                        hiddenWord,
+                        maxScore: String(question.rewardCore ?? ""),
+                        difficulty: String(detail.difficulty ?? 1),
+                        contentType: question.promptType,
+                        content: question.questionText || "",
+                        preview: null,
+                        choices,
+                        image: imageUrl,
+                        sound: soundUrl,
+                        images,
+                        correctIndex,
+                        active: question.active ?? true,
+                    } as QuestionState;
+                });
+
+                setQuestions(mapped);
+            } catch (err) {
+                console.error("LOAD GAME ERROR:", err);
+                setError("Không thể tải dữ liệu game");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadAll();
+    }, [gameType, lessonId, gameId]);
+
 
 
     function validateGame() {
@@ -151,9 +265,6 @@ const Game = forwardRef<GameHandle, GameProps>(({
                 const notFound = rightWords.filter(w => !leftWords.includes(w));
 
                 if (notFound.length > 0) return false;
-
-
-
                 // Skip toàn bộ validate khác
                 continue;
             }
@@ -215,6 +326,9 @@ const Game = forwardRef<GameHandle, GameProps>(({
         const choiceCount = getChoiceCount(gameType);
 
         return {
+            id: undefined,
+            optionReqIds: undefined,
+            hiddenWord: "",
             maxScore: "",
             difficulty: "1",
             contentType:
@@ -250,23 +364,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
     }, [questions]); // CHỈ phụ thuộc questions
 
     // === FETCH DATA =============================================
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                setLoading(true);
-                const res = await getDataGame(gameType, lessonId);
-                setGameData(res);
 
-                setQuestions([createEmptyQuestion()]);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchData();
-    }, [gameType]);
 
     const addQuestion = () => {
         setQuestions([...questions, createEmptyQuestion()]);
@@ -302,57 +400,25 @@ const Game = forwardRef<GameHandle, GameProps>(({
             let promptType = q.contentType;
             let promptRefId = 0;
 
-            // WORD_TO_SENTENCE
-            if (gameType === "WORD_TO_SENTENCE") {
-                const optionId = getOptionIdByTerm(q.choices[0] || "");
-                return {
-                    position,
-                    promptType: "SENTENCE",
-                    promptRefId: optionId || 0,
-                    questionText: "",
-                    rewardCore,
-                    optionReqs: [],
-                    active: q.active,
-                };
-            }
-
-            // IMAGE
+            // 1) Determine promptRefId
             if (isPicture4Game) {
                 promptType = "IMAGE";
                 promptRefId = getMediaAssetIdByUrl(q.images[0]) || 0;
             } else if (isImageGame) {
                 promptType = "IMAGE";
                 promptRefId = getMediaAssetIdByUrl(q.image) || 0;
-            } else // SENTENCE_HIDDEN_WORD
-                if (isSentenceHiddenGame) {
-                    return {
-                        position,
-                        promptType: "IMAGE",
-                        promptRefId: getMediaAssetIdByUrl(q.image) || 0,
-                        questionText: q.content,
-                        hiddenWord: q.choices[0],     // CHỈ 1 từ hoặc nhiều từ ghép?
-                        rewardCore,
-                        optionReqs: [],               // backend không cần → gửi mảng rỗng
-                        active: q.active,
-                    } as any;
-                }
+            } else if (isSentenceHiddenGame) {
+                promptType = "IMAGE";
+                promptRefId = getMediaAssetIdByUrl(q.image) || 0;
+            } else if (isVoiceGame) {
+                promptType = "AUDIO";
+                promptRefId = getMediaAssetIdByUrl(q.sound) || 0;
+            } else {
+                promptType = "TEXT";
+                promptRefId = 0;
+            }
 
-
-
-
-                // VOICE
-                else if (isVoiceGame) {
-                    promptType = "AUDIO";
-                    promptRefId = getMediaAssetIdByUrl(q.sound) || 0;
-                }
-
-                // TEXT
-                else {
-                    promptType = "TEXT";
-                    promptRefId = 0;
-                }
-
-            // BUILD optionReqs
+            // 2) Build optionReqs
             let optionReqs: OptionReq[] = [];
 
             if (isPicture4Game) {
@@ -362,48 +428,68 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
                     return [
                         {
+                            id: q.optionReqIds?.[i * 2],  // giữ id cho UPDATE
                             contentType: "IMAGE",
                             contentRefId: imageId,
                             correct: true,
                             position: i * 2 + 1,
                         },
                         {
+                            id: q.optionReqIds?.[i * 2 + 1],
                             contentType: "VOCAB",
                             contentRefId: vocabId,
                             correct: true,
                             position: i * 2 + 2,
-                        },
+                        }
                     ];
                 });
-            } else {
+            }
+            else if (isSentenceHiddenGame) {
+                optionReqs = []; // BE không dùng
+            }
+            else {
+                const resolvedCorrectIndex =
+                    q.correctIndex !== undefined && q.correctIndex >= 0
+                        ? q.correctIndex
+                        : q.choices.length > 0
+                            ? 0
+                            : -1;
+
                 optionReqs = q.choices.map((choice, i) => ({
+                    id: q.optionReqIds?.[i],
                     contentType: "VOCAB",
                     contentRefId: getOptionIdByTerm(choice) || 0,
-                    correct: i === q.correctIndex,
+                    correct: resolvedCorrectIndex >= 0 ? i === resolvedCorrectIndex : false,
                     position: i + 1,
                 }));
             }
 
+
             return {
+                id: q.id,                                 // giữ id cho UPDATE
                 position,
                 promptType,
                 promptRefId,
-                questionText: q.content,
+                questionText: q.content || "",
+                hiddenWord: isSentenceHiddenGame ? (q.hiddenWord || q.choices[0] || "") : undefined,
                 rewardCore,
                 optionReqs,
                 active: q.active,
             };
         });
 
-
         return {
-            title: title || gameData?.title || gameType.replaceAll("_", " "),
+            id: gameId,                                   // thêm
+            title: title || gameType.replaceAll("_", " "),
             type: gameType,
-            difficulty: questions.length > 0 ? Number(questions[0].difficulty) || 1 : 1,
+            difficulty: questions.length > 0 ? Number(questions[0].difficulty) : 1,
             lessonId,
+            active: isActive,
             questions: questionPayloads,
         };
     }
+
+
 
     // Handle save action
     const handleSave = async () => {
@@ -415,16 +501,19 @@ const Game = forwardRef<GameHandle, GameProps>(({
         }
 
         try {
-            const res = await createGame(payload);
-            console.log("Game tạo thành công:", res);
-
-            alert("Tạo game thành công!");
+            if (gameId) {
+                await updateGame(gameId, payload);
+                alert("Cập nhật game thành công!");
+            } else {
+                await createGame(payload);
+                alert("Tạo game thành công!");
+            }
 
             onSaved?.(); // báo cho màn cha
 
         } catch (err) {
-            console.log("Lỗi tạo game:", err);
-            alert("Tạo game thất bại!");
+            console.error("Lưu game thất bại:", err);
+            alert(gameId ? "Cập nhật game thất bại!" : "Tạo game thất bại!");
         }
     };
 

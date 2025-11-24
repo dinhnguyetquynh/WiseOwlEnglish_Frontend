@@ -1,18 +1,30 @@
 import { Box, Button, Typography } from "@mui/material";
 import type { GameTypeEnum } from "../schemas/game.schema";
 import Game, { type GameHandle } from "./GameComponent/Game";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function CreateGameScreen({
     gameType,
     lessonId,
+    gameId,       // <── THÊM VÀO ĐÂY
     onBack,
 }: {
     gameType: GameTypeEnum;
     lessonId: number;
+    gameId?: number;  // <── THÊM VÀO ĐÂY
     onBack: () => void;
 }) {
+    console.log("CreateGameScreen nhận props:", { gameId, gameType, lessonId });
+
     const gameRef = useRef<GameHandle>(null);
+    useEffect(() => {
+        console.log("CreateGameScreen → useEffect gameId:", gameId);
+    }, [gameId]);
+
+    console.log("CreateGameScreen MOUNTED!");
+    useEffect(() => {
+        return () => console.log("CreateGameScreen UNMOUNTED!");
+    }, []);
 
     const [isGameValid, setIsGameValid] = useState(false);
     const handleSaveGame = () => {
@@ -21,9 +33,8 @@ export default function CreateGameScreen({
 
     const handleGameSaved = () => {
         console.log("Tạo game thành công");
-        onBack();       // hoặc gọi refetch list game tùy backstage
+        onBack();
     };
-
 
 
     return (
@@ -62,31 +73,18 @@ export default function CreateGameScreen({
                     }}
                     onClick={handleSaveGame}
                 >
-                    LƯU GAME
+                    {gameId ? "CẬP NHẬT GAME" : "LƯU GAME"}
                 </Button>
+
             </Box>
             <Game
                 ref={gameRef}
                 gameType={gameType}
                 lessonId={lessonId}
+                gameId={gameId}
                 onValidate={setIsGameValid}
                 onSaved={handleGameSaved}
             />
-
-            {/* {gameType === "PICTURE_WORD_MATCHING" && (
-                <Game1 gameType={gameType} onSave={handleSaveGame} />
-            )}
-            {gameType === "PICTURE_SENTENCE_MATCHING" && (
-                <Game1 gameType={gameType} onSave={handleSaveGame} />
-            )}
-            {gameType === "PICTURE_WORD_WRITING" && (
-                <Game1 gameType={gameType} onSave={handleSaveGame} />
-            )}
-            {gameType === "PICTURE4_WORD4_MATCHING" && <Typography> <Game1 gameType={gameType} onSave={handleSaveGame} /></Typography>}
-            {gameType === "PRONUNCIATION" && <Typography><Game1 gameType={gameType} onSave={handleSaveGame} /></Typography>}
-            {gameType === "SENTENCE_HIDDEN_WORD" && <Typography><Game1 gameType={gameType} onSave={handleSaveGame} /></Typography>}
-            {gameType === "WORD_TO_SENTENCE" && <Typography><Game1 gameType={gameType} onSave={handleSaveGame} /></Typography>}
-            {gameType === "SOUND_WORD_MATCHING" && <Typography><Game1 gameType={gameType} onSave={handleSaveGame} /></Typography>} */}
         </Box>
     );
 }

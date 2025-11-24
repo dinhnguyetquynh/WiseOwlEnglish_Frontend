@@ -21,16 +21,20 @@ export default function GameLayout() {
     const { selectedClass, setSelectedClass, setLessons, lessons } = useHomeContext();
     const [creatingGameType, setCreatingGameType] = useState<GameTypeEnum | null>(null);
     const [creatingLessonId, setCreatingLessonId] = useState<number | null>(null);
+    const [editingGameId, setEditingGameId] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+
     const fetchLessons = async () => {
         const data = await getLessonsGameByGrade(Number(selectedClass));
         setLessons(data);
     };
+
     useEffect(() => {
         if (!selectedClass) return;
+
         const fetchData = async () => {
             try {
                 setLoading(true);
@@ -43,10 +47,11 @@ export default function GameLayout() {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, [selectedClass]);
 
-    // --- Dropdown lớp (disable khi xem chi tiết) ---
+    // --- Dropdown lớp ---
     const renderHeader = (
         <Box sx={{ mb: 3, width: 200 }}>
             <Select
@@ -54,7 +59,7 @@ export default function GameLayout() {
                 onChange={(e) => setSelectedClass(e.target.value)}
                 displayEmpty
                 IconComponent={ArrowDownIcon}
-                disabled={!!selectedLesson} // ✅ disable khi đang ở trang chi tiết
+                disabled={!!selectedLesson}
                 sx={{
                     bgcolor: "white",
                     fontSize: 14,
@@ -78,22 +83,33 @@ export default function GameLayout() {
             </Select>
         </Box>
     );
+
+    // --- MÀN TẠO HOẶC CHỈNH SỬA GAME ---
     if (creatingGameType && creatingLessonId) {
+        console.log("GameLayout → editingGameId:", editingGameId);
+        console.log("GameLayout → creatingGameType:", creatingGameType);
+        console.log("GameLayout → creatingLessonId:", creatingLessonId);
+
         return (
             <>
                 {renderHeader}
+
+                {/* FIX QUAN TRỌNG: key={editingGameId} → REMOUNT component khi gameId thay đổi */}
                 <CreateGameScreen
                     gameType={creatingGameType}
                     lessonId={creatingLessonId}
+                    gameId={editingGameId ?? undefined}
                     onBack={() => {
                         setCreatingGameType(null);
                         setCreatingLessonId(null);
+                        setEditingGameId(null);
                     }}
                 />
             </>
         );
     }
-    // --- Trang chi tiết ---
+
+    // --- TRANG CHI TIẾT ---
     if (selectedLesson) {
         return (
             <>
@@ -101,20 +117,26 @@ export default function GameLayout() {
                 <LessonDetail
                     lessonId={selectedLesson.lessonId}
                     onBack={() => {
-                        fetchLessons();        // ← Reload ngay tại parent
+                        fetchLessons();
                         setSelectedLesson(null);
                     }}
-                    onCreateGame={(type, id) => {
+                    onCreateGame={(type, id, gameId) => {
                         setCreatingGameType(type as GameTypeEnum);
                         setCreatingLessonId(id);
+                        setEditingGameId(gameId ?? null);
+                    }}
+                    onUpdateGame={(type, id, gameId) => {
+                        console.log("GameLayout nhận onUpdateGame → gameId:", gameId);
+                        setCreatingGameType(type as GameTypeEnum);
+                        setCreatingLessonId(id);
+                        setEditingGameId(gameId);          // chỉnh sửa → có gameId
                     }}
                 />
-
             </>
         );
     }
 
-    // --- Trang danh sách ---
+    // --- TRANG DANH SÁCH ---
     return (
         <>
             {renderHeader}

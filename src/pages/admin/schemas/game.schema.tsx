@@ -1,5 +1,42 @@
 import { z } from "zod";
 
+export const GameOptionResSchema = z.object({
+    id: z.number(),
+    contentType: z.string(),        // "VOCAB", "IMAGE", "AUDIO", ...
+    contentRefId: z.number(),
+    answerText: z.string().nullable(),
+    correct: z.boolean(),
+    side: z.string().nullable(),
+    pairKey: z.string().nullable(),
+    position: z.number().nullable().optional(),
+});
+
+export const GameQuestionResSchema = z.object({
+    id: z.number(),
+    promptType: z.string(),         // "IMAGE" | "AUDIO" | "TEXT"
+    promptRefId: z.number(),
+    questionText: z.string().nullable(),
+    hiddenWord: z.string().nullable(),
+    rewardCore: z.number().nullable(),
+    optionReqs: z.array(GameOptionResSchema),
+    active: z.boolean().optional().default(true),
+});
+
+export const GameAdminDetailResSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    type: z.string(),
+    difficulty: z.number(),
+    lessonId: z.number(),
+    active: z.boolean(),
+    questions: z.array(GameQuestionResSchema),
+});
+
+// === TypeScript type infer ===
+export type GameAdminDetailRes = z.infer<typeof GameAdminDetailResSchema>;
+export type GameQuestionRes = z.infer<typeof GameQuestionResSchema>;
+export type GameOptionRes = z.infer<typeof GameOptionResSchema>;
+
 // --- Enum cho gameType ---
 export const GameTypeEnum = z.enum([
     "PICTURE_WORD_MATCHING",

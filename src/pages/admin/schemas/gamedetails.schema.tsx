@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 // --- Schema cho từng game ---
 export const GameDetailSchema = z.object({
@@ -6,6 +6,7 @@ export const GameDetailSchema = z.object({
     totalQuestion: z.number(),
     gameType: z.string(),
     title: z.string(),
+    active: boolean(),
     updatedDate: z.string(),
 });
 

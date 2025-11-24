@@ -10,6 +10,11 @@ export const useHome = () => {
     const [selectedClass, setSelectedClass] = useState("1");
     const [lessonData, setLessonData] = useState<LessonRes[]>([]);
     const [orderIndexList, setOrderIndexList] = useState<number[]>([]);
+    const [editingGameInfo, setEditingGameInfo] = useState<{
+        gameType: string | null;
+        lessonId: number | null;
+        gameId: number | null;
+    } | null>(null);
 
     return {
         lessons,
@@ -19,7 +24,7 @@ export const useHome = () => {
         selectedClass,
         setSelectedClass,
         lessonData,
-        setLessonData, orderIndexList, setOrderIndexList
-
+        setLessonData, orderIndexList, setOrderIndexList,
+        editingGameInfo, setEditingGameInfo
     };
 };

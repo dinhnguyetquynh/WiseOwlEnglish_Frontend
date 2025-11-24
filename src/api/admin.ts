@@ -1,7 +1,7 @@
 import z from "zod";
 import type { GamePayload } from "../pages/admin/component/GameComponent/Game";
 import type { DataGameRespon } from "../pages/admin/schemas/dataGameResponse";
-import type { GameTypeEnum, GameTypesByGrade, Lessons } from "../pages/admin/schemas/game.schema";
+import type { GameAdminDetailRes, GameTypeEnum, GameTypesByGrade, Lessons } from "../pages/admin/schemas/game.schema";
 import type { LessonDetail } from "../pages/admin/schemas/gamedetails.schema";
 import axiosClient from "./axiosClient";
 
@@ -254,4 +254,27 @@ export async function createSentences(
     );
 
     return res.data;
+}
+
+export async function getGameDetailToUpdate(
+    gameId: number
+): Promise<GameAdminDetailRes> {
+    try {
+        const response = await axiosClient.get<GameAdminDetailRes>(
+            `/api/games/update/detail/${gameId}`
+        );
+        return response.data;
+    } catch (error: any) {
+        const message =
+            error.response?.data?.message || "Không thể tải game để chỉnh sửa";
+        throw new Error(message);
+    }
+}
+export async function updateGame(gameId: number, payload: GamePayload) {
+    try {
+        const res = await axiosClient.put(`/api/games/update/${gameId}`, payload);
+        return res.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Không thể cập nhật game");
+    }
 }
