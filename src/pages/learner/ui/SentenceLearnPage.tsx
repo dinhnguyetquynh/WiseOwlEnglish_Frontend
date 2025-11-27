@@ -4,6 +4,7 @@ import { fetchSentenceByLesson, type SentenceDTORes} from "../../../api/learn";
 import "../css/VocabLearnPage.css";
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
+import LessonCompletion from "../../../components/learner/ui/LessonCompletion";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
@@ -23,6 +24,8 @@ export default function SentenceLearnPage() {
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // 2 audio players (normal / slow)
   const normalAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -92,8 +95,11 @@ export default function SentenceLearnPage() {
     try {
         await markItemAsCompleted(myPayload);
         console.log("FE: Đã cập nhật tiến độ học câu thành công!");
-        if (idx < total - 1) setIdx((i) => i + 1);
-        else navigate(-1); // xong bài → quay lại menu (tuỳ bạn chỉnh hướng)
+        if (idx < total - 1) {
+            setIdx((i) => i + 1);
+        } else {
+            setShowSuccess(true);
+        }
     } catch (error) {
         if (error instanceof Error) {
             console.error(error.message); 
@@ -116,7 +122,35 @@ export default function SentenceLearnPage() {
     slowAudioRef.current?.load();
     slowAudioRef.current?.play().catch(() => {});
   };
+  // 👇 Các hàm xử lý cho Modal
+const toLessonMenu = () => {
+  const qs = new URLSearchParams({
+    title: state?.title ?? "",
+    unitName: state?.unitName ?? "",
+    unitTitle: state?.unitTitle ?? "",
+  }).toString();
 
+  navigate(`/learn/units/${unitId}?${qs}`, {
+    replace: true,                
+    state: { 
+      title: state?.title, 
+      unitName: state?.unitName,
+      unitTitle: state?.unitTitle,
+    },
+  });
+};
+
+  const handleReview = () => {
+    // Chuyển hướng sang trang chọn game câu
+    navigate(`/learn/units/${unitId}/sentence/review`, { 
+      state: state 
+    });
+  };
+
+  const handleRetry = () => {
+    setIdx(0);
+    setShowSuccess(false);
+  };
   return (
     <div className="vl">
       {/* Top bar & close */}
@@ -184,6 +218,15 @@ export default function SentenceLearnPage() {
           {idx < total - 1 ? "TIẾP TỤC" : "HOÀN THÀNH"}
         </button>
       </div>
+      {showSuccess && (
+        <LessonCompletion
+          type="sentence"
+          totalItem={total}
+          onClose={toLessonMenu}
+          onRetry={handleRetry}
+          onReview={handleReview}
+        />
+      )}
     </div>
   );
 }

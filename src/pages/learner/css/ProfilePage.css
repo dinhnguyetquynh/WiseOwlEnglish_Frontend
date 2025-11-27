@@ -1,0 +1,198 @@
+/* Page toàn màn hình */
+.pp-page {
+  width: 100%;
+  min-height: calc(100vh - 100px); /* giống trước để trừ header/layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background-color: #f6fbfb; /* nền nhẹ giống app */
+  padding-bottom: 40px;
+  border-radius: 10px ;
+ 
+}
+
+/* Header gradient full-width ở trên cùng (kéo ngang ra 100%) */
+.pp-page-header {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 180px;
+  min-height: 100px;
+  background: linear-gradient(90deg, #a855f7 0%, #3b82f6 100%);
+  box-shadow: inset 0 -2px 6px rgba(0,0,0,0.03);
+  flex-shrink: 0;
+  border-radius: 10px ;
+}
+
+/* Nội dung chính: giới hạn chiều ngang nội dung để đọc thoải mái nhưng page là full-width */
+.pp-page-content {
+  width: 100%;
+  max-width: 1100px; /* giới hạn nội dung để không quá rộng trên màn hình lớn */
+  margin-top: -70px; /* kéo phần avatar đè lên header */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* Avatar */
+.pp-avatar-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.pp-avatar-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  position: relative;
+}
+
+.pp-avatar-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #69db7c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 4px solid #fff;
+}
+
+.pp-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Title */
+.pp-title-section {
+  text-align: center;
+  margin-top: 6px;
+}
+
+.pp-title {
+  color: #22c55e;
+  font-size: clamp(20px, 3vh, 28px);
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.pp-divider {
+  width: 50px;
+  height: 4px;
+  background-color: #22c55e;
+  margin: 6px auto 0 auto;
+  border-radius: 2px;
+}
+
+/* Grid info: 2 cột, tự co giãn */
+.pp-grid-wrapper {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(10px, 2vh, 24px);
+  box-sizing: border-box;
+  padding: 0 12px;
+}
+
+/* Info card đơn giản */
+.pp-info-card {
+  background-color: #ffffff;
+  border-radius: 14px;
+  padding: clamp(12px, 1.5vh, 16px) 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 6px 18px rgba(15,23,42,0.03);
+}
+
+.pp-icon-box {
+  width: 44px; height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
+}
+
+.pp-icon-box svg {
+  font-size: 22px;
+}
+
+.pp-info-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.pp-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pp-value {
+  font-size: clamp(14px, 2vh, 16px);
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* Footer badge */
+.pp-footer-badge {
+  background: linear-gradient(90deg, #ff9a9e 0%, #fecfef 100%);
+  padding: clamp(10px, 1.2vh, 14px) 36px;
+  border-radius: 99px;
+  color: #db2777;
+  font-weight: 700;
+  font-size: clamp(14px, 2vh, 18px);
+  box-shadow: 0 6px 20px rgba(251,113,133,0.18);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 40px 0;
+}
+
+/* Loading / error */
+.pp-loading, .pp-error {
+  width: 100%;
+  max-width: 1100px;
+  margin: 24px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  text-align: center;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .pp-page-header { height: 120px; }
+  .pp-page-content { max-width: 760px; margin-top: -60px; padding: 0 18px; }
+  .pp-avatar-circle { width: 120px; height: 120px; }
+  .pp-grid-wrapper { grid-template-columns: 1fr; padding: 0 6px; }
+}
+
+@media (max-width: 420px) {
+  .pp-page-header { height: 100px; }
+  .pp-avatar-circle { width: 100px; height: 100px; }
+  .pp-title { font-size: 18px; }
+  .pp-footer-badge { padding: 10px 18px; font-size: 14px; }
+}

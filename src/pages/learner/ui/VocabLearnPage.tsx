@@ -4,6 +4,7 @@ import { fetchVocabulariesByLesson, type VocabularyDTORes } from "../../../api/l
 import "../css/VocabLearnPage.css";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 import { getProfileId } from "../../../store/storage";
+import LessonCompletion from "../../../components/learner/ui/LessonCompletion";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
@@ -22,6 +23,8 @@ export default function VocabLearnPage() {
   const [idx, setIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+  //  STATE MỚI: Kiểm soát hiển thị màn hình tổng kết
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // 2 audio players (normal / slow)
   const normalAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -91,8 +94,12 @@ export default function VocabLearnPage() {
     try {
         await markItemAsCompleted(myPayload);
         console.log("FE: Đã cập nhật thành công!");
-        if (idx < total - 1) setIdx((i) => i + 1);
-        else navigate(-1); // xong bài → quay lại menu (tuỳ bạn chỉnh hướng)
+        if (idx < total - 1) {
+            setIdx((i) => i + 1);
+        } else {
+            // 👇 THAY ĐỔI Ở ĐÂY: Không navigate ngay mà hiện popup
+            setShowSuccess(true);
+        }
     } catch (error) {
         if (error instanceof Error) {
             console.error(error.message); 
@@ -131,6 +138,20 @@ const toLessonMenu = () => {
     },
   });
 };
+// 👇 Hàm xử lý nút "Ôn tập"
+  const handleReview = () => {
+    // Chuyển hướng sang trang chọn game từ vựng
+    // Giữ nguyên state để breadcrumb hoạt động nếu cần
+    navigate(`/learn/units/${unitId}/vocab/review`, { 
+      state: state 
+    });
+  };
+
+  // 👇 Hàm xử lý nút "Học lại"
+  const handleRetry = () => {
+    setIdx(0);
+    setShowSuccess(false);
+  };
 
   return (
     <div className="vl">
@@ -199,6 +220,17 @@ const toLessonMenu = () => {
           {idx < total - 1 ? "TIẾP TỤC" : "HOÀN THÀNH"}
         </button>
       </div>
+      {/* 👇 RENDER POPUP KHI HOÀN THÀNH */}
+      {showSuccess && (
+        <LessonCompletion
+          type="vocab"
+          totalItem={total}
+          onClose={toLessonMenu}
+          onRetry={handleRetry}
+          onReview={handleReview}
+        />
+      )}
+
     </div>
   );
 }

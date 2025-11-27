@@ -4,7 +4,7 @@ import LearnerLayout from './layouts/LearnerLayout';
 import HomePage from './pages/learner/HomePage';
 import PracticePage from './pages/learner/PracticePage';
 
-import ProfilePage from './pages/learner/ProfilePage';
+import ProfilePage from './pages/learner/ui/ProfilePage';
 import LessonMenu from './pages/learner/ui/LessonMenu';
 import WelcomePage from './pages/auth/ui/WelcomePage';
 import RegisterPage from './pages/learner/ui/RegisterPage';

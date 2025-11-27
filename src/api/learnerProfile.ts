@@ -40,88 +40,7 @@ export type ProfileRes ={
 
 }
 
-// const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-// function getAccessToken(): string | null {
-//   return localStorage.getItem("accessToken");
-// }
-
-// export async function createLearnerProfileApi(
-//   payload: LearnerProfileReq
-// ): Promise<ProfileRes> {
-//   const token = getAccessToken();
-//   if (!token) throw new Error("Bạn chưa đăng nhập.");
-
-//   const res = await fetch(`${BASE_URL}/api/learner-profiles/create-profile`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: JSON.stringify(payload),
-//   });
-
-//   if (!res.ok) {
-//     let msg = "Tạo hồ sơ thất bại";
-//     try {
-//       const data = await res.json();
-//       msg = data?.message ?? data?.error ?? msg;
-//     } catch {}
-//     throw new Error(msg);
-//   }
-//   return res.json();
-// }
-
-// export async function getListLearnerProfile(): Promise<LearnerProfileRes[]> {
-//   const token = getAccessToken();
-//   if(!token) throw new Error("Ban chua dang nhap");
-
-//   const res = await fetch(`${BASE_URL}/api/learner-profiles/list-by-user`,{
-//     method: "GET",
-//     headers:{
-//       "Content-Type":"application/json",
-//       Authorization:`Bearer ${token}`,
-//     }
-//   });
-//   const data = await res.json().catch(() => null);
-
-//   if (!res.ok) {
-//     const msg = data?.message ?? data?.error ?? "Lấy danh sách profile thất bại";
-//     throw new Error(msg);
-//   }
-
-//   return data;
-
-// }
-
-// export async function uploadAvatarApi(file:File): Promise<string> {
-//   const token = getAccessToken();
-//   if(!token) throw new Error("You have not logged in");
-
-//   const form = new FormData();
-//   form.append("file",file);
-
-//   const res = await fetch (`${BASE_URL}/api/uploads/avatar`,{
-//     method: "POST",
-//     headers:{
-//       Authorization:`Bearer ${token}`,
-
-//     },
-//     body: form,
-//   });
-
-//   if(!res.ok){
-//     let msg = "Upload anh that bai";
-//     try {
-//       const data = await res.json();
-//       msg = data?.message ?? data?.error ?? msg;
-//     }catch{}
-//     throw new Error(msg);
-//   }
-//   const data = await res.json();
-//   return data.url;
-  
-// }
 
 // Helper lấy message lỗi từ BE
 function getErrMsg(e: any, fallback: string) {
@@ -172,4 +91,35 @@ export async function getProfile(profileId:Number):Promise<LearnerProfileRes> {
     throw error;
   }
   
+}
+// src/api/learnerProfile.ts
+// ... (giữ nguyên các code cũ) ...
+
+// 1. Thêm Type mới khớp với BE DTO
+export type ProfileByLearnerRes = {
+  learnerId: number;
+  fullName: string;
+  nickName: string;
+  dateOfBirth: string; // "yyyy-MM-dd"
+  avatarUrl: string;
+  createdAt: string;   // ISO LocalDateTime
+  numberDayStudied: number;
+};
+
+// 2. Thêm hàm gọi API mới
+export async function getProfileByLearnerApi(learnerId: number): Promise<ProfileByLearnerRes> {
+  try {
+    // Giả sử endpoint của bạn nằm trong LearnerProfileController
+    // Nếu controller của bạn có @RequestMapping("/api/learner-profiles"), url sẽ là như dưới.
+    // Bạn hãy chỉnh lại đường dẫn nếu endpoint thực tế khác.
+    const res = await axiosClient.get<ProfileByLearnerRes>(`/api/learner-profiles/${learnerId}`);
+    return res.data;
+  } catch (error: any) {
+    console.error("Failed to fetch learner profile:", error);
+    let message = "Không tải được thông tin hồ sơ";
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    }
+    throw new Error(message);
+  }
 }

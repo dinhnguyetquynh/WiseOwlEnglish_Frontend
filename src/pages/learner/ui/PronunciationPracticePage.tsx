@@ -138,22 +138,24 @@ export default function PronunciationPracticePage() {
   };
 
   // Gửi file đi chấm điểm
-  const handleSubmitRecording = async (audioBlob: Blob) => {
-    if (!current || !profileId) return;
+const handleSubmitRecording = async (audioBlob: Blob) => {
+  if (!current || !profileId) return;
 
-    setIsGrading(true);
-    setErr("");
-    
-    try {
-      const result = await gradePronunciationApi(audioBlob, current.term_en);
-      setGradeResult(result);
-    } catch (e: any) {
-    //   setError(e.message || "Lỗi chấm điểm");
-      setGradeResult(null);
-    } finally {
-      setIsGrading(false);
-    }
-  };
+  setIsGrading(true);
+  setErr("");
+  
+  try {
+    // Bây giờ truyền cả blob user và URL audio ref
+    const result = await gradePronunciationApi(audioBlob, media.normal);
+    setGradeResult(result);
+  } catch (e: any) {
+    console.error("Grade error:", e);
+    setGradeResult(null);
+    setErr(e.message || "Lỗi chấm điểm");
+  } finally {
+    setIsGrading(false);
+  }
+};
 
   // Chuyển từ tiếp theo
   const handleNext = async () => {
@@ -278,6 +280,9 @@ export default function PronunciationPracticePage() {
             <div className="pp-fb-left">
               <div className="pp-fb-text">
                 <div className="pp-fb-title">{gradeResult.feedback}</div>
+                <div className="pp-fb-score">
+                  <strong>{gradeResult.score}</strong> điểm — {gradeResult.grade}
+                </div>
               </div>
             </div>
             <div className="pp-fb-right">
