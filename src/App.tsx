@@ -47,15 +47,17 @@ function App() {
           <Route path="/" element={<WelcomePage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/select-profile" element={<SelectProfilePage />} />
-          <Route path="/create-profile" element={<CreateLearnerProfilePage />} />
+          
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          
         </Route>
 
         {/* Tất cả route của learner đều nằm trong LearnerLayout */}
         {/* PROTECTED */}
         <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/select-profile" element={<SelectProfilePage />} />
+          <Route path="/create-profile" element={<CreateLearnerProfilePage />} />
           <Route path="/learn" element={<LearnerLayout />}>
             <Route index element={<HomePage />} />
             <Route path="units/:unitId" element={<LessonMenu />} />

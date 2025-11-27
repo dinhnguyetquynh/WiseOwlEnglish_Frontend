@@ -61,7 +61,7 @@ export default function SelectProfilePage() {
             onSelect={() => setSelectedId(p.id)}
           />
         ))}
-        <AddCard onClick={() => console.log("Open create profile modal")} />
+        <AddCard onClick={() => navigate(`/create-profile`)} />
       </div>
 
       <button className="sp-btn" 

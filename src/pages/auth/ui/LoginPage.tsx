@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginApi } from "../../../api/auth";
 import "../css/LoginPage.css";
 import { useHomeContext } from "../../../context/AuthContext";
+import { saveRole } from "../../../store/storage";
 
 
 export default function LoginPage() {
@@ -23,8 +24,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await loginApi({ email, password: pw });
-      // localStorage.setItem("accessToken", data.accessToken);
-      // localStorage.setItem("refreshToken", data.refreshToken);
+      // ✅ LƯU ROLE VÀO STORAGE
+      saveRole(data.roleAccount);
       setRoleAccountState(data.roleAccount);
 
       if (data.roleAccount === "ADMIN") {

@@ -91,3 +91,102 @@
 
 .pg-skeleton{background:#f3f4f6;border:1px solid #e5e7eb;border-radius:16px;height:260px}
 .pg-skeleton--btn{height:56px}
+.pg-feedback {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 24px 0;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  z-index: 100; /* Đảm bảo nằm trên các phần tử khác */
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.pg-feedback--correct { background: #eaffdb; }
+.pg-feedback--wrong { background: #fdecec; }
+
+.pg-feedback-inner {
+  width: min(960px, 92vw); /* Đồng bộ độ rộng với container chính */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.pg-fb-left {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.pg-fb-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  font-size: 28px;
+}
+/* Icon màu sắc */
+.pg-fb-icon.correct { color: #2f9e44; border: 2px solid #b2f2bb; }
+.pg-fb-icon.wrong { color: #fa5252; border: 2px solid #ffc9c9; }
+
+.pg-fb-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pg-fb-title {
+  font-weight: 800;
+  font-size: 18px;
+}
+.pg-feedback--correct .pg-fb-title { color: #2f9e44; }
+.pg-feedback--wrong .pg-fb-title { color: #e03131; }
+
+.pg-fb-answer {
+  margin-top: 4px;
+  color: #343a40;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.pg-fb-reward {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #f59f00; /* Màu cam vàng cho điểm thưởng */
+  font-weight: 700;
+}
+
+.pg-fb-right {
+  /* Container cho nút bấm bên phải */
+}
+
+/* Responsive cho mobile */
+@media (max-width: 600px) {
+  .pg-feedback-inner {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  .pg-fb-left {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pg-fb-right {
+    width: 100%;
+  }
+  .pg-fb-right button {
+    width: 100%;
+  }
+}

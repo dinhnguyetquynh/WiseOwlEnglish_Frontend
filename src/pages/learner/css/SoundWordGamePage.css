@@ -15,21 +15,57 @@ html, body, #root { height: 100%; }
 }
 
 /* Top bar */
-.swg__top {
+/* .swg__top {
   display: flex;
   justify-content: center;
   margin-bottom: 12px;
+} */
+.swg__top {
+  display: flex;            /* Xếp các phần tử con theo hàng ngang */
+  align-items: flex-start;  /* Căn hàng theo cạnh trên (hoặc center nếu muốn giữa) */
+  gap: 16px;                /* Khoảng cách giữa nút X và thanh tiến độ */
+  margin-bottom: 12px;
+  width: min(1100px, 92vw);
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 10px;        /* Thêm chút padding trên nếu cần */
 }
+
+/* Nút X: Không cho co lại */
+.swg__close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0;
+  color: #6c757d;
+  transition: opacity 0.2s;
+  margin-top: -10px; /* Tinh chỉnh nhỏ để cân đối với thanh bar nếu cần */
+}
+.swg__close:hover {
+  opacity: 1;
+  color: #000;
+}
+
 
 .swg__progress {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  width: min(1100px, 92vw);     /* rộng nhưng vẫn đẹp trên màn lớn */
+  flex: 1;
+  flex-direction: column; /* Xếp thanh bar và chữ theo chiều dọc */
+  justify-content: center;
+  /* width: 100%; */
 }
 
 .swg__progress-bar {
-  flex: 1;
+  /* flex: 1;
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 999px;
+  overflow: hidden; */
+  width: 100%;            /* Full chiều rộng */
   height: 12px;
   background: #e9ecef;
   border-radius: 999px;
@@ -42,10 +78,12 @@ html, body, #root { height: 100%; }
   transition: width .35s ease;
 }
 .swg__progress-text {
-  font-size: 12px;
-  color: #6c757d;
-  min-width: 44px;
-  text-align: right;
+  text-align: center;     /* Căn giữa chữ */
+  margin-top: 6px;        /* Cách thanh bar một chút */
+  font-size: 14px;
+  font-weight: 700;       /* Đậm hơn chút cho đẹp */
+  color: #ec4899;         /* (Tùy chọn) Màu hồng giống PictureGuessingGame nếu muốn */
+  width: 100%;
 }
 
 /* Title */

@@ -17,6 +17,9 @@ import {
 import GameLayout from "../component/GameLayout";
 import LessonLayout from "../component/LessonLayout";
 import { useHomeContext } from "../../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { tokenService } from "../../../api/tokenService";
+import { clearProfile, clearRole } from "../../../store/storage";
 
 type Game = { vocab: string[]; sentence: string[] };
 type Unit = { id: string; title: string; games: Game | null };
@@ -28,11 +31,29 @@ const drawerWidth = 240;
 export default function AdminPageMUI() {
     const [activeItem, setActiveItem] = useState("game");
     const { setSelectedClass } = useHomeContext();
+    const navigate = useNavigate();
+    // Hàm xử lý đăng xuất
+    const handleLogout = () => {
+        // 1. Xóa token
+        tokenService.clear(); // Hoặc localStorage.removeItem("accessToken")...
+        
+        // 2. Xóa role và profile (nếu có)
+        clearRole();
+        clearProfile();
+        sessionStorage.clear();
+
+        // 3. Điều hướng về trang login
+        navigate("/login", { replace: true });
+    };
 
     useEffect(() => {
         // Chỉ reset khi chuyển sang màn Lesson
         if (activeItem === "lesson") {
             setSelectedClass("1");
+        }
+        // ✅ Kiểm tra nếu user bấm logout
+        if (activeItem === "logout") {
+            handleLogout();
         }
     }, [activeItem, setSelectedClass]);
     return (
@@ -165,6 +186,7 @@ function SidebarMUI({
 
 // --- MainContent (hiển thị layout theo menu) ---
 function MainContentMUI({ activeItem }: { activeItem: string }) {
+    if (activeItem === "logout") return null;
     return (
         <Box
             component="main"
@@ -183,7 +205,7 @@ function MainContentMUI({ activeItem }: { activeItem: string }) {
             {activeItem === "stats" && <Typography>Thống kê người dùng</Typography>}
             {activeItem === "report" && <Typography>Báo cáo học tập</Typography>}
             {activeItem === "profile" && <Typography>Hồ sơ cá nhân</Typography>}
-            {activeItem === "logout" && <Typography>Đăng xuất hệ thống</Typography>}
+            {/* {activeItem === "logout" && <Typography>Đăng xuất hệ thống</Typography>} */}
         </Box>
     );
 }

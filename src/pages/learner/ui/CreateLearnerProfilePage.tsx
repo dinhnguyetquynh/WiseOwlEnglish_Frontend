@@ -8,6 +8,7 @@ import {
 } from "../../../api/learnerProfile";
 import "../css/CreateLearnerProfilePage.css";
 import { getAllGradeLevels, type GradeLevelDTO } from "../../../api/gradeLevel";
+import { saveProfileId } from "../../../store/storage";
 
 export default function CreateLearnerProfilePage() {
   const nav = useNavigate();
@@ -108,7 +109,7 @@ export default function CreateLearnerProfilePage() {
         initialGradeLevelId: Number(gradeId),
       };
       const res = await createLearnerProfileApi(payload);
-      localStorage.setItem("currentProfileId", String(res.id));
+      saveProfileId(res.id);
       setSuccess(res);
       // Điều hướng bước tiếp theo (ví dụ chọn khối lớp)
       setTimeout(() => {

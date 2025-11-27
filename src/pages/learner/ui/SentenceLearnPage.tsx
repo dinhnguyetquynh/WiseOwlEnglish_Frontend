@@ -5,14 +5,15 @@ import "../css/VocabLearnPage.css";
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 import LessonCompletion from "../../../components/learner/ui/LessonCompletion";
+import type { MenuState } from "../../../type/menu";
 
-type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
+// type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
 export default function SentenceLearnPage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
   console.log("unitId la: "+unitId);
-  const { state } = useLocation() as { state?: HeaderState };
+  const { state } = useLocation() as { state?: MenuState };
 
   // Header text (nếu có từ LessonMenu)
   const headerText =
@@ -28,8 +29,11 @@ export default function SentenceLearnPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   // 2 audio players (normal / slow)
-  const normalAudioRef = useRef<HTMLAudioElement | null>(null);
-  const slowAudioRef = useRef<HTMLAudioElement | null>(null);
+  // const normalAudioRef = useRef<HTMLAudioElement | null>(null);
+  // const slowAudioRef = useRef<HTMLAudioElement | null>(null);
+
+    // Ref cho audio
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   //lấy tổng số từ vựng để hiển thị lên thanh progress
   const total = list.length;
@@ -75,6 +79,30 @@ export default function SentenceLearnPage() {
     return () => { isMounted = false; };
   }, [unitId]);
 
+    // 👇 1. Hàm phát audio chung
+  const playAudio = (url: string) => {
+    if (!url) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio(url);
+    } else {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = url;
+    }
+    audioRef.current.play().catch((e) => console.warn("Auto-play blocked:", e));
+  };
+
+  // 👇 2. Tự động phát khi chuyển câu
+  useEffect(() => {
+    if (media.normal && !showSuccess) {
+        const timer = setTimeout(() => {
+            playAudio(media.normal);
+        }, 350);
+        return () => clearTimeout(timer);
+    }
+  }, [media.normal, showSuccess]);
+
+
   const pct = useMemo(() => {
     if (total === 0) return 0;
     return Math.round(((idx + 1) / total) * 100);
@@ -110,18 +138,9 @@ export default function SentenceLearnPage() {
        
   };
 
-  const playNormal = () => {
-    if (!media.normal) return;
-    normalAudioRef.current?.pause();
-    normalAudioRef.current?.load();
-    normalAudioRef.current?.play().catch(() => {});
-  };
-  const playSlow = () => {
-    if (!media.slow) return;
-    slowAudioRef.current?.pause();
-    slowAudioRef.current?.load();
-    slowAudioRef.current?.play().catch(() => {});
-  };
+  // 👇 3. Nút bấm thủ công
+  const handlePlayNormal = () => playAudio(media.normal);
+  const handlePlaySlow = () => playAudio(media.slow);
   // 👇 Các hàm xử lý cho Modal
 const toLessonMenu = () => {
   const qs = new URLSearchParams({
@@ -183,7 +202,7 @@ const toLessonMenu = () => {
             
           {/* Audio buttons */}
           <div className="vl__audio-row">
-            <button className="vl__audio-btn" onClick={playNormal}  title="Phát âm thường">
+            <button className="vl__audio-btn" onClick={handlePlayNormal}  title="Phát âm thường">
               <img
                 src="https://res.cloudinary.com/dxhhluk84/image/upload/v1759733260/NormalSound_c5nhfv.png"
                 alt="Phát âm chuẩn"
@@ -191,7 +210,7 @@ const toLessonMenu = () => {
               />
               Normal
             </button>
-            <button className="vl__audio-btn" onClick={playSlow}  title="Phát âm chậm">
+            <button className="vl__audio-btn" onClick={handlePlaySlow}  title="Phát âm chậm">
               <img
                 src="https://res.cloudinary.com/dxhhluk84/image/upload/v1759733260/NormalSound_c5nhfv.png"
                 alt="Phát âm chậm"
@@ -200,8 +219,7 @@ const toLessonMenu = () => {
               Slow 
             </button>
           </div>
-          <audio ref={normalAudioRef} src={media.normal} preload="auto" />
-          <audio ref={slowAudioRef} src={media.slow} preload="auto" />
+     
 
           {/* Word & meaning */}
           <div className="vl__word">{current.sentence_en}</div>

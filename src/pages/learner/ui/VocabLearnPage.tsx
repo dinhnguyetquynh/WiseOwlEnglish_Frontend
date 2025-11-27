@@ -5,13 +5,14 @@ import "../css/VocabLearnPage.css";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 import { getProfileId } from "../../../store/storage";
 import LessonCompletion from "../../../components/learner/ui/LessonCompletion";
+import type { MenuState } from "../../../type/menu";
 
-type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
+// type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
 export default function VocabLearnPage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
-  const { state } = useLocation() as { state?: HeaderState };
+  const { state } = useLocation() as { state?: MenuState };
 
   // Header text (nếu có từ LessonMenu)
   const headerText =
@@ -26,9 +27,10 @@ export default function VocabLearnPage() {
   //  STATE MỚI: Kiểm soát hiển thị màn hình tổng kết
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // 2 audio players (normal / slow)
-  const normalAudioRef = useRef<HTMLAudioElement | null>(null);
-  const slowAudioRef = useRef<HTMLAudioElement | null>(null);
+  // // 2 audio players (normal / slow)
+  // const normalAudioRef = useRef<HTMLAudioElement | null>(null);
+  // const slowAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   //lấy tổng số từ vựng để hiển thị lên thanh progress
   const total = list.length;
@@ -74,6 +76,33 @@ export default function VocabLearnPage() {
     return () => { isMounted = false; };
   }, [unitId]);
 
+  // 👇 1. Hàm phát âm thanh chung (giống SoundWordGamePage)
+  const playAudio = (url: string) => {
+    if (!url) return;
+    
+    if (!audioRef.current) {
+      audioRef.current = new Audio(url);
+    } else {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      // Luôn cập nhật src mới để đảm bảo đúng file
+      audioRef.current.src = url;
+    }
+    
+    // Bắt lỗi autoplay nếu trình duyệt chặn
+    audioRef.current.play().catch((e) => console.warn("Auto-play blocked:", e));
+  };
+
+  useEffect(() => {
+    if (media.normal && !showSuccess) {
+        // Thêm delay nhỏ để UI chuyển cảnh mượt hơn trước khi phát
+        const timer = setTimeout(() => {
+            playAudio(media.normal);
+        }, 300);
+        return () => clearTimeout(timer);
+    }
+  }, [media.normal, showSuccess]); // Chạy lại khi url normal thay đổi
+
   const pct = useMemo(() => {
     if (total === 0) return 0;
     return Math.round(((idx + 1) / total) * 100);
@@ -110,18 +139,8 @@ export default function VocabLearnPage() {
        
   };
 
-  const playNormal = () => {
-    if (!media.normal) return;
-    normalAudioRef.current?.pause();
-    normalAudioRef.current?.load();
-    normalAudioRef.current?.play().catch(() => {});
-  };
-  const playSlow = () => {
-    if (!media.slow) return;
-    slowAudioRef.current?.pause();
-    slowAudioRef.current?.load();
-    slowAudioRef.current?.play().catch(() => {});
-  };
+const handlePlayNormal = () => playAudio(media.normal);
+  const handlePlaySlow = () => playAudio(media.slow);
 const toLessonMenu = () => {
   const qs = new URLSearchParams({
     title: state?.title ?? "",
@@ -184,7 +203,7 @@ const toLessonMenu = () => {
 
           {/* Audio buttons */}
           <div className="vl__audio-row">
-            <button className="vl__audio-btn" onClick={playNormal}  title="Phát âm thường">
+            <button className="vl__audio-btn" onClick={handlePlayNormal}  title="Phát âm thường">
               <img
                 src="https://res.cloudinary.com/dxhhluk84/image/upload/v1759733260/NormalSound_c5nhfv.png"
                 alt="Phát âm chuẩn"
@@ -192,7 +211,7 @@ const toLessonMenu = () => {
               />
               Normal
             </button>
-            <button className="vl__audio-btn" onClick={playSlow}  title="Phát âm chậm">
+            <button className="vl__audio-btn" onClick={handlePlaySlow}  title="Phát âm chậm">
               <img
                 src="https://res.cloudinary.com/dxhhluk84/image/upload/v1759733260/NormalSound_c5nhfv.png"
                 alt="Phát âm chậm"
@@ -201,9 +220,7 @@ const toLessonMenu = () => {
               Slow 
             </button>
           </div>
-          <audio ref={normalAudioRef} src={media.normal} preload="auto" />
-          <audio ref={slowAudioRef} src={media.slow} preload="auto" />
-
+         
           {/* Word & meaning */}
           <div className="vl__word">{current.term_en}</div>
           {!!current.phonetic && <div className="vl__phonetic">{current.phonetic}_({current.partOfSpeech})</div>}

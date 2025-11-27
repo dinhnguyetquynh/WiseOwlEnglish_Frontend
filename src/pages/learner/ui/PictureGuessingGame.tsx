@@ -258,7 +258,7 @@ export default function PictureGuessingGamePage() {
         </button>
       </div>
 
-      {showResult && (
+      {/* {showResult && (
         <div className={`pg-result ${showResult === "wrong" ? "pg-result--wrong" : "pg-result--correct"}`}>
           <div className="pg-result__info">
             <div className="pg-result__icon">{showResult === "wrong" ? "✖" : "✔"}</div>
@@ -276,6 +276,51 @@ export default function PictureGuessingGamePage() {
             <button onClick={gotoNext} className={`pg-btn ${showResult === "wrong" ? "pg-btn--danger" : "pg-btn--success"}`}>
               {showResult === "wrong" ? "ĐÃ HIỂU" : "TIẾP TỤC"}
             </button>
+          </div>
+        </div>
+      )} */}
+
+      {/* 👇 CẬP NHẬT PHẦN HIỂN THỊ KẾT QUẢ (FEEDBACK BANNER) */}
+      {showResult && (
+        <div className={`pg-feedback ${showResult === "correct" ? "pg-feedback--correct" : "pg-feedback--wrong"}`}>
+          <div className="pg-feedback-inner">
+            
+            <div className="pg-fb-left">
+              {/* Icon */}
+              <div className={`pg-fb-icon ${showResult}`}>
+                {showResult === "correct" ? "✔" : "✖"}
+              </div>
+              
+              {/* Text Content */}
+              <div className="pg-fb-text">
+                <div className="pg-fb-title">
+                  {showResult === "correct" ? "Chính xác!" : "Đáp án đúng:"}
+                </div>
+                
+                <div className="pg-fb-answer">
+                  {correctAnswerText}
+                </div>
+
+                {/* Reward Point */}
+                {showResult === "correct" && (
+                  <div className="pg-fb-reward">
+                    +{earned - (correctCount - 1) * (current.reward || 0)} điểm thưởng
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Button */}
+            <div className="pg-fb-right">
+              <button 
+                onClick={gotoNext} 
+                className={`pg-btn ${showResult === "correct" ? "pg-btn--success" : "pg-btn--danger"}`}
+                autoFocus // Tự động focus để user có thể bấm Enter
+              >
+                {showResult === "correct" ? "TIẾP TỤC" : "ĐÃ HIỂU"}
+              </button>
+            </div>
+
           </div>
         </div>
       )}

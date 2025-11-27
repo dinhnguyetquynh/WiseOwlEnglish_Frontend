@@ -146,25 +146,33 @@
   .gr-main{ padding:14px; }
   .gr-score{ gap:16px; }
 }
+
+/* 👇 SỬA LẠI NÚT X: Bỏ viền tròn, làm style tối giản */
 .gr-exit-btn {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 24px;
+  left: 24px;
+  
+  /* Style mới */
   background: transparent;
-  border: 2px solid #ccc;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  font-size: 20px;
-  line-height: 1;
+  border: none;
+  font-size: 36px;       /* To hơn cho dễ bấm */
+  color: #9ca3af;        /* Màu xám nhạt (giống các trang khác) */
   cursor: pointer;
-  color: #555;
-  transition: all 0.2s ease;
-  z-index: 10;
+  line-height: 1;
+  padding: 0;
+  transition: color 0.2s ease;
+  z-index: 20;
+
+  /* Reset style cũ (nếu bị dính) */
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .gr-exit-btn:hover {
-  background: #f8f9fa;
-  border-color: #999;
-  color: #000;
+  color: #374151;        /* Đậm hơn khi hover */
+  background: transparent;
+  border: none;
 }

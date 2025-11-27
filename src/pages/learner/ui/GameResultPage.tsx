@@ -108,7 +108,7 @@ export default function GameResultPage() {
     <div className={`gr-wrap gr-${tier}`}>
       {/* confetti */}
       <button className="gr-exit-btn" onClick={() => nav(`/learn/units/${unitId}`)}>
-        ✕
+        ×
       </button>
       <div className="gr-confetti" aria-hidden>
         {Array.from({ length: 20 }).map((_, i) => (
@@ -175,9 +175,9 @@ export default function GameResultPage() {
         <button className="gr-btn gr-btn-primary" onClick={playAgain}>
           Chơi lại
         </button>
-        <button className="gr-btn gr-btn-success" onClick={toUnit}>
+        {/* <button className="gr-btn gr-btn-success" onClick={toUnit}>
           Học tiếp Unit
-        </button>
+        </button> */}
       </footer>
     </div>
   );

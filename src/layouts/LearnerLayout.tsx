@@ -4,6 +4,7 @@ import Sidebar from "../components/learner/ui/Sidebar";
 import "../styles/LearnerLayout.css";
 import { useState } from "react";
 import UserBadge from "../components/learner/ui/UserBadge";
+import { clearProfile, clearRole } from "../store/storage";
 export default function LearnerLayout() {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function LearnerLayout() {
     // Xoá dữ liệu đăng nhập
     localStorage.removeItem("accessToken");
     localStorage.removeItem("profileId");
+    clearProfile();
+    clearRole();
     sessionStorage.clear();
     // Điều hướng về login và xóa history entry hiện tại
     navigate("/login", { replace: true });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../css/SoundWordGamePage.css";
 import {
   getSoundWordGames,
@@ -11,11 +11,37 @@ import {
 import { gotoResult } from "../../../utils/gameResult";
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
+import type { MenuState } from "../../../type/menu";
 
 export default function SoundWordGamePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { unitId = "" } = useParams();
   const profileId = getProfileId(); // 👈 Lấy profileId
+
+  // Lấy state từ Router HOẶC LocalStorage
+  const navState = useMemo(() => {
+    // Cách 1: Có sẵn trong location (do trang trước truyền tới)
+    if (location.state) return location.state;
+
+    // Cách 2: Mất state (do F5 hoặc vào thẳng link), lấy lại từ LocalStorage
+    try {
+      const raw = localStorage.getItem("lessonMenuState");
+      if (raw) {
+        const saved = JSON.parse(raw) as MenuState;
+        // Quan trọng: Kiểm tra xem data trong LocalStorage có đúng là của bài này không
+        // (Tránh trường hợp LS lưu bài 1, nhưng đang chơi bài 2)
+        if (String(saved.unitId) === String(unitId)) {
+          return saved;
+        }
+      }
+    } catch (e) {
+      console.error("Lỗi đọc localStorage", e);
+    }
+    return null; // Không tìm thấy gì cả
+  }, [location.state, unitId]);
+
+
 
   const [questions, setQuestions] = useState<SoundWordQuestionRes[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +56,9 @@ export default function SoundWordGamePage() {
   // State mới
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [correctAnswerText, setCorrectAnswerText] = useState("");
+   const total = questions.length;
+  const q = questions[idx];
+  const current = q; // Dùng tên 'current' cho nhất quán
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -49,31 +78,66 @@ export default function SoundWordGamePage() {
       
   }, [unitId]);
 
-  const total = questions.length;
-  const q = questions[idx];
-  const current = q; // Dùng tên 'current' cho nhất quán
+  // 👇 2. Logic phát âm thanh (Dùng chung)
+  const playAudio = (url: string) => {
+    if (!url) return;
 
-  //   const correctOption = useMemo(
-  //   () => q?.options.find((o) => o.isCorrect),
-  //   [q]
-  // );
+    // Nếu chưa có audio instance thì tạo mới
+    if (!audioRef.current) {
+      audioRef.current = new Audio(url);
+    } else {
+      // Nếu có rồi thì pause cái cũ và gán src mới
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      
+      // Chỉ gán lại src nếu khác url cũ (để tránh load lại nếu bấm nghe lại)
+      // Tuy nhiên với game này mỗi câu là 1 url khác nhau nên gán luôn cũng được
+      if (audioRef.current.src !== url) { 
+          audioRef.current.src = url;
+      }
+    }
+  const playPromise = audioRef.current.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        console.warn("Autoplay bị chặn hoặc lỗi phát âm thanh:", error);
+        // Trình duyệt (nhất là Chrome) chặn autoplay nếu user chưa tương tác với trang.
+        // Nhưng vì user đã click vào đây từ trang trước nên thường sẽ phát được.
+      });
+    }
+  };
 
+  // 👇 3. Tự động phát khi câu hỏi (current) thay đổi
+  useEffect(() => {
+    if (current?.urlSound) {
+      // Thêm delay nhỏ để UI render xong mượt mà rồi mới phát
+      const timer = setTimeout(() => {
+        playAudio(current.urlSound);
+      }, 300); 
+      return () => clearTimeout(timer);
+    }
+  }, [current]); // Chạy lại mỗi khi 'current' thay đổi (chuyển câu)
+  // 👇 4. Nút bấm thủ công (Nghe lại)
+  const handleManualPlay = () => {
+    if (current?.urlSound) {
+      playAudio(current.urlSound);
+    }
+  };
   const progressPercent = useMemo(() => {
     if (total === 0) return 0;
     return Math.round(((idx) / total) * 100);
   }, [idx, total]);
 
-  const handlePlay = () => {
-    if (!q?.urlSound) return;
-    if (!audioRef.current) {
-      audioRef.current = new Audio(q.urlSound);
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = q.urlSound;
-    }
-    audioRef.current.play().catch(() => {});
-  };
+  // const handlePlay = () => {
+  //   if (!q?.urlSound) return;
+  //   if (!audioRef.current) {
+  //     audioRef.current = new Audio(q.urlSound);
+  //   } else {
+  //     audioRef.current.pause();
+  //     audioRef.current.currentTime = 0;
+  //     audioRef.current.src = q.urlSound;
+  //   }
+  //   audioRef.current.play().catch(() => {});
+  // };
 
 const handleSelect = (op: SoundWordOptionRes) => {
     if (judge) return; // đã kiểm tra thì không đổi
@@ -143,19 +207,25 @@ const handleSelect = (op: SoundWordOptionRes) => {
       setJudge(null); // 👈 Đổi tên
       setCorrectAnswerText(""); // 👈 Reset
       // preload âm thanh tiếp theo
-      setTimeout(() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-          audioRef.current.src = questions[idx + 1]?.urlSound || "";
-        }
-      }, 0);
+      // setTimeout(() => {
+      //   if (audioRef.current) {
+      //     audioRef.current.pause();
+      //     audioRef.current.currentTime = 0;
+      //     audioRef.current.src = questions[idx + 1]?.urlSound || "";
+      //   }
+      // }, 0);
     }
   };
 const handleSkip = () => {
     setJudge(null);
     setSelected(null);
     goNext();
+  };
+
+const handleClose = () => {
+   // Quay về trang GameSelectedPage (Ôn tập từ vựng)
+    // Route tương ứng trong App.tsx là: /learn/units/:unitId/vocab/review
+    navigate(`/learn/units/${unitId}/vocab/review`, { state: navState });
   };
 
   if (loading) return <div className="swg__wrap"><div className="swg__loading">Đang tải...</div></div>;
@@ -166,6 +236,10 @@ const handleSkip = () => {
     <div className="swg__wrap">
       {/* Top bar */}
       <div className="swg__top">
+        {/* Nút X gọi hàm handleClose */}
+        <button className="swg__close" onClick={handleClose} aria-label="Thoát">
+          ×
+        </button>
         <div className="swg__progress">
           <div className="swg__progress-bar">
             <div className="swg__progress-fill" style={{ width: `${progressPercent}%` }} />
@@ -177,7 +251,7 @@ const handleSkip = () => {
       <h2 className="swg__title">Nghe âm thanh chọn chữ</h2>
 
       {/* Speaker button */}
-      <button className="swg__speaker" onClick={handlePlay} aria-label="Phát âm thanh">
+      <button className="swg__speaker" onClick={handleManualPlay} aria-label="Phát âm thanh">
         <span className="swg__speaker-icon" />
       </button>
 

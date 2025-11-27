@@ -3,13 +3,10 @@ import { useLocation, useNavigate, useParams, useSearchParams } from "react-rout
 import GameCard, { type GameCardProps } from "../../../components/learner/ui/GameCard";
 import "../css/GameSelectPage.css";
 import { getGamesForReview, type GameResByLesson } from "../../../api/game";
+import type { MenuState } from "../../../type/menu";
 
 
-type MenuState = {
-  unitName?: string;
-  unitTitle?: string;
-  title?: string;
-};
+
 const iconImgClass = "gs-game-icon";
 
 const getGameUIDetails = (game: GameResByLesson, unitId: string): Omit<GameCardProps, "onClick"> => {

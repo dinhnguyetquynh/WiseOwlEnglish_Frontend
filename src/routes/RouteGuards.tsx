@@ -1,5 +1,6 @@
 // src/routes/RouteGuards.tsx
 import { Navigate, Outlet } from "react-router-dom";
+import { getRole } from "../store/storage";
 
 // Tùy bạn đọc token từ đâu (localStorage, cookie, zustand...):
 function hasToken() {
@@ -13,5 +14,15 @@ export function ProtectedRoute() {
 
 export function PublicRoute() {
   // Chặn vào /login, /register... nếu đã đăng nhập
-  return hasToken() ? <Navigate to="/learn" replace /> : <Outlet />;
+  if (hasToken()) {
+    const role = getRole();
+    if (role === "ADMIN") {
+      return <Navigate to="/admin" replace />;
+    }
+    // Mặc định là LEARNER
+    return <Navigate to="/learn" replace />;
+  }
+
+  // Nếu chưa đăng nhập, cho phép vào (Login, Register...)
+  return <Outlet />;
 }
