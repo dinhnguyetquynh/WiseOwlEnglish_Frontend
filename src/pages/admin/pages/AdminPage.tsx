@@ -20,6 +20,7 @@ import { useHomeContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { tokenService } from "../../../api/tokenService";
 import { clearProfile, clearRole } from "../../../store/storage";
+import LessionPage from "../component/LessionLayout/pages/LessionPage";
 
 type Game = { vocab: string[]; sentence: string[] };
 type Unit = { id: string; title: string; games: Game | null };
@@ -36,7 +37,7 @@ export default function AdminPageMUI() {
     const handleLogout = () => {
         // 1. Xóa token
         tokenService.clear(); // Hoặc localStorage.removeItem("accessToken")...
-        
+
         // 2. Xóa role và profile (nếu có)
         clearRole();
         clearProfile();
@@ -49,7 +50,7 @@ export default function AdminPageMUI() {
     useEffect(() => {
         // Chỉ reset khi chuyển sang màn Lesson
         if (activeItem === "lesson") {
-            setSelectedClass("1");
+            setSelectedClass(1);
         }
         // ✅ Kiểm tra nếu user bấm logout
         if (activeItem === "logout") {
@@ -201,7 +202,7 @@ function MainContentMUI({ activeItem }: { activeItem: string }) {
         >
             {activeItem === "lesson" && <LessonLayout />}
             {activeItem === "game" && <GameLayout />}
-            {activeItem === "test" && <Typography>Trang kiểm tra</Typography>}
+            {activeItem === "test" && <LessionPage />}
             {activeItem === "stats" && <Typography>Thống kê người dùng</Typography>}
             {activeItem === "report" && <Typography>Báo cáo học tập</Typography>}
             {activeItem === "profile" && <Typography>Hồ sơ cá nhân</Typography>}

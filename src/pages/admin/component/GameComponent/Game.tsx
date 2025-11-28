@@ -77,13 +77,14 @@ type GameProps = {
     gameId?: number;
     onValidate: (valid: boolean) => void;
     onSaved?: () => void;
+    type: "game" | "lession"
 
 };
 
 const Game = forwardRef<GameHandle, GameProps>(({
     gameType,
     lessonId,
-    gameId,
+    gameId, type,
     onValidate,
     onSaved
 }, ref) => {
@@ -532,114 +533,126 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
     return (
         <Box>
-            <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-                <Typography sx={{ fontWeight: "bold", mb: 2 }}>
-                    {gameData?.title}
-                </Typography>
 
-                <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                    {/* LEFT: 50% */}
-                    <Box sx={{ flex: 1 }}>
-                        <TextField
-                            fullWidth
-                            label="Tiêu đề"
-                            placeholder="Nhập tiêu đề trò chơi..."
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </Box>
+            {type !== "lession" && (
+                <Paper sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+                    <Typography sx={{ fontWeight: "bold", mb: 2 }}>
+                        {gameData?.title}
+                    </Typography>
 
-                    {/* RIGHT: 50% */}
-                    <Box
-                        sx={{
-                            flex: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",  // căn chữ giữa theo chiều ngang
-                            border: "1px solid #ccc",
-                            borderRadius: 1,
-                            px: 2,
-                            bgcolor: "#f5f5f5",
-                            height: 56,
-                        }}
-                    >
-                        <Typography>{gameType}</Typography>
-                    </Box>
-                </Box>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 4, mb: 2 }}>
+                    <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                        {/* LEFT: 50% */}
+                        <Box sx={{ flex: 1 }}>
+                            <TextField
+                                fullWidth
+                                label="Tiêu đề"
+                                placeholder="Nhập tiêu đề trò chơi..."
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </Box>
 
-                    {/* GROUP: LOẠI CÂU HỎI */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "50%" }}>
-                        {!isPicture4Game && (
-                            <>
-                                {/* LEFT 10% */}
-                                <Box sx={{ width: "120px", display: "flex", alignItems: "center" }}>
-                                    <Typography fontWeight="medium">Loại câu hỏi:</Typography>
-                                </Box>
-
-                                {/* RIGHT 20% */}
-                                <Box
-                                    sx={{
-                                        width: "160px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        border: "1px solid #ccc",
-                                        borderRadius: 1,
-                                        px: 2,
-                                        height: 50,
-                                        bgcolor: "#f5f5f5",
-                                    }}
-                                >
-                                    <Typography fontWeight="bold">
-                                        {questions[0]?.contentType}
-                                    </Typography>
-                                </Box>
-                            </>
-                        )}
-                    </Box>
-
-
-
-                    {/* GROUP: CHECKBOX */}
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "50%" }}>
-                        <Checkbox
-                            checked={isActive}
-                            onChange={(e) => {
-                                const value = e.target.checked;
-                                setIsActive(value);
-
-                                setQuestions((prev) =>
-                                    prev.map((q) => ({
-                                        ...q,
-                                        active: value,
-                                    }))
-                                );
+                        {/* RIGHT: 50% */}
+                        <Box
+                            sx={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",  // căn chữ giữa theo chiều ngang
+                                border: "1px solid #ccc",
+                                borderRadius: 1,
+                                px: 2,
+                                bgcolor: "#f5f5f5",
+                                height: 56,
                             }}
-                        />
+                        >
+                            <Typography>{gameType}</Typography>
+                        </Box>
+                    </Box>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 4, mb: 2 }}>
+
+                        {/* GROUP: LOẠI CÂU HỎI */}
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "50%" }}>
+                            {!isPicture4Game && (
+                                <>
+                                    {/* LEFT 10% */}
+                                    <Box sx={{ width: "120px", display: "flex", alignItems: "center" }}>
+                                        <Typography fontWeight="medium">Loại câu hỏi:</Typography>
+                                    </Box>
+
+                                    {/* RIGHT 20% */}
+                                    <Box
+                                        sx={{
+                                            width: "160px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            border: "1px solid #ccc",
+                                            borderRadius: 1,
+                                            px: 2,
+                                            height: 50,
+                                            bgcolor: "#f5f5f5",
+                                        }}
+                                    >
+                                        <Typography fontWeight="bold">
+                                            {questions[0]?.contentType}
+                                        </Typography>
+                                    </Box>
+                                </>
+                            )}
+                        </Box>
 
 
-                        <Typography>Kích hoạt game</Typography>
+
+                        {/* GROUP: CHECKBOX */}
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, width: "50%" }}>
+                            <Checkbox
+                                checked={isActive}
+                                onChange={(e) => {
+                                    const value = e.target.checked;
+                                    setIsActive(value);
+
+                                    setQuestions((prev) =>
+                                        prev.map((q) => ({
+                                            ...q,
+                                            active: value,
+                                        }))
+                                    );
+                                }}
+                            />
+
+
+                            <Typography>Kích hoạt game</Typography>
+                        </Box>
+
                     </Box>
 
-                </Box>
-
-            </Paper >
-
+                </Paper >
+            )}
             {
                 questions.map((q, index) => (
                     <Paper key={index} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
                             <Box sx={{ minWidth: 150 }}>
-                                {!isPicture4Game && (
-                                    <Typography fontWeight="bold">
-                                        CÂU HỎI {index + 1}:
+                                {type === "lession" ? (
+                                    <Typography fontWeight="bold" color="primary">
+                                        {gameType}   {/* HIỂN THỊ LOẠI GAME */}
                                     </Typography>
+                                ) : (
+                                    !isPicture4Game && (
+                                        <Typography fontWeight="bold">
+                                            CÂU HỎI {index + 1}:
+                                        </Typography>
+                                    )
                                 )}
                             </Box>
 
-                            <Button variant="outlined" color="error" onClick={() => removeQuestion(index)}>
-                                XÓA CÂU HỎI
-                            </Button>
+                            {type !== "lession" && (
+                                <Button variant="outlined" color="error" onClick={() => removeQuestion(index)}>
+                                    XÓA CÂU HỎI
+                                </Button>
+                            )}
+
+
                         </Box>
 
 
@@ -958,7 +971,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                             </Box>
                         )}
 
-                        {/* SENTENCE HIDDEN WORD GAME UI */}
+
                         {isSentenceHiddenGame && (
 
                             <Box sx={{ mt: 3 }}>
@@ -1083,11 +1096,14 @@ const Game = forwardRef<GameHandle, GameProps>(({
                 ))
             }
 
-            < Box sx={{ textAlign: "center" }}>
-                <Button variant="outlined" onClick={addQuestion}>
-                    + Thêm câu hỏi mới
-                </Button>
-            </Box >
+            {type !== "lession" && (
+                <Box sx={{ textAlign: "center" }}>
+                    <Button variant="outlined" onClick={addQuestion}>
+                        + Thêm câu hỏi mới
+                    </Button>
+                </Box>
+            )}
+
         </Box >
     );
 });

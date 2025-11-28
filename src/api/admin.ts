@@ -278,3 +278,51 @@ export async function updateGame(gameId: number, payload: GamePayload) {
         throw new Error(error.response?.data?.message || "Không thể cập nhật game");
     }
 }
+export interface TestItem {
+    id: number;
+    lessonId: number;
+    title: string;
+    type: string;
+    description: string;
+    durationMin: number;
+    active: boolean;
+}
+
+export interface LessonTestItem {
+    lessonId: number;
+    unitName: string;
+    lessonName: string;
+    orderIndex: number;
+    tests: TestItem[];
+}
+export const getTestsByGrade = async (gradeId: number) => {
+    const res = await axiosClient.get(
+        `/api/test-admin/by-grade?gradeId=${gradeId}`
+    );
+    return res.data;
+};
+
+export interface TestDetailItem {
+    id: number;
+    lessonId: number;
+    title: string;
+    type: string;
+    description: string;
+    durationMin: number;
+    active: boolean;
+    totalQuestion: number;
+    hasAttempt: boolean;
+}
+export interface LessonDetailResponse {
+    id: number;                // lessonId
+    unitNumber: string;        // "Unit 1"
+    unitName: string;          // "Colors"
+    testList: TestDetailItem[];
+}
+
+export async function getTestsByLesson(lessonId: number): Promise<LessonDetailResponse> {
+    const res = await axiosClient.get(
+        `/api/test-admin/get-all/${lessonId}`
+    );
+    return res.data;
+}
