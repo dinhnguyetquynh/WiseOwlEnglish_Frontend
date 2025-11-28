@@ -34,6 +34,7 @@ import LessonProgressDetailPage from './pages/learner/ui/LessonProgressDetailPag
 import PronunciationPracticePage from './pages/learner/ui/PronunciationPracticePage';
 import RankPage from './pages/learner/ui/RankPage';
 import HeaderLayout from './layouts/HeaderLayout';
+import ShopPage from './pages/learner/ui/ShopPage';
 
 
 
@@ -66,6 +67,7 @@ function App() {
             <Route path="progress/lesson/:lessonId" element={<LessonProgressDetailPage />} />
             <Route path="rank" element={<RankPage />} />
             <Route path="profile" element={<ProfilePage />} />
+            <Route path="shop" element={<ShopPage />} />
           </Route>
           
           <Route element={<HeaderLayout />}>
