@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
     Box,
     Paper,
@@ -10,14 +10,24 @@ import {
     IconButton,
 } from "@mui/material";
 import type { GameTypeEnum } from "../../../schemas/game.schema";
-import Game from "../../GameComponent/Game";
+import Game, { type GameHandle, type TestQuestionPayload } from "../../GameComponent/Game";
 import DeleteIcon from "@mui/icons-material/Delete";
+import axiosClient from "../../../../../api/axiosClient";
 interface Props {
     lessonId: number;
     onBack: () => void;
     onSaved?: () => void;
 }
-
+// 1. Define Request Payload Structure
+interface CreateTestRequest {
+    lessonId: number;
+    title: string;
+    type: string;
+    description: string;
+    durationMin: number;
+    active: boolean;
+    questions: TestQuestionPayload[];
+}
 export default function CreateLessonWithGame({
     lessonId,
     onBack,
@@ -28,7 +38,7 @@ export default function CreateLessonWithGame({
 
     // ====== MẢNG GAME ĐÃ CHỌN ======
     const [games, setGames] = useState<GameTypeEnum[]>([]);
-
+    const gameRefs = useRef<{ [key: number]: GameHandle | null }>({});
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [duration, setDuration] = useState(15);
@@ -44,22 +54,48 @@ export default function CreateLessonWithGame({
     };
     const removeGame = (index: number) => {
         setGames(prev => prev.filter((_, i) => i !== index));
+        // Xóa ref tương ứng (optional, để tránh memory leak nhẹ)
+        delete gameRefs.current[index];
     };
-    const handleSaveLesson = () => {
+    const handleSaveLesson = async () => {
         if (!title.trim()) return alert("Vui lòng nhập tên bài kiểm tra");
         if (games.length === 0) return alert("Vui lòng chọn ít nhất 1 game");
 
-        console.log("SAVE PAYLOAD:", {
-            title,
-            description,
-            duration,
-            lessonId,
-            games
+        // A. Thu thập questions từ tất cả các Game con
+        let allQuestions: TestQuestionPayload[] = [];
+
+        games.forEach((_, index) => {
+            const ref = gameRefs.current[index];
+            if (ref) {
+                // Gọi hàm mapping từ Game.tsx
+                const questionsFromGame = ref.getTestQuestions();
+                allQuestions = [...allQuestions, ...questionsFromGame];
+            }
         });
 
-        alert("Lưu lesson + games thành công!");
-        onSaved?.();
-        onBack();
+        // B. Tạo Payload đúng cấu trúc "JSON Đúng"
+        const payload: CreateTestRequest = {
+            lessonId: lessonId,
+            title: title,
+            type: "ENGLISH",
+            description: description,
+            durationMin: duration, // Field này giờ là durationMin
+            active: true,
+            questions: allQuestions // Gán mảng câu hỏi đã map vào đây
+        };
+
+        console.log("FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
+
+        // C. Gọi API thật
+        try {
+            await axiosClient.post("/api/test-admin/create", payload);
+            alert("Tạo bài kiểm tra thành công!");
+            onSaved?.();
+            onBack();
+        } catch (error: any) {
+            console.error("Lỗi save test:", error);
+            alert("Lỗi khi lưu bài kiểm tra: " + (error.response?.data?.message || error.message));
+        }
     };
 
     return (
@@ -123,7 +159,7 @@ export default function CreateLessonWithGame({
                     </Box>
 
                     <Game
-                        ref={null}
+                        ref={(el) => { gameRefs.current[index] = el; }}
                         gameType={g}
                         lessonId={lessonId}
                         onValidate={() => { }}
@@ -154,7 +190,7 @@ export default function CreateLessonWithGame({
                         <MenuItem value="PICTURE_SENTENCE_MATCHING">Picture - Sentence</MenuItem>
                         <MenuItem value="PICTURE_WORD_WRITING">Picture - Writing</MenuItem>
                         <MenuItem value="SOUND_WORD_MATCHING">Sound - Word</MenuItem>
-                        <MenuItem value="PRONUNCIATION">Pronunciation</MenuItem>
+                        <MenuItem value="WORD_TO_SENTENCE">Word To Sentence</MenuItem>
                         <MenuItem value="SENTENCE_HIDDEN_WORD">Sentence Hidden Word</MenuItem>
                     </Select>
                 </Box>

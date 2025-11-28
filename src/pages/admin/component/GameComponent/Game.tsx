@@ -66,9 +66,27 @@ type QuestionState = {
     correctIndex: number;
     active: boolean;
 };
+export type TestOptionPayload = {
+    contentType: "VOCAB" | "SENTENCE" | "IMAGE" | "AUDIO";
+    contentRefId?: number; // Có thể null nếu là text thuần
+    correct: boolean;
+    side?: "LEFT" | "RIGHT";
+    pairKey?: string;
+    text?: string; // Dùng nếu không có RefId
+};
+export type TestQuestionPayload = {
+    questionType: string;
+    stemType: "IMAGE" | "AUDIO" | "TEXT" | "SENTENCE";
+    stemRefId?: number;
+    stemText?: string;
+    hiddenWord?: string;
+    maxScore: number;
+    options?: TestOptionPayload[];
+};
 
 export type GameHandle = {
     handleSave: () => void;
+    getTestQuestions: () => TestQuestionPayload[];
 };
 
 type GameProps = {
@@ -519,12 +537,78 @@ const Game = forwardRef<GameHandle, GameProps>(({
     };
 
 
+    function buildTestPayload(): TestQuestionPayload[] {
+        if (!gameData) return [];
 
+        return questions.map((q) => {
+            const baseQuestion: TestQuestionPayload = {
+                questionType: gameType,
+                stemType: "TEXT",
+                maxScore: Number(q.maxScore) || 5,
+                options: [],
+            };
+
+            // --- A. XỬ LÝ STEM (Đề bài) ---
+            if (["PICTURE_WORD_MATCHING", "PICTURE_SENTENCE_MATCHING", "PICTURE_WORD_WRITING", "SENTENCE_HIDDEN_WORD"].includes(gameType)) {
+                baseQuestion.stemType = "IMAGE";
+                baseQuestion.stemRefId = getMediaAssetIdByUrl(q.image);
+            } else if (["SOUND_WORD_MATCHING", "PRONUNCIATION"].includes(gameType)) {
+                baseQuestion.stemType = "AUDIO";
+                baseQuestion.stemRefId = getMediaAssetIdByUrl(q.sound);
+            } else if (gameType === "WORD_TO_SENTENCE") {
+                baseQuestion.stemType = "SENTENCE";
+                baseQuestion.stemRefId = getOptionIdByTerm(q.choices[0]);
+            }
+
+            // --- B. XỬ LÝ OPTIONS (Đáp án) ---
+            if (gameType === "PICTURE4_WORD4_MATCHING") {
+                baseQuestion.stemType = "TEXT";
+                baseQuestion.options = q.choices.flatMap((choiceText, i) => {
+                    const imgUrl = q.images[i];
+                    const imgId = getMediaAssetIdByUrl(imgUrl);
+                    const vocabId = getOptionIdByTerm(choiceText);
+                    const pairKey = `p${i + 1}`;
+
+                    return [
+                        { contentType: "IMAGE", contentRefId: imgId, correct: true, side: "LEFT", pairKey },
+                        { contentType: "VOCAB", contentRefId: vocabId, correct: true, side: "RIGHT", pairKey }
+                    ];
+                });
+            }
+            else if (gameType === "SENTENCE_HIDDEN_WORD") {
+                baseQuestion.stemText = q.content;
+                baseQuestion.hiddenWord = q.choices[0];
+                baseQuestion.options = [];
+            }
+            else if (gameType === "PICTURE_WORD_WRITING") {
+                const vocabId = getOptionIdByTerm(q.choices[0]);
+                if (vocabId) {
+                    baseQuestion.options = [{ contentType: "VOCAB", contentRefId: vocabId, correct: true }];
+                }
+            }
+            else {
+                // Trắc nghiệm
+                let optionType: "VOCAB" | "SENTENCE" = "VOCAB";
+                if (gameType === "PICTURE_SENTENCE_MATCHING") optionType = "SENTENCE";
+
+                const resolvedCorrectIndex = q.correctIndex !== undefined && q.correctIndex >= 0 ? q.correctIndex : 0;
+
+                baseQuestion.options = q.choices.map((choiceText, i) => ({
+                    contentType: optionType,
+                    contentRefId: getOptionIdByTerm(choiceText),
+                    correct: i === resolvedCorrectIndex
+                }));
+            }
+
+            return baseQuestion;
+        });
+    }
 
 
     // Expose handleSave to parent component
     useImperativeHandle(ref, () => ({
         handleSave,
+        getTestQuestions: () => buildTestPayload(), // 👈 New method
     }));
 
     // === LOADING / ERROR ========================================
