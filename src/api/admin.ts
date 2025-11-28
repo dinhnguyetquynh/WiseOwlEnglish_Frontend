@@ -326,3 +326,16 @@ export async function getTestsByLesson(lessonId: number): Promise<LessonDetailRe
     );
     return res.data;
 }
+export async function updateTestStatus(testId: number, active: boolean) {
+    try {
+        const res = await axiosClient.patch(
+            `api/test-admin/update-status/${testId}?active=${active}`
+        );
+
+        return res.data;
+    } catch (err) {
+        console.error("Update test status error:", err);
+        throw new Error("Không thể cập nhật trạng thái");
+    }
+}
+

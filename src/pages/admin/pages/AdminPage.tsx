@@ -23,7 +23,7 @@ import { clearProfile, clearRole } from "../../../store/storage";
 import LessionPage from "../component/LessionLayout/pages/LessionPage";
 
 type Game = { vocab: string[]; sentence: string[] };
-type Unit = { id: string; title: string; games: Game | null };
+
 
 
 const drawerWidth = 240;

@@ -1,27 +1,12 @@
 import { Box, Button, Select, Typography } from "@mui/material";
 import { useHomeContext } from "../../../../../context/AuthContext";
 import {
-
-
-    MenuItem,
-
+    MenuItem
 } from "@mui/material";
 import { KeyboardArrowDown as ArrowDownIcon } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { getTestsByGrade, type LessonTestItem } from "../../../../../api/admin";
 import LessonDetail from "../component/LessonDetail";
-
-
-interface TestItem {
-    id: string;
-    name: string;
-}
-
-interface UnitItem {
-    id: string;
-    title: string;
-    tests: TestItem[];
-}
 export default function LessionPage() {
     const { selectedClass, setSelectedClass, setSelectedLesson, selectedLesson } = useHomeContext();
     const [data, setData] = useState<LessonTestItem[]>([]);

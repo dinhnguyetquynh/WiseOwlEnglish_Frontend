@@ -13,8 +13,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useEffect, useState } from "react";
+import { updateTestStatus } from "../../../../../api/admin";
 
-import { getTestsByLesson, type LessonDetailResponse, type TestDetailItem } from "../../../../../api/admin";
+import { getTestsByLesson, type LessonDetailResponse } from "../../../../../api/admin";
 import CreateLessonWithGame from "./CreateLessonWithGame";
 
 interface LessonDetailProps {
@@ -25,6 +26,7 @@ interface LessonDetailProps {
 export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
     const [tests, setTests] = useState<LessonDetailResponse | null>(null);
     const [openCreate, setOpenCreate] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState<{ [key: number]: boolean }>({});
 
     const [loading, setLoading] = useState(false);
 
@@ -41,6 +43,33 @@ export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
             setLoading(false);
         }
     };
+    const handleToggleStatus = async (testId: number, newStatus: boolean) => {
+        // bật loading cho Switch này
+        setLoadingStatus(prev => ({ ...prev, [testId]: true }));
+
+        try {
+            await updateTestStatus(testId, newStatus);
+
+            // cập nhật UI local
+            setTests(prev =>
+                prev
+                    ? {
+                        ...prev,
+                        testList: prev.testList.map(t =>
+                            t.id === testId ? { ...t, active: newStatus } : t
+                        )
+                    }
+                    : prev
+            );
+        } catch (err) {
+            alert("Không thể cập nhật trạng thái");
+            console.error(err);
+        } finally {
+            // tắt loading
+            setLoadingStatus(prev => ({ ...prev, [testId]: false }));
+        }
+    };
+
 
     if (loading) {
         return (
@@ -150,9 +179,18 @@ export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
                     </Box>
 
                     {/* Status */}
-                    <Box flex={1}>
-                        <Switch defaultChecked={t.active} />
+                    <Box flex={1} display="flex" alignItems="center">
+                        {loadingStatus[t.id] ? (
+                            <CircularProgress size={22} />
+                        ) : (
+                            <Switch
+                                checked={t.active}
+                                onChange={(e) => handleToggleStatus(t.id, e.target.checked)}
+                                disabled={loadingStatus[t.id]}
+                            />
+                        )}
                     </Box>
+
 
                     {/* Edit */}
                     <Box flex={1}>

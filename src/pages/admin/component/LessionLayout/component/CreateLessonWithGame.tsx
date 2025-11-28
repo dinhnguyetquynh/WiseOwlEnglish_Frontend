@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import type { GameTypeEnum } from "../../../schemas/game.schema";
 import Game, { type GameHandle, type TestQuestionPayload } from "../../GameComponent/Game";
-import DeleteIcon from "@mui/icons-material/Delete";
 import axiosClient from "../../../../../api/axiosClient";
 interface Props {
     lessonId: number;
