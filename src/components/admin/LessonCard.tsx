@@ -1,4 +1,3 @@
-import React from "react";
 import type { Lesson } from "../../type/lesson";
 import "../../styles/admin.css";
 
