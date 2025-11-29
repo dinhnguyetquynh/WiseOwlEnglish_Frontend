@@ -82,6 +82,7 @@ export default function CreateGameScreen({
                 gameType={gameType}
                 lessonId={lessonId}
                 gameId={gameId}
+                type="game"
                 onValidate={setIsGameValid}
                 onSaved={handleGameSaved}
             />

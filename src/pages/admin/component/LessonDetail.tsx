@@ -37,7 +37,7 @@ export default function LessonDetail({
     onUpdateGame,
 }: LessonDetailProps) {
     console.log("LessonDetail props:", { lessonId, onCreateGame, onUpdateGame });
-    const { editingGameInfo, setEditingGameInfo } = useHomeContext()
+    const { setEditingGameInfo } = useHomeContext()
     const { selectedClass } = useHomeContext(); // ✅ lấy lớp học hiện tại
     const [lesson, setLesson] = useState<LessonDetail | null>(null);
     const [loading, setLoading] = useState(true);

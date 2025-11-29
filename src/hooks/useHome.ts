@@ -1,13 +1,14 @@
 import { useState } from "react";
 import type { Lessons } from "../pages/admin/schemas/game.schema";
-import type { LessonRes } from "../api/admin";
+import type { LessonRes, LessonTestItem } from "../api/admin";
 
 // --- Kiểu role ---
 export type RoleAccount = "ADMIN" | "LEARNER";
 export const useHome = () => {
     const [lessons, setLessons] = useState<Lessons>([]);
     const [roleAccount, setRoleAccountState] = useState<RoleAccount | null>(null);
-    const [selectedClass, setSelectedClass] = useState("1");
+    const [selectedLesson, setSelectedLesson] = useState<LessonTestItem | null>(null);
+    const [selectedClass, setSelectedClass] = useState(1);
     const [lessonData, setLessonData] = useState<LessonRes[]>([]);
     const [orderIndexList, setOrderIndexList] = useState<number[]>([]);
     const [editingGameInfo, setEditingGameInfo] = useState<{
@@ -24,6 +25,8 @@ export const useHome = () => {
         selectedClass,
         setSelectedClass,
         lessonData,
+        selectedLesson,
+        setSelectedLesson,
         setLessonData, orderIndexList, setOrderIndexList,
         editingGameInfo, setEditingGameInfo
     };
