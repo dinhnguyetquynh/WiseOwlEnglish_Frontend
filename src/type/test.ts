@@ -23,6 +23,7 @@ export type TestQuestionRes = {
 export type TestOptionRes = {
   id: number;
   optionText?: string;
+  imgUrl?: string;
   isCorrect: boolean; // đã @JsonProperty("isCorrect")
   position: number;
   side?: string;
