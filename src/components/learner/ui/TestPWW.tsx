@@ -35,7 +35,7 @@ export default function TestPWW({
     <input
     ref={inputRef}
      type="text"
- className="pg-text-input" // Cần thêm CSS cho class này
+     className="pg-text-input" // Cần thêm CSS cho class này
      placeholder="Nhập đáp án..."
      value={currentValue}
      onChange={(e) => onWrite(e.target.value)}
