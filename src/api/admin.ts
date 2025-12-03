@@ -227,7 +227,7 @@ export const uploadVocabImage = async (file: File): Promise<string> => {
     return res.data.url; // server trả về URL ảnh
 };
 export const createVocab = async (payload: any) => {
-    const res = await axiosClient.post("/api/vocab-admin/create", payload);
+    const res = await axiosClient.post("/api/admin/vocab/create", payload);
     return res.data.url;
 };
 
@@ -249,7 +249,7 @@ export async function createSentences(
 ): Promise<SentenceAdminRes> {
 
     const res = await axiosClient.post<SentenceAdminRes>(
-        "/api/sentences/create",
+        "/api/admin/sentences/create",
         payload
     );
 
@@ -352,4 +352,16 @@ export const deleteLesson = async (id: number): Promise<string> => {
     // Gọi API DELETE: /api/lessons/delete/{id}
     const response = await axiosClient.delete(`/api/lesson-admin/delete/${id}`);
     return response.data; // Trả về thông báo String từ Backend
+};
+// API Xoá Vocabulary
+export const deleteVocab = async (id: number): Promise<string> => {
+    // Backend trả về String message (ResponseEntity<String>)
+    const response = await axiosClient.delete(`/api/admin/vocab/delete/${id}`); 
+    return response.data; 
+};
+
+// API Xoá Sentence
+export const deleteSentence = async (id: number): Promise<string> => {
+    const response = await axiosClient.delete(`/api/admin/sentences/delete/${id}`);
+    return response.data;
 };
