@@ -30,7 +30,8 @@ export default function TestPSM({
 
       {/* Dùng grid 1 cột cho câu dài dễ đọc hơn */}
       <div className="pg-options" style={{display: 'grid', gap: '12px', marginTop: '20px'}}>
-        {list.map((opt) => (
+        {/* {list.map((opt) => (
+          
           <button
             key={opt.id}
             className={`pg-option ${selectedId === opt.id ? "pg-option--active" : ""}`}
@@ -40,7 +41,29 @@ export default function TestPSM({
           >
             {opt.optionText}
           </button>
-        ))}
+        ))} */}
+        {list.map((opt) => {
+          const isSelected = selectedId === opt.id;
+          
+          // 👇 LOGIC REVIEW
+          let reviewClass = "";
+          if (disabled) {
+            if (opt.isCorrect) reviewClass = "pg-option--correct";
+            else if (isSelected && !opt.isCorrect) reviewClass = "pg-option--wrong";
+          }
+
+          return (
+            <button
+              key={opt.id}
+              className={`pg-option ${isSelected ? "pg-option--active" : ""} ${reviewClass}`}
+              onClick={() => onPick(opt.id)}
+              disabled={disabled}
+              style={{height: 'auto', minHeight: '56px', padding: '12px'}}
+            >
+              {opt.optionText}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

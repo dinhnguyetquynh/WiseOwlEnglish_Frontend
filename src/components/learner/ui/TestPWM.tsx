@@ -28,7 +28,9 @@ export default function TestPWM({
       </div>
 
       <div className="pg-options pg-options--grid">
-        {list.map((opt) => (
+        {/* {list.map((opt) => (
+          
+
           <button
             key={opt.id}
             className={`pg-option ${selectedId === opt.id ? "pg-option--active" : ""}`}
@@ -37,7 +39,33 @@ export default function TestPWM({
           >
             {opt.optionText}
           </button>
-        ))}
+        ))} */}
+        {list.map((opt) => {
+          const isSelected = selectedId === opt.id;
+          
+          // --- LOGIC REVIEW ---
+          let reviewClass = "";
+          if (disabled) {
+            if (opt.isCorrect) {
+              reviewClass = "pg-option--correct"; // Luôn xanh nếu là đáp án đúng
+            } else if (isSelected && !opt.isCorrect) {
+              reviewClass = "pg-option--wrong";   // Đỏ nếu chọn sai
+            }
+          }
+
+          return (
+            <button
+              key={opt.id}
+              // Kết hợp class cũ và class review
+              className={`pg-option ${isSelected ? "pg-option--active" : ""} ${reviewClass}`}
+              onClick={() => onPick(opt.id)}
+              disabled={disabled}
+            >
+              {opt.optionText}
+            </button>
+          )
+        })}
+
       </div>
     </div>
   );

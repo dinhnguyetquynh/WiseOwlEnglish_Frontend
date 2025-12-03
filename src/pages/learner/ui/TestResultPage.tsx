@@ -8,7 +8,9 @@ export default function TestResultPage() {
   const result: SubmitTestRes = location.state;
 
   const goHome = () => navigate("/learn"); // hoặc quay về trang menu bài học
-
+  const handleReview = () => {
+    navigate("/learn/test-review", { state: { result } });
+  };
   return (
     <div className="result-wrap">
       <div className="header-link">
@@ -47,6 +49,9 @@ export default function TestResultPage() {
       </div>
 
       <div className="result-actions">
+        <button onClick={handleReview} className="pg-btn pg-btn--ghost" style={{ marginRight: 10 }}>
+          XEM LẠI BÀI LÀM
+        </button>
         <button onClick={goHome} className="pg-btn pg-btn--primary">
           VỀ TRANG CHÍNH
         </button>

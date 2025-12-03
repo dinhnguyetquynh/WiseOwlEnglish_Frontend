@@ -36,3 +36,4 @@ export async function getLessonsByGrade(
     throw new Error(message);
   }
 }
+

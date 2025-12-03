@@ -35,6 +35,7 @@ import PronunciationPracticePage from './pages/learner/ui/PronunciationPracticeP
 import RankPage from './pages/learner/ui/RankPage';
 import HeaderLayout from './layouts/HeaderLayout';
 import ShopPage from './pages/learner/ui/ShopPage';
+import TestReviewPage from './pages/learner/ui/TestReviewPage';
 
 
 
@@ -75,7 +76,7 @@ function App() {
           <Route path="/learn/units/:unitId/sentence/learn" element={<SentenceLearnPage />} />
           <Route path="/learn/units/:unitId/vocab/review" element={<GameSelectPage />} />
           <Route path="/learn/units/:unitId/sentence/review" element={<GameSelectedPageSentence />} />
-           <Route path="/learn/units/:unitId/vocab/pronounce" element={<PronunciationPracticePage />} />
+          <Route path="/learn/units/:unitId/vocab/pronounce" element={<PronunciationPracticePage />} />
 
           {/*Game tu vung */}
           <Route path="/games/picture-guessing/:unitId" element={<PictureGuessingGamePage />} />
@@ -91,6 +92,7 @@ function App() {
           <Route path="/learn/units/:lessonId/testlist" element={<LessonTestsPage />} />
           <Route path="/learn/units/:testId/test" element={<TestPage />} />
           <Route path="/learn/test-result" element={<TestResultPage />} />
+          <Route path="/learn/test-review" element={<TestReviewPage />} />
           </Route>
 
         </Route>

@@ -56,6 +56,9 @@ export type QuestionResultRes = {
   selectedOptionId?: number | null;
   selectedOptionIds?: number[] | null;
   correctOptionIds: number[];
+  textInput?: string | null;
+  userSequence?: number[] | null;
+  userPairs?: { leftOptionId: number; rightOptionId: number }[] | null;
 };
 
 export type SubmitTestRes = {

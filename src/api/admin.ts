@@ -339,3 +339,17 @@ export async function updateTestStatus(testId: number, active: boolean) {
     }
 }
 
+export const updateLessonStatus = async (id: number, isActive: boolean): Promise<CreateLessonRes> => {
+    // Gọi API PATCH: /api/lessons/{id}/active?isActive=...
+    const response = await axiosClient.patch(`/api/lesson-admin/${id}/active`, null, {
+        params: {
+            isActive: isActive
+        }
+    });
+    return response.data; // Backend trả về đối tượng Lesson (CreateLessonRes)
+};
+export const deleteLesson = async (id: number): Promise<string> => {
+    // Gọi API DELETE: /api/lessons/delete/{id}
+    const response = await axiosClient.delete(`/api/lesson-admin/delete/${id}`);
+    return response.data; // Trả về thông báo String từ Backend
+};

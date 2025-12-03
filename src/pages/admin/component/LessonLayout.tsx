@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Box, Button, Card, Grid, Select, Typography, MenuItem } from "@mui/material";
+import { Box, Button, Card, Grid, Select, Typography, MenuItem, Switch, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
 import { KeyboardArrowDown as ArrowDownIcon } from "@mui/icons-material";
 import { useHomeContext } from "../../../context/AuthContext";
-import { getListLesson, type LessonRes } from "../../../api/admin";
+import { deleteLesson, getListLesson, updateLessonStatus, type LessonRes } from "../../../api/admin";
 
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CreateNewLesson from "./LessionComponent/CreateNewLession";
@@ -21,6 +21,10 @@ export default function LessonLayout() {
     const [selectedLesson, setSelectedLesson] = useState<LessonRes | null>(null);
 
     const [isCreating, setIsCreating] = useState(false);
+
+    // Trong LessonLayout function
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [deletingLessonId, setDeletingLessonId] = useState<number | null>(null);
 
 
     const fetchData = async () => {
@@ -44,6 +48,77 @@ export default function LessonLayout() {
     useEffect(() => {
         fetchData();
     }, [selectedClass]);
+
+    // --- HÀM XỬ LÝ UPDATE ACTIVE ---
+    const handleToggleActive = async (lessonId: number, currentStatus: boolean) => {
+        try {
+            // 1. Tính trạng thái mới (ngược lại với hiện tại)
+            const newStatus = !currentStatus;
+
+            // 2. Gọi API cập nhật
+            const updatedLesson = await updateLessonStatus(lessonId, newStatus);
+            
+            // 3. Cập nhật State Local ngay lập tức với dữ liệu mới từ Backend trả về
+            // (Bao gồm cả active mới và updatedAt mới)
+            const normalized = {
+            ...updatedLesson,
+            // convert API string timestamp to Date to match local state type
+            updatedAt: new Date(updatedLesson.updatedAt),
+            } as {
+            id: number;
+            unitNumber: string;
+            unitName: string;
+            orderIndex: number;
+            active: boolean;
+            urlMascot: string | null;
+            updatedAt: Date;
+            };
+
+            setLessonData((prevData) => 
+                prevData.map((item) => 
+                    item.id === lessonId ?  normalized : item
+                )
+            );
+            
+            console.log("Cập nhật thành công:", updatedLesson);
+        } catch (error) {
+            console.error("Lỗi khi cập nhật trạng thái:", error);
+            // Có thể thêm thông báo lỗi (Toast/Snackbar) ở đây
+        }
+    };
+    // --- HÀM XỬ LÝ XOÁ MỚI ---
+    // 1. Hàm được gọi khi bấm nút "Xoá" trên Card
+    const handleClickDelete = (id: number) => {
+        setDeletingLessonId(id); // Lưu lại ID cần xoá
+        setOpenDeleteDialog(true); // Mở hộp thoại
+    };
+    // 2. Hàm được gọi khi bấm nút "Xoá" trong Hộp thoại
+        const handleConfirmDelete = async () => {
+            if (deletingLessonId === null) return;
+
+            try {
+                // Gọi API xoá
+                await deleteLesson(deletingLessonId);
+
+                // Cập nhật UI (Lọc bỏ item đã xoá)
+                setLessonData((prevData) => 
+                    prevData.filter((item) => item.id !== deletingLessonId)
+                );
+
+                // Đóng hộp thoại
+                setOpenDeleteDialog(false);
+                setDeletingLessonId(null);
+                
+            } catch (error) {
+                console.error("Lỗi xoá:", error);
+                // Có thể hiện thông báo lỗi ở đây
+            }
+        };
+    // 3. Hàm đóng hộp thoại (khi bấm Hủy hoặc bấm ra ngoài)
+        const handleCloseDialog = () => {
+            setOpenDeleteDialog(false);
+            setDeletingLessonId(null);
+        };
 
     // UI tạo bài học
     if (isCreating) {
@@ -158,12 +233,24 @@ export default function LessonLayout() {
                                     <Typography fontWeight={600} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                         {item.unitNumber}: {item.unitName}
 
-                                        {item.active && (
+                                        {/* {item.active && (
                                             <CheckCircleIcon
                                                 sx={{ fontSize: 20, color: "green" }}
                                             />
-                                        )}
+                                        )} */}
                                     </Typography>
+                                    {/* --- PHẦN SWITCH MỚI --- */}
+                                    <Box 
+                                        onClick={(e) => e.stopPropagation()} // Ngăn chặn sự kiện click lan ra Card cha
+                                    >
+                                        <Switch
+                                            checked={item.active}
+                                            onChange={() => handleToggleActive(item.id, item.active)}
+                                            color="success" // Màu xanh khi bật
+                                            size="small"
+                                        />
+                                    </Box>
+                                    {/* ----------------------- */}
                                 </Box>
                             </Box>
 
@@ -186,10 +273,24 @@ export default function LessonLayout() {
 
                             <Box sx={{ width: "20%" }}>
                                 <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                                    <Button fullWidth variant="contained" sx={{ bgcolor: "#a5d6a7" }}>
+                                    <Button 
+                                        fullWidth variant="contained" 
+                                        sx={{ bgcolor: "#a5d6a7" }}
+                                        onClick={(e) => {
+                                        e.stopPropagation(); // Ngăn click vào card
+                                        // Logic xoá
+                                        }}
+                                        >
                                         Sửa
                                     </Button>
-                                    <Button fullWidth variant="contained" sx={{ bgcolor: "#ef9a9a" }}>
+                                    <Button 
+                                        fullWidth variant="contained" 
+                                        sx={{ bgcolor: "#ef9a9a" }}
+                                        onClick={(e) => {
+                                        e.stopPropagation(); // Ngăn click vào card
+                                        handleClickDelete(item.id); // Chỉ mở Dialog, chưa xoá ngay
+                                        }}
+                                        >
                                         Xoá
                                     </Button>
                                 </Box>
@@ -198,6 +299,31 @@ export default function LessonLayout() {
                     </Card>
                 ))
             }
+            {/* --- PHẦN DIALOG XÁC NHẬN --- */}
+            <Dialog
+                open={openDeleteDialog}
+                onClose={handleCloseDialog}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Xác nhận xoá bài học?"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có chắc chắn muốn xoá bài học này không? Hành động này sẽ chuyển bài học vào thùng rác (hoặc xoá vĩnh viễn tuỳ cài đặt).
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="primary">
+                        Hủy bỏ
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+                        Đồng ý Xoá
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            {/* ---------------------------- */}
         </Box>
     );
 }

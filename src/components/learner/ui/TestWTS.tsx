@@ -59,6 +59,31 @@ export default function TestWTS({
     onUpdate(sequence.filter((sid) => sid !== id)); 
   };
 
+  // Đáp án đúng (Full câu) để hiển thị khi sai
+  const correctSentence = useMemo(() => {
+      return allOptions
+        .slice()
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0)) // Sắp theo thứ tự đúng
+        .map(o => o.optionText)
+        .join(" ");
+  }, [allOptions]);
+
+  // Kiểm tra đúng sai (đơn giản: so sánh chuỗi id)
+  const isCorrect = useMemo(() => {
+      if (!disabled) return null;
+      // Logic so sánh sequence user vs sequence đúng
+      const correctSeq = allOptions
+          .slice()
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+          .map(o => o.id);
+      return JSON.stringify(sequence) === JSON.stringify(correctSeq);
+  }, [sequence, allOptions, disabled]);
+  // Style vùng trả lời khi Review
+  const answerZoneStyle = useMemo(() => {
+    if (!disabled) return { border: "2px dashed #b2d9ff", background: "#f8fbff" };
+    if (isCorrect) return { border: "2px solid #22c55e", background: "#ecfdf5" }; // Đúng: Xanh
+    return { border: "2px solid #ef4444", background: "#fef2f2" }; // Sai: Đỏ
+  }, [disabled, isCorrect]);
   return (
     <div>
       {/* --- PHẦN ĐỀ BÀI --- */}
@@ -81,16 +106,18 @@ export default function TestWTS({
       <div 
         style={{
             minHeight: 80, 
-            border: '2px dashed #b2d9ff', 
+            
             borderRadius: 14, 
-            background: '#f8fbff',
+            
             margin: '20px 0', 
             padding: 16, 
             display: 'flex', 
             flexWrap: 'wrap', 
             gap: 10,
             justifyContent: 'center',
-            alignItems: 'center'
+            alignItems: 'center',
+            transition: "all 0.3s",
+          ...answerZoneStyle, // Áp dụng style động
         }}
       >
         {selectedOptions.length === 0 && (
@@ -102,15 +129,14 @@ export default function TestWTS({
             key={`sel-${opt!.id}`}
             // Tái sử dụng class CSS của game nếu có, hoặc style trực tiếp
             style={{
-                background: '#e9f5ff', 
-                border: '2px solid #74c0fc', 
-                color: '#007bff', 
-                padding: '8px 16px', 
-                borderRadius: 12, 
-                cursor: 'pointer',
-                fontSize: '18px',
-                fontWeight: 600,
-                boxShadow: '0 2px 0 #74c0fc'
+              background: disabled ? "#fff" : "#e9f5ff",
+              border: `2px solid ${disabled ? "#ccc" : "#74c0fc"}`,
+              color: disabled ? "#333" : "#007bff",
+              padding: "8px 16px",
+              borderRadius: 12,
+              cursor: disabled ? "default" : "pointer",
+              fontSize: "18px",
+              fontWeight: 600,
             }}
             onClick={() => handleDeselect(opt!.id)}
             disabled={disabled}
@@ -119,6 +145,15 @@ export default function TestWTS({
           </button>
         ))}
       </div>
+
+      {disabled && !isCorrect && (
+        <div style={{ marginBottom: 20, textAlign: "center", animation: "fadeIn 0.3s" }}>
+          <div style={{ fontSize: 14, color: "#6b7280" }}>Thứ tự đúng:</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#22c55e", marginTop: 4 }}>
+            {correctSentence}
+          </div>
+        </div>
+      )}
 
       {/* --- NGÂN HÀNG TỪ (Hiển thị các từ chưa chọn - Đã xáo trộn) --- */}
       <div style={{display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center'}}>

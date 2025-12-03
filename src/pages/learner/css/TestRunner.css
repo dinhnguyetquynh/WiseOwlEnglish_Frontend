@@ -118,3 +118,19 @@
 .pg-text-input:disabled {
  background-color: #f1f3f5;
 }
+/* src/pages/learner/css/PictureGuessingGame.css (hoặc file tương ứng) */
+
+/* Màu xanh cho đáp án đúng */
+.pg-option--correct {
+  border-color: #22c55e !important;
+  background-color: #f0fff4 !important;
+  color: #166534 !important;
+}
+
+/* Màu đỏ cho đáp án chọn sai */
+.pg-option--wrong {
+  border-color: #ef4444 !important;
+  background-color: #fff2f2 !important;
+  color: #991b1b !important;
+  opacity: 0.8;
+}
