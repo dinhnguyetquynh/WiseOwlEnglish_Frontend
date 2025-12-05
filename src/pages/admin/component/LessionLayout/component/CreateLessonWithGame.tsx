@@ -203,7 +203,7 @@ export default function CreateLessonWithGame({
                     sx={{ bgcolor: "#ddd", color: "#000", width: 240 }}
                     onClick={handleSaveLesson}
                 >
-                    LƯU BÀI HỌC
+                    LƯU BÀI KIỂM TRA
                 </Button>
             </Box>
         </Box>

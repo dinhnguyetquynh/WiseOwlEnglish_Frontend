@@ -122,7 +122,7 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                     />
                 </Box>
 
-                <Box sx={{ width: "48%" }}>
+                {/* <Box sx={{ width: "48%" }}>
                     <Typography sx={{ mb: 1 }}>Thứ tự bài học</Typography>
                     <Select
                         value={orderIndex}
@@ -138,7 +138,7 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
 
                     </Select>
 
-                </Box>
+                </Box> */}
 
                 <Box sx={{ width: "48%" }}>
                     <Typography sx={{ mb: 1 }}>Chọn ảnh minh hoạ</Typography>

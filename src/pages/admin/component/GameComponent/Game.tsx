@@ -22,6 +22,7 @@ export type OptionReq = {
     contentRefId: number;
     correct: boolean;
     position: number;
+    pairKey?: string; // 👈 THÊM DÒNG NÀY
 };
 
 export type QuestionPayload = {
@@ -432,10 +433,18 @@ const Game = forwardRef<GameHandle, GameProps>(({
             } else if (isVoiceGame) {
                 promptType = "AUDIO";
                 promptRefId = getMediaAssetIdByUrl(q.sound) || 0;
-            } else {
-                promptType = "TEXT";
-                promptRefId = 0;
+            // } else {
+            //     promptType = "TEXT";
+            //     promptRefId = 0;
+            // }
             }
+            // 👇 --- THÊM ĐOẠN NÀY --- 👇
+            else  {
+                promptType = "SENTENCE";
+                // Với game này, người dùng chọn câu từ dropdown (lưu trong choices[0])
+                // Ta cần lấy ID của câu đó để gửi về BE làm promptRefId
+                promptRefId = getOptionIdByTerm(q.choices[0]) || 0;
+            } 
 
             // 2) Build optionReqs
             let optionReqs: OptionReq[] = [];
@@ -445,6 +454,9 @@ const Game = forwardRef<GameHandle, GameProps>(({
                     const vocabId = getOptionIdByTerm(choice) || 0;
                     const imageId = getMediaAssetIdByUrl(q.images[i]) || 0;
 
+                    // 👇 THÊM: Tạo key ghép cặp dựa trên index (vd: "p0", "p1"...)
+                    const pairKeyVal = `p${i}`;
+
                     return [
                         {
                             id: q.optionReqIds?.[i * 2],  // giữ id cho UPDATE
@@ -452,6 +464,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                             contentRefId: imageId,
                             correct: true,
                             position: i * 2 + 1,
+                            pairKey: pairKeyVal, // 👈 Gán key vào
                         },
                         {
                             id: q.optionReqIds?.[i * 2 + 1],
@@ -459,6 +472,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                             contentRefId: vocabId,
                             correct: true,
                             position: i * 2 + 2,
+                            pairKey: pairKeyVal, // 👈 Gán key vào
                         }
                     ];
                 });
@@ -473,23 +487,28 @@ const Game = forwardRef<GameHandle, GameProps>(({
                         : q.choices.length > 0
                             ? 0
                             : -1;
+                // 👇 THÊM ĐOẠN NÀY: Xác định contentType dựa vào loại game
+                const isSentenceGame = gameType === "PICTURE_SENTENCE_MATCHING";
 
                 optionReqs = q.choices.map((choice, i) => ({
                     id: q.optionReqIds?.[i],
-                    contentType: "VOCAB",
+                    contentType: isSentenceGame ? "SENTENCE" : "VOCAB",
                     contentRefId: getOptionIdByTerm(choice) || 0,
                     correct: resolvedCorrectIndex >= 0 ? i === resolvedCorrectIndex : false,
                     position: i + 1,
                 }));
             }
-
+            let finalQuestionText = q.content || "";
+            if (gameType === "WORD_TO_SENTENCE") {
+                finalQuestionText = q.choices[0] || "";
+            }
 
             return {
                 id: q.id,                                 // giữ id cho UPDATE
                 position,
                 promptType,
                 promptRefId,
-                questionText: q.content || "",
+                questionText: finalQuestionText,
                 hiddenWord: isSentenceHiddenGame ? (q.hiddenWord || q.choices[0] || "") : undefined,
                 rewardCore,
                 optionReqs,
@@ -1060,6 +1079,19 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
                             <Box sx={{ mt: 3 }}>
                                 <Box sx={{ mb: 3 }}>
+                                    <TextField
+                                        sx={{ width: "20%" }}
+                                        label="Điểm tối đa"
+                                        value={q.maxScore}
+                                        onChange={(e) => {
+                                            const updated = [...questions];
+                                            updated[index].maxScore = e.target.value;
+                                            setQuestions(updated);
+                                        }}
+                                    />
+                                </Box>
+                                <Box sx={{ mb: 3 }}>
+
                                     <Typography fontWeight="bold" sx={{ mb: 2 }}>
                                         HÌNH ẢNH CHO CÂU HỎI:
                                     </Typography>

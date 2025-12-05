@@ -365,3 +365,9 @@ export const deleteSentence = async (id: number): Promise<string> => {
     const response = await axiosClient.delete(`/api/admin/sentences/delete/${id}`);
     return response.data;
 };
+
+export const deleteGame = async (gameId: number) => {
+    // API endpoint khớp với backend controller: /api/games/delete/{id}
+    const response = await axiosClient.delete(`/api/games/delete/${gameId}`);
+    return response.data;
+};

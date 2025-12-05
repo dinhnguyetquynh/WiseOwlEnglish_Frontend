@@ -140,8 +140,11 @@ export default function PictureMatchWordGamePage() {
       return;
     }
 
-    // 💥 LOGIC CHẤM TẠI FE ĐỂ LẤY FEEDBACK 💥
-    const isRight = leftOpt.pairKey === rightOpt.pairKey;
+    // 💥 SỬA LOGIC CHECK: Đảm bảo pairKey tồn tại (khác null/undefined) rồi mới so sánh
+    const isRight = 
+        leftOpt.pairKey && 
+        rightOpt.pairKey && 
+        (leftOpt.pairKey === rightOpt.pairKey);
     
     if (isRight) {
       // 1. Nối đúng -> Thêm vào 'paired'

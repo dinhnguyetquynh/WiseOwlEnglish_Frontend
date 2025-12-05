@@ -183,21 +183,21 @@ export default function LessionPage() {
                             {/* Button */}
                             <Button
                                 variant="outlined"
-                                disabled={unit.tests.length === 0}     // 👈 DISABLE KHI KHÔNG CÓ BÀI KIỂM TRA
+                                // disabled={unit.tests.length === 0}     
                                 sx={{
                                     borderRadius: 2,
                                     textTransform: "none",
                                     borderColor: "#ccc",
-                                    color: unit.tests.length === 0 ? "#999" : "#555",  // màu mờ hơn khi disable
+                                    color: "#555",  // màu mờ hơn khi disable
                                     fontWeight: 500,
-                                    backgroundColor: unit.tests.length === 0 ? "#f5f5f5" : "#eee",
+                                    backgroundColor: "#eee",
                                     "&:hover": {
-                                        backgroundColor: unit.tests.length === 0 ? "#f5f5f5" : "#e0e0e0",
-                                        borderColor: unit.tests.length === 0 ? "#ccc" : "#bbb",
+                                        backgroundColor: "#e0e0e0",
+                                        borderColor: "#bbb",
                                     },
                                 }}
                                 onClick={() => {
-                                    if (unit.tests.length === 0) return;  // tránh click khi disable
+                                    // if (unit.tests.length === 0) return;  // tránh click khi disable
                                     setSelectedLesson(unit);
                                 }}
                             >
