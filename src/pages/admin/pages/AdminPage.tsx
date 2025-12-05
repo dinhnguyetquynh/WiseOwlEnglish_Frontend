@@ -21,6 +21,9 @@ import { useNavigate } from "react-router-dom";
 import { tokenService } from "../../../api/tokenService";
 import { clearProfile, clearRole } from "../../../store/storage";
 import LessionPage from "../component/LessionLayout/pages/LessionPage";
+import UserStatsPage from "../component/StatsComponent/UserStatsPage";
+import LearningReportPage from "../component/StatsComponent/LearningReportPage";
+
 
 type Game = { vocab: string[]; sentence: string[] };
 
@@ -203,8 +206,8 @@ function MainContentMUI({ activeItem }: { activeItem: string }) {
             {activeItem === "lesson" && <LessonLayout />}
             {activeItem === "game" && <GameLayout />}
             {activeItem === "test" && <LessionPage />}
-            {activeItem === "stats" && <Typography>Thống kê người dùng</Typography>}
-            {activeItem === "report" && <Typography>Báo cáo học tập</Typography>}
+            {activeItem === "stats" && "stats" && <UserStatsPage />}
+            {activeItem === "report" && "stats" && <LearningReportPage />}
             {activeItem === "profile" && <Typography>Hồ sơ cá nhân</Typography>}
             {/* {activeItem === "logout" && <Typography>Đăng xuất hệ thống</Typography>} */}
         </Box>
