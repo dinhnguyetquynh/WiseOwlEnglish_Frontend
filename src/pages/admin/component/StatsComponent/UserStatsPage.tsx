@@ -1,26 +1,30 @@
 import { useEffect, useState } from "react";
 import {
-  Box, Grid, Paper, Typography, CircularProgress, Card, CardContent
+  Box,  Grid, Paper, Typography, CircularProgress, Card, CardContent, Select, MenuItem
 } from "@mui/material";
-import { People, School, TrendingUp } from "@mui/icons-material";
+import { People, School, BarChart as BarChartIcon } from "@mui/icons-material";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 import { getLearnerStats, type LearnerStatsRes } from "../../../../api/stats";
 
 export default function UserStatsPage() {
   const [data, setData] = useState<LearnerStatsRes | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // State chọn năm (mặc định 2025)
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const years = [2023, 2024, 2025, 2026]; // Danh sách năm tùy chỉnh
 
   useEffect(() => {
-    getLearnerStats()
+    setLoading(true);
+    getLearnerStats(selectedYear)
       .then(setData)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, []);
+  }, [selectedYear]); // Gọi lại khi đổi năm
 
-  if (loading) return <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />;
-  if (!data) return <Typography color="error">Không tải được dữ liệu</Typography>;
+  if (!data) return <CircularProgress sx={{ display: 'block', margin: '20px auto' }} />;
 
   return (
     <Box>
@@ -28,89 +32,104 @@ export default function UserStatsPage() {
         THỐNG KÊ NGƯỜI DÙNG
       </Typography>
 
-      {/* 1. Card Tổng quan */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ bgcolor: "#e3f2fd", borderRadius: 3, boxShadow: 2 }}>
+      <Grid container spacing={3}>
+        
+        {/* --- HÀNG 1: CÁC THẺ TỔNG QUAN --- */}
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Card sx={{ bgcolor: "#e3f2fd", borderRadius: 3, height: '100%' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ p: 1.5, bgcolor: '#fff', borderRadius: '50%', color: '#1976d2' }}><School /></Box>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">Tổng Hồ sơ học tập</Typography>
-                <Typography variant="h3" fontWeight={800} color="#1565c0">{data.totalLearners}</Typography>
+                <Typography variant="h4" fontWeight={800} color="#1565c0">{data.totalLearners}</Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Card sx={{ bgcolor: "#e8f5e9", borderRadius: 3, boxShadow: 2 }}>
+
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Card sx={{ bgcolor: "#e8f5e9", borderRadius: 3, height: '100%' }}>
             <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ p: 1.5, bgcolor: '#fff', borderRadius: '50%', color: '#2e7d32' }}><People /></Box>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">Tổng Tài khoản phụ huynh</Typography>
-                <Typography variant="h3" fontWeight={800} color="#2e7d32">{data.totalUserAccounts}</Typography>
+                <Typography variant="h4" fontWeight={800} color="#2e7d32">{data.totalUserAccounts}</Typography>
               </Box>
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
 
-      {/* 2. Phân bổ học sinh (List) & Biểu đồ tăng trưởng */}
-      <Grid container spacing={3}>
-        {/* List Phân bổ */}
+        {/* --- HÀNG 1 (BÊN PHẢI): LIST PHÂN BỔ LỚP --- */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Paper sx={{ p: 2, borderRadius: 3, height: '100%', maxHeight: 300, overflow: 'auto' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>
                Phân bổ theo Lớp
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {data.gradeDistribution.map((item, index) => (
                 <Box 
                   key={index} 
                   sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center',
-                    p: 2, 
-                    bgcolor: '#f5f5f5', 
-                    borderRadius: 2,
-                    borderLeft: `6px solid ${['#42a5f5', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc'][index % 5]}`
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    p: 1.5, bgcolor: '#f9fafb', borderRadius: 2,
+                    borderLeft: `4px solid ${['#42a5f5', '#66bb6a', '#ffa726', '#ef5350', '#ab47bc'][index % 5]}`
                   }}
                 >
-                  <Typography fontWeight={600} color="text.secondary">{item.gradeName}</Typography>
-                  <Typography fontWeight={800} fontSize={18}>{item.count} học sinh</Typography>
+                  <Typography variant="body2" fontWeight={600}>{item.gradeName}</Typography>
+                  <Typography variant="body2" fontWeight={700}>{item.count}</Typography>
                 </Box>
               ))}
             </Box>
           </Paper>
         </Grid>
 
-        {/* Chart Tăng trưởng */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: 400 }}>
-            <Typography variant="h6" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TrendingUp /> Người học mới theo tháng
-            </Typography>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.monthlyGrowth}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="timeLabel" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="count" 
-                  name="Học viên mới" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} 
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        {/* --- HÀNG 2: BIỂU ĐỒ CỘT (FULL WIDTH) --- */}
+        <Grid size={{ xs: 12 }}>
+          <Paper sx={{ p: 3, borderRadius: 3 }}>
+            {/* Header biểu đồ + Dropdown Năm */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <BarChartIcon /> Người học mới năm {selectedYear}
+              </Typography>
+              
+              <Select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                size="small"
+                sx={{ minWidth: 100, bgcolor: '#f5f5f5', fontWeight: 600 }}
+              >
+                {years.map(y => <MenuItem key={y} value={y}>Năm {y}</MenuItem>)}
+              </Select>
+            </Box>
+
+            {/* Chart */}
+            <div style={{ width: '100%', height: 350 }}>
+              {loading ? <CircularProgress sx={{ display: 'block', margin: 'auto' }} /> : (
+                <ResponsiveContainer>
+                  <BarChart data={data.monthlyGrowth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="timeLabel" axisLine={false} tickLine={false} />
+                    <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip 
+                      cursor={{fill: '#f0f9ff'}}
+                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                    />
+                    <Bar 
+                      dataKey="count" 
+                      name="Học viên mới" 
+                      fill="#3b82f6" 
+                      radius={[4, 4, 0, 0]} 
+                      barSize={40}
+                      // Animation
+                      animationDuration={1000}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </Paper>
         </Grid>
+
       </Grid>
     </Box>
   );

@@ -31,8 +31,10 @@ export interface GradeReportRes {
   lessons: LessonStatsRes[];
 }
 
-export async function getLearnerStats(): Promise<LearnerStatsRes> {
-  const res = await axiosClient.get("/api/admin/stats/learners");
+export async function getLearnerStats(year: number): Promise<LearnerStatsRes> {
+  const res = await axiosClient.get("/api/admin/stats/learners", {
+    params: { year }
+  });
   return res.data;
 }
 
