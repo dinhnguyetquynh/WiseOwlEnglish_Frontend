@@ -8,6 +8,7 @@ import {
     Select,
     MenuItem,
     CircularProgress,
+    FormHelperText,
 } from "@mui/material";
 import { KeyboardArrowDown as ArrowDownIcon } from "@mui/icons-material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -32,15 +33,66 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
     const [previewUrl, setPreviewUrl] = useState<string>("");
     const [loading, setLoading] = useState(false);
 
+    // 1. State lưu lỗi
+    const [errors, setErrors] = useState<{
+        unitNumber?: string;
+        unitName?: string;
+        mascot?: string;
+    }>({});
+  
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         setMascotFile(file);
         setPreviewUrl(URL.createObjectURL(file));
+
+        if (errors.mascot) setErrors({ ...errors, mascot: undefined });
     };
+    // 2. Hàm kiểm tra dữ liệu
+    const validateForm = () => {
+        const newErrors: { unitNumber?: string; unitName?: string; mascot?: string } = {};
+        let isValid = true;
+
+        // Regex kiểm tra ký tự đầu tiên là số
+        const startsWithNumberRegex = /^\d/;
+
+        // --- Validate Unit Number ---
+        if (!unitNumber.trim()) {
+            newErrors.unitNumber = "Tên Unit không được để trống";
+            isValid = false;
+        } else if (startsWithNumberRegex.test(unitNumber.trim())) {
+            newErrors.unitNumber = "Tên Unit không được bắt đầu bằng số";
+            isValid = false;
+        }
+
+        // --- Validate Unit Name ---
+        if (!unitName.trim()) {
+            newErrors.unitName = "Tên bài học không được để trống";
+            isValid = false;
+        } else if (startsWithNumberRegex.test(unitName.trim())) {
+            newErrors.unitName = "Tên bài học không được bắt đầu bằng số";
+            isValid = false;
+        }
+
+        // --- Validate Ảnh ---
+        if (!mascotFile) {
+            newErrors.mascot = "Vui lòng chọn ảnh minh hoạ";
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
+
+
 
     // Submit có upload ảnh + gửi dữ liệu về parent
     const handleSubmit = async () => {
+        // 3. Gọi hàm validate trước khi xử lý
+        if (!validateForm()) {
+            enqueueSnackbar("Vui lòng kiểm tra lại thông tin nhập!", { variant: "warning" });
+            return;
+        }
         try {
             setLoading(true);
 
@@ -73,8 +125,6 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
         }
     };
 
-
-
     return (
         <Box
             sx={{
@@ -105,20 +155,36 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
             {/* Layout 2 cột */}
             <Grid container columnGap={3} rowGap={3}>
                 <Box sx={{ width: "48%" }}>
-                    <Typography sx={{ mb: 1 }}>Tên Unit</Typography>
+                    <Typography sx={{ mb: 1 }}>Tên Unit<span style={{ color: 'red' }}>*</span></Typography>
                     <TextField
                         fullWidth
                         value={unitNumber}
-                        onChange={(e) => setUnitNumber(e.target.value)}
+                        onChange={(e) => {
+                                setUnitNumber(e.target.value)
+                                // Xóa lỗi khi người dùng nhập lại
+                            if (errors.unitNumber) setErrors({ ...errors, unitNumber: undefined });
+                        }
+                        }
+                        // Hiển thị lỗi
+                        error={!!errors.unitNumber}
+                        helperText={errors.unitNumber}
+                        
                     />
                 </Box>
 
                 <Box sx={{ width: "48%" }}>
-                    <Typography sx={{ mb: 1 }}>Tên bài học</Typography>
+                    <Typography sx={{ mb: 1 }}>Tên bài học<span style={{ color: 'red' }}>*</span></Typography>
                     <TextField
                         fullWidth
                         value={unitName}
-                        onChange={(e) => setUnitName(e.target.value)}
+                        onChange={(e) => {
+                            setUnitName(e.target.value);
+                            // Xóa lỗi khi người dùng nhập lại
+                            if (errors.unitName) setErrors({ ...errors, unitName: undefined });
+                        }}
+                        // Hiển thị lỗi
+                        error={!!errors.unitName}
+                        helperText={errors.unitName}
                     />
                 </Box>
 
@@ -141,15 +207,18 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                 </Box> */}
 
                 <Box sx={{ width: "48%" }}>
-                    <Typography sx={{ mb: 1 }}>Chọn ảnh minh hoạ</Typography>
+                    <Typography sx={{ mb: 1 }}>Chọn ảnh minh hoạ<span style={{ color: 'red' }}>*</span></Typography>
 
                     <Button
                         variant="outlined"
                         component="label"
                         fullWidth
+                        // Đổi màu viền sang đỏ nếu có lỗi
+                        color={errors.mascot ? "error" : "primary"}
                         sx={{
                             height: 54,
                             fontWeight: 700,
+                            border: errors.mascot ? "1px solid #d32f2f" : undefined
                         }}
                     >
                         THÊM ẢNH +
@@ -160,6 +229,12 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                             onChange={handleUpload}
                         />
                     </Button>
+                    {/* Hiển thị dòng thông báo lỗi cho ảnh */}
+                    {errors.mascot && (
+                        <FormHelperText error sx={{ mt: 1 }}>
+                            {errors.mascot}
+                        </FormHelperText>
+                    )}
                 </Box>
             </Grid>
 

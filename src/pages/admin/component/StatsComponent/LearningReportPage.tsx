@@ -64,9 +64,13 @@ export default function LearningReportPage() {
                 </Typography>
                 <Box sx={{ height: 350 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={reportData.lessons} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <BarChart data={reportData.lessons} margin={{ top: 30, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="lessonName" tick={{fontSize: 12}} />
+                      <XAxis 
+                        dataKey="lessonName" 
+                        tick={{fontSize: 12}} 
+                        tickFormatter={(value) => value.split(':')[0]}
+                        />
                       <YAxis domain={[0, 100]} />
                       <Tooltip cursor={{fill: '#f1f8e9'}} />
                       <Bar 
@@ -86,14 +90,17 @@ export default function LearningReportPage() {
             {/* Chart 2: Điểm trung bình */}
             <Grid size={{ xs: 12 }}>
               <Paper sx={{ p: 3, borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight={700} color="#5e35b1" sx={{ mb: 2 }}>
+                <Typography variant="h6" fontWeight={700} color="#5e35b1" sx={{ mb: 2 }} >
                   🎯 Điểm kiểm tra trung bình (Thang 10)
                 </Typography>
                 <Box sx={{ height: 350 }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={reportData.lessons} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <BarChart data={reportData.lessons} margin={{ top: 30, right: 10, left: -20, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="lessonName" tick={{fontSize: 12}} />
+                      <XAxis 
+                        dataKey="lessonName" tick={{fontSize: 12}} 
+                        tickFormatter={(value) => value.split(':')[0]}
+                        />
                       <YAxis domain={[0, 10]} />
                       <Tooltip cursor={{fill: '#ede7f6'}} />
                       <Bar 

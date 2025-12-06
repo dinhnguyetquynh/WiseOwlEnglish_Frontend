@@ -6,7 +6,7 @@ export interface GradeDistRes {
 }
 
 export interface MonthlyNewLearnerRes {
-  timeLabel: string;
+  month: string;
   count: number;
 }
 

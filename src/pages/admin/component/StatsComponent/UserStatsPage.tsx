@@ -108,7 +108,7 @@ export default function UserStatsPage() {
                 <ResponsiveContainer>
                   <BarChart data={data.monthlyGrowth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="timeLabel" axisLine={false} tickLine={false} />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} />
                     <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
                     <Tooltip 
                       cursor={{fill: '#f0f9ff'}}
