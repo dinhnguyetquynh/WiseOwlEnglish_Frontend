@@ -20,6 +20,16 @@ export type ShopDataRes = {
   ownedStickerIds: number[];
 };
 
+export type StickerRes ={
+  id : number;
+  name : string;
+  imgUrl : string;
+  price : number;
+  rarity : string;
+  category : string;
+  
+}
+
 export async function getShopData(profileId: number): Promise<ShopDataRes> {
   const res = await axiosClient.get<ShopDataRes>(`/api/shop/${profileId}`);
   return res.data;
@@ -36,3 +46,10 @@ export async function equipSticker(profileId: number, stickerId: number): Promis
     params: { learnerId: profileId, stickerId },
   });
 }
+
+
+
+export const claimEpicRewardApi = async (learnerId: number):Promise<StickerRes> => {
+  const response = await axiosClient.post(`/api/shop/reward-epic?learnerId=${learnerId}`);
+  return response.data; // Trả về thông tin Sticker
+};

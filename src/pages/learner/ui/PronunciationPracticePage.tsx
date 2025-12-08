@@ -6,6 +6,8 @@ import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lesson
 // import { gradePronunciationApi, type PronounceGradeResponse } from "../../../api/game"; // 👈 Import API mới
 import "../css/PronunciationPracticePage.css"; // 👈 File CSS mới (Bước 2.5)
 import { gradePronunciationApi, type PronounceGradeResponse } from "../../../api/game";
+import { claimEpicRewardApi, type StickerRes } from "../../../api/shop";
+import RewardModal from "../../../components/learner/ui/RewardModal";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
@@ -32,6 +34,12 @@ export default function PronunciationPracticePage() {
   const [gradeResult, setGradeResult] = useState<GradeResult>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  const [showRewardModal, setShowRewardModal] = useState(false);
+  const [earnedSticker, setEarnedSticker] = useState<StickerRes>();
+
+  const [passedCount, setPassedCount] = useState(0);
+
 
   const total = list.length;
   const current = list[idx];
@@ -146,8 +154,13 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
   
   try {
     // Bây giờ truyền cả blob user và URL audio ref
-    const result = await gradePronunciationApi(audioBlob, media.normal);
+    const result = await gradePronunciationApi(audioBlob, current.term_en);
     setGradeResult(result);
+    if (result.grade === 'ACCURATE' || result.grade === 'ALMOST') {
+        // Sử dụng functional update để tránh stale state
+        setPassedCount(prev => prev + 1);
+      }
+
   } catch (e: any) {
     console.error("Grade error:", e);
     setGradeResult(null);
@@ -157,6 +170,37 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
   }
 };
 
+// Kiểm tra xem đây có phải là từ cuối cùng không
+  const isLastWord = idx === total - 1;
+  // Hàm kiểm tra kết quả cuối cùng và thoát
+  const checkRewardAndExit = async () => {
+    // Điều kiện nhận quà: Phải đọc đúng ít nhất 1 từ (hoặc tùy bạn chỉnh)
+    const isEligibleForReward = passedCount / total >=0.5;
+
+    if (isEligibleForReward) {
+      try {
+        const sticker = await claimEpicRewardApi(Number(profileId));
+        setEarnedSticker(sticker);
+        setShowRewardModal(true);
+      } catch (rewardErr) {
+        console.error("Lỗi nhận thưởng:", rewardErr);
+        navigate(-1);
+      }
+    } else {
+      // Không đủ điều kiện nhận quà -> Thông báo và thoát
+      alert("Bé đã hoàn thành bài học! Hãy cố gắng đọc đúng nhiều hơn để nhận Sticker nhé!");
+      navigate(-1);
+    }
+  };
+  // Hàm xử lý nút BỎ QUA
+  const handleSkip = () => {
+    if (isLastWord) {
+      checkRewardAndExit();
+    } else {
+      setGradeResult(null);
+      setIdx((i) => i + 1);
+    }
+  };
   // Chuyển từ tiếp theo
   const handleNext = async () => {
     if (!current || !profileId) return;
@@ -169,31 +213,32 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
       itemType: "VOCAB", // Dùng lại type "VOCAB"
       itemRefId: Number(current.id)
     };
-
     try {
-      // Gọi API ngầm, không chặn người dùng
-      markItemAsCompleted(myPayload).catch(e => {
-          console.error("Lỗi ngầm khi lưu tiến độ phát âm:", e.message);
-      });
+      // Gọi không chờ (fire and forget) để trải nghiệm mượt hơn
+      markItemAsCompleted(myPayload).catch(e => console.error(e));
+    } catch (e) { console.error(e); }
 
-      // 2. Chuyển từ
-      setGradeResult(null); // Xóa kết quả
-      if (idx < total - 1) {
-        setIdx((i) => i + 1);
-      } else {
-        navigate(-1); // Xong bài -> quay lại menu
-      }
-    } catch (error) {
-      console.error(error);
+    // 2. Xử lý chuyển cảnh
+    if (isLastWord) {
+      checkRewardAndExit();
+    } else {
+      setGradeResult(null);
+      setIdx((i) => i + 1);
     }
   };
+
+
 
   const handleRetry = () => {
     // Chỉ cần xóa kết quả hiện tại, màn hình sẽ tự động
     // quay về trạng thái 3a (chờ ghi âm)
     setGradeResult(null);
   };
-
+  // 4. Hàm đóng Modal (được gọi khi bé bấm nút trên Modal)
+  const handleCloseReward = () => {
+    setShowRewardModal(false);
+    navigate(-1); // Quay về trang trước
+  };
   // Lấy class màu cho feedback
   const feedbackClass = useMemo(() => {
     if (!gradeResult) return '';
@@ -265,7 +310,7 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
 
           <button 
             className="pp-btn pp-btn--skip" 
-            onClick={handleNext} 
+            onClick={handleSkip} 
             disabled={isRecording || isGrading}
           >
             BỎ QUA
@@ -297,12 +342,18 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
                 onClick={handleNext}
                 autoFocus
               >
-                TIẾP TỤC
+                {isLastWord ? "HOÀN THÀNH" : "TIẾP TỤC"}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <RewardModal 
+        isOpen={showRewardModal} 
+        sticker={earnedSticker??null} 
+        onClose={handleCloseReward} 
+      />
 
     </div>
   );

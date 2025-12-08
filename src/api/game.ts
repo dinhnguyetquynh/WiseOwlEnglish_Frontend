@@ -287,44 +287,60 @@ export type PronounceGradeResponse = {
   score: number;
   feedback: string;
 };
-export async function gradePronunciationApi(
-  audioBlob: Blob,            // người dùng ghi
-  referenceAudioUrl: string   // URL file âm chuẩn (media.normal)
-): Promise<PronounceGradeResponse> {
+// export async function gradePronunciationApi(
+//   audioBlob: Blob,            // người dùng ghi
+//   referenceAudioUrl: string   // URL file âm chuẩn (media.normal)
+// ): Promise<PronounceGradeResponse> {
 
-  // 1) Lấy blob của audio tham chiếu
-  const refResp = await fetch(referenceAudioUrl);
-  if (!refResp.ok) {
-    throw new Error("Không thể tải audio tham chiếu");
-  }
-  const refBlob = await refResp.blob();
+//   // 1) Lấy blob của audio tham chiếu
+//   const refResp = await fetch(referenceAudioUrl);
+//   if (!refResp.ok) {
+//     throw new Error("Không thể tải audio tham chiếu");
+//   }
+//   const refBlob = await refResp.blob();
 
-  // 2) Tạo FormData với 2 file: audioUser, audioRef
+//   // 2) Tạo FormData với 2 file: audioUser, audioRef
+//   const formData = new FormData();
+//   formData.append("audioUser", audioBlob, "user.webm");   // tên file tùy ý
+//   formData.append("audioRef", refBlob, "ref.wav");       // backend chấp nhận wav/webm/...
+
+//   try {
+//     // Sử dụng axiosClient nếu bạn có wrapper cấu hình baseURL / interceptors
+//     const res = await axiosClient.post<PronounceGradeResponse>(
+//       `/api/pronounce/score`,   // endpoint backend bạn đã tạo
+//       formData,
+//       {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//         },
+//         // timeout/others nếu cần
+//       }
+//     );
+//     return res.data;
+//   } catch (error: any) {
+//     let message = "Không thể chấm điểm phát âm";
+//     if (error.response?.data) {
+//       // backend có thể trả object message hoặc string
+//       const data = error.response.data;
+//       if (typeof data === "string") message = data;
+//       else if (data.message) message = data.message;
+//     }
+//     throw new Error(message);
+//   }
+// }
+
+// Sửa hàm gọi API
+export const gradePronunciationApi = async (
+  audioBlob: Blob, 
+  targetText: string // Thay url bằng text
+): Promise<PronounceGradeResponse> => {
   const formData = new FormData();
-  formData.append("audioUser", audioBlob, "user.webm");   // tên file tùy ý
-  formData.append("audioRef", refBlob, "ref.wav");       // backend chấp nhận wav/webm/...
+  formData.append("audioUser", audioBlob);
+  formData.append("targetText", targetText); // Gửi text
 
-  try {
-    // Sử dụng axiosClient nếu bạn có wrapper cấu hình baseURL / interceptors
-    const res = await axiosClient.post<PronounceGradeResponse>(
-      `/api/pronounce/score`,   // endpoint backend bạn đã tạo
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        // timeout/others nếu cần
-      }
-    );
-    return res.data;
-  } catch (error: any) {
-    let message = "Không thể chấm điểm phát âm";
-    if (error.response?.data) {
-      // backend có thể trả object message hoặc string
-      const data = error.response.data;
-      if (typeof data === "string") message = data;
-      else if (data.message) message = data.message;
-    }
-    throw new Error(message);
-  }
-}
+  // Gọi axios hoặc fetch như bình thường
+  const response = await axiosClient.post("/api/pronounce/score", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
