@@ -32,6 +32,43 @@ export default function CreateLessonWithGame({
     onBack,
     onSaved
 }: Props) {
+    const titleRef = useRef<HTMLInputElement>(null);
+    const durationRef = useRef<HTMLInputElement>(null);
+    const descRef = useRef<HTMLTextAreaElement>(null);
+    const [formErrors, setFormErrors] = useState({
+        title: "",
+        duration: "",
+        description: ""
+    });
+    function validateForm(title: string, duration: number, description: string) {
+        const errors = {
+            title: "",
+            duration: "",
+            description: ""
+        };
+
+        let valid = true;
+
+        // === TITLE ===
+        if (!title.trim()) {
+            errors.title = "Vui lòng nhập tên bài kiểm tra";
+            valid = false;
+        }
+
+        // === DURATION ===
+        if (!duration || duration <= 0) {
+            errors.duration = "Vui lòng nhập thời gian hợp lệ";
+            valid = false;
+        }
+
+        // === DESCRIPTION ===
+        if (!description.trim()) {
+            errors.description = "Vui lòng nhập mô tả bài kiểm tra";
+            valid = false;
+        }
+
+        return { valid, errors };
+    }
 
     const [gameType, setGameType] = useState<GameTypeEnum | "">("");
 
@@ -40,7 +77,7 @@ export default function CreateLessonWithGame({
     const gameRefs = useRef<{ [key: number]: GameHandle | null }>({});
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [duration, setDuration] = useState(15);
+    const [duration, setDuration] = useState(0);
 
     const handleSelectGame = (value: any) => {
         if (!value) return;
@@ -57,9 +94,53 @@ export default function CreateLessonWithGame({
         delete gameRefs.current[index];
     };
     const handleSaveLesson = async () => {
-        if (!title.trim()) return alert("Vui lòng nhập tên bài kiểm tra");
-        if (games.length === 0) return alert("Vui lòng chọn ít nhất 1 game");
+        let hasError = false;
 
+        const newErrors = { title: "", duration: "", description: "" };
+
+        // === CHECK TITLE ===
+        if (!title.trim()) {
+            newErrors.title = "Vui lòng nhập tên bài kiểm tra";
+            hasError = true;
+            titleRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            setTimeout(() => titleRef.current?.focus(), 200);
+        }
+
+        // === CHECK DURATION ===
+        if (!duration || duration <= 0) {
+            newErrors.duration = "Vui lòng nhập thời gian hợp lệ";
+            if (!hasError) {
+                durationRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => durationRef.current?.focus(), 200);
+            }
+            hasError = true;
+        }
+
+        // === CHECK DESCRIPTION ===
+        if (!description.trim()) {
+            newErrors.description = "Vui lòng nhập mô tả bài kiểm tra";
+            if (!hasError) {
+                descRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => descRef.current?.focus(), 200);
+            }
+            hasError = true;
+        }
+
+        setFormErrors(newErrors);
+
+        if (hasError) return; // ❌ STOP
+        if (games.length === 0) return alert("Vui lòng chọn ít nhất 1 game");
+        // 1. Validate tất cả Game con trước
+        for (let i = 0; i < games.length; i++) {
+            const ref = gameRefs.current[i];
+            if (ref && ref.validateGame) {
+                const ok = ref.validateGame();
+                if (!ok) {
+                    alert(`Game thứ ${i + 1} chưa hợp lệ, vui lòng kiểm tra.`);
+                    return; // ❌ STOP — không lưu bài kiểm tra
+                }
+            }
+        }
         // A. Thu thập questions từ tất cả các Game con
         let allQuestions: TestQuestionPayload[] = [];
 
@@ -97,6 +178,7 @@ export default function CreateLessonWithGame({
         }
     };
 
+    const baseRegex = /^[\p{L}][\p{L}0-9\s]*$/u;
     return (
         <Box display="flex" flexDirection="column" gap={3}>
 
@@ -113,10 +195,56 @@ export default function CreateLessonWithGame({
                             <TextField
                                 fullWidth
                                 label="Tiêu đề bài kiểm tra"
-                                placeholder="Nhập tên bài kiểm tra..."
+                                inputRef={titleRef}
                                 value={title}
-                                onChange={(e) => setTitle(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+
+                                    const baseRegex = /^[\p{L}][\p{L}0-9\s]*$/u;
+
+                                    // Cho nhập rỗng
+                                    if (val === "") {
+                                        setTitle(val);
+                                        setFormErrors((prev) => ({ ...prev, title: "" }));
+                                        return;
+                                    }
+
+                                    // Kiểm tra sai regex → KHÔNG setTitle để chặn nhập
+                                    if (!baseRegex.test(val)) {
+                                        setFormErrors((prev) => ({
+                                            ...prev,
+                                            title: "Không được bắt đầu bằng số và không chứa ký tự đặc biệt",
+                                        }));
+                                        return;
+                                    }
+
+                                    // Qua regex → cho setTitle
+                                    setTitle(val);
+
+                                    // Đếm số chữ cái
+                                    const letterCount = (val.match(/\p{L}/gu) || []).length;
+
+                                    // Nếu ít hơn 3 chữ cái → chỉ báo lỗi, không chặn
+                                    if (letterCount < 3) {
+                                        setFormErrors((prev) => ({
+                                            ...prev,
+                                            title: "Tiêu đề phải có ít nhất 3 chữ cái",
+                                        }));
+                                        return;
+                                    }
+
+                                    // Đủ điều kiện
+                                    setFormErrors((prev) => ({ ...prev, title: "" }));
+                                }}
+                                error={!!formErrors.title}
+                                helperText={formErrors.title}
                             />
+
+
+
+
+
+
                         </Box>
 
                         <Box sx={{ mb: 2 }}>
@@ -124,9 +252,19 @@ export default function CreateLessonWithGame({
                                 fullWidth
                                 type="number"
                                 label="Thời gian làm bài (phút)"
-                                value={duration}
-                                onChange={(e) => setDuration(Number(e.target.value))}
+                                inputRef={durationRef}
+                                value={duration === 0 ? "" : duration}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (/^[1-9][0-9]*$/.test(val) || val === "") {
+                                        setDuration(Number(val) || 0);
+                                    }
+                                }}
+
+                                error={!!formErrors.duration}
+                                helperText={formErrors.duration}
                             />
+
                         </Box>
                     </Box>
 
@@ -137,8 +275,17 @@ export default function CreateLessonWithGame({
                             multiline
                             rows={3}
                             label="Mô tả"
+                            inputRef={descRef}
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                if (/^[A-Za-zÀ-ỹ0-9\s.,!?;:\-()'"“”]+$/.test(val) || val === "") {
+                                    setDescription(val);
+                                }
+                            }}
+
+                            error={!!formErrors.description}
+                            helperText={formErrors.description}
                         />
                     </Box>
                 </Box>

@@ -63,7 +63,6 @@ export default function CreateGameScreen({
                 {/* Nút LƯU GAME nằm góc phải – luôn có */}
                 <Button
                     variant="outlined"
-                    disabled={!isGameValid}
                     sx={{
                         borderRadius: 2,
                         textTransform: "none",

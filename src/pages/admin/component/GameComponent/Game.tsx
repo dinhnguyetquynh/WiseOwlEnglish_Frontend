@@ -1,4 +1,4 @@
-import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useState, useImperativeHandle, forwardRef, useRef } from "react";
 import {
     Box,
     Paper,
@@ -9,6 +9,8 @@ import {
     MenuItem,
     IconButton,
     Checkbox,
+    FormControl,
+    FormHelperText,
 } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import type { GameTypeEnum } from "../../schemas/game.schema";
@@ -88,6 +90,7 @@ export type TestQuestionPayload = {
 export type GameHandle = {
     handleSave: () => void;
     getTestQuestions: () => TestQuestionPayload[];
+    validateGame: () => boolean;
 };
 
 type GameProps = {
@@ -116,6 +119,12 @@ const Game = forwardRef<GameHandle, GameProps>(({
     const [error, setError] = useState<string | null>(null);
     const [title, setTitle] = useState("");
     const [isActive, setIsActive] = useState(false);
+    const [errorFocus, setErrorFocus] = useState<
+        { index: number; field: string }[]
+    >([]);
+    const titleRegex = /^(?!\s*$)(?!\d)(?=.{3,}$)[\p{L}\p{N} ]+$/u;
+
+    const scoreRegex = /^[0-9]+$/;
 
     function getMediaUrlByIdFromBase(base: DataGameRespon, id?: number): string {
         if (!id) return "";
@@ -165,7 +174,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
             console.warn("Từ không tồn tại:", notFound);
         }
     };
-
+    const questionRefs = useRef<(HTMLDivElement | null)[]>([]);
     useEffect(() => {
         async function loadAll() {
             try {
@@ -260,69 +269,95 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
 
 
-    function validateGame() {
-        if (!gameData) return false;
+    function validateGameDetailed(): { valid: boolean; errors?: { index: number; field: string }[] } {
+        const errors: { index: number; field: string }[] = [];
 
-        for (const q of questions) {
-
-            // ============================
-            // BLOCK: SENTENCE_HIDDEN_WORD
-            // ============================
-            if (isSentenceHiddenGame) {
-
-                // câu gốc
-                if (!q.content.trim()) return false;
-
-                // hình ảnh
-                if (!q.image) return false;
-
-                // từ cần kiểm tra
-                if (!q.choices[0].trim()) return false;
-
-                // so sánh từ
-                const leftWords = extractWords(q.content.toLowerCase());
-                const rightWords = extractWords(q.choices[0].toLowerCase());
-                const notFound = rightWords.filter(w => !leftWords.includes(w));
-
-                if (notFound.length > 0) return false;
-                // Skip toàn bộ validate khác
-                continue;
-            }
-
-            // ============================
-            // BLOCK: PICTURE4 WORD4
-            // ============================
-            if (isPicture4Game) {
-                if (!q.images || q.images.some((img) => !img)) return false;
-                if (q.choices.some((c) => !c)) return false;
-                continue;
-            }
-
-            // ============================
-            // IMAGE GAME
-            // ============================
-            if (isImageGame) {
-                if (!q.image) return false;
-            }
-
-            // ============================
-            // VOICE GAME
-            // ============================
-            if (isVoiceGame) {
-                if (!q.sound) return false;
-            }
-
-            // ============================
-            // CHOICE CHECK FOR OTHER GAMES
-            // ============================
-            if (q.choices.some((c) => !c.trim())) return false;
-
-            // SCORE cho các game khác
-            if (!q.maxScore.trim()) return false;
+        if (!gameData) {
+            errors.push({ index: 0, field: "system" });
+            return { valid: false, errors };
         }
 
-        return true;
+        // ---- CHECK TITLE ----
+        if (!title.trim()) {
+            errors.push({ index: -1, field: "title" });
+        }
+
+        for (let i = 0; i < questions.length; i++) {
+            const q = questions[i];
+
+            // 1) Max Score
+            if (!q.maxScore.trim()) {
+                errors.push({ index: i, field: "maxScore" });
+            }
+
+            // 2) Sentence Hidden Word
+            if (isSentenceHiddenGame) {
+
+                if (!q.maxScore.trim()) {
+                    errors.push({ index: i, field: "maxScore" });
+                }
+
+                if (!q.image) {
+                    errors.push({ index: i, field: "image" });
+                }
+
+                if (!q.content.trim()) {
+                    errors.push({ index: i, field: "content" });
+                }
+
+                const left = extractWords(q.content.toLowerCase());
+                const right = extractWords(q.choices[0]?.toLowerCase() || "");
+
+                if (!q.choices[0]?.trim()) {
+                    errors.push({ index: i, field: "hiddenWord" });
+                } else if (right.some(w => !left.includes(w))) {
+                    errors.push({ index: i, field: "hiddenWord" });
+                }
+
+                continue;
+            }
+
+
+            // 3) Picture4 (4 hình + 4 choice)
+            if (isPicture4Game) {
+                q.images.forEach((img, j) => {
+                    if (!img) {
+                        errors.push({ index: i, field: "images" });
+                    }
+                });
+
+                q.choices.forEach((c, j) => {
+                    if (!c.trim()) {
+                        errors.push({ index: i, field: `choice_${j}` });
+                    }
+                });
+
+                continue;
+            }
+
+
+            // 4) Image game
+            if (isImageGame && !q.image) {
+                errors.push({ index: i, field: "image" });
+            }
+
+            // 5) Voice game
+            if (isVoiceGame && !q.sound) {
+                errors.push({ index: i, field: "sound" });
+            }
+
+            // 6) Choices chung
+            for (let j = 0; j < q.choices.length; j++) {
+                if (!q.choices[j]?.trim()) {
+                    errors.push({ index: i, field: `choice_${j}` });
+                }
+            }
+        }
+
+        return errors.length > 0 ? { valid: false, errors } : { valid: true };
     }
+
+
 
 
 
@@ -377,11 +412,6 @@ const Game = forwardRef<GameHandle, GameProps>(({
         createEmptyQuestion(),
     ]);
 
-    // Khi questions thay đổi → báo cho parent biết state hợp lệ
-    useEffect(() => {
-        const isValid = validateGame();
-        onValidate(isValid);   // parent chỉ nhận true/false
-    }, [questions]); // CHỈ phụ thuộc questions
 
     // === FETCH DATA =============================================
 
@@ -433,18 +463,18 @@ const Game = forwardRef<GameHandle, GameProps>(({
             } else if (isVoiceGame) {
                 promptType = "AUDIO";
                 promptRefId = getMediaAssetIdByUrl(q.sound) || 0;
-            // } else {
-            //     promptType = "TEXT";
-            //     promptRefId = 0;
-            // }
+                // } else {
+                //     promptType = "TEXT";
+                //     promptRefId = 0;
+                // }
             }
             // 👇 --- THÊM ĐOẠN NÀY --- 👇
-            else  {
+            else {
                 promptType = "SENTENCE";
                 // Với game này, người dùng chọn câu từ dropdown (lưu trong choices[0])
                 // Ta cần lấy ID của câu đó để gửi về BE làm promptRefId
                 promptRefId = getOptionIdByTerm(q.choices[0]) || 0;
-            } 
+            }
 
             // 2) Build optionReqs
             let optionReqs: OptionReq[] = [];
@@ -531,12 +561,29 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
     // Handle save action
     const handleSave = async () => {
-        const payload = buildPayload();
-        const isValid = validateGame();
-        if (!isValid) {
-            alert("Game chưa hợp lệ. Vui lòng kiểm tra lại!");
+        const result = validateGameDetailed();
+
+        if (!result.valid) {
+            setErrorFocus(result.errors || []);
+
+            const first = result.errors![0];
+
+            if (first.index === -1) {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+                questionRefs.current[first.index]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+            }
+
             return;
         }
+
+
+        const payload = buildPayload();
+
+
 
         try {
             if (gameId) {
@@ -627,12 +674,41 @@ const Game = forwardRef<GameHandle, GameProps>(({
     // Expose handleSave to parent component
     useImperativeHandle(ref, () => ({
         handleSave,
-        getTestQuestions: () => buildTestPayload(), // 👈 New method
+
+        getTestQuestions: () => buildTestPayload(),
+
+        validateGame: () => {
+            const result = validateGameDetailed();
+
+            setErrorFocus(result.errors || []);
+
+            // Nếu có lỗi → focus vào lỗi đầu tiên
+            if (!result.valid) {
+                const first = result.errors![0];
+
+                if (first.index === -1) {
+                    // lỗi ở tiêu đề
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                } else {
+                    // lỗi trong câu hỏi → focus vào câu đó
+                    questionRefs.current[first.index]?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "center"
+                    });
+                }
+
+                return false; // báo cho màn cha: Game này không hợp lệ
+            }
+
+            return true; // hợp lệ
+        }
     }));
+
 
     // === LOADING / ERROR ========================================
     if (loading) return <Typography>Đang tải dữ liệu...</Typography>;
     if (error) return <Typography color="error">{error}</Typography>;
+
 
     return (
         <Box>
@@ -645,15 +721,30 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
                     <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                         {/* LEFT: 50% */}
-                        <Box sx={{ flex: 1 }}>
-                            <TextField
-                                fullWidth
-                                label="Tiêu đề"
-                                placeholder="Nhập tiêu đề trò chơi..."
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
-                        </Box>
+                        <TextField
+                            fullWidth
+                            label="Tiêu đề"
+                            value={title}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                setTitle(value);
+
+                                if (!titleRegex.test(value)) {
+                                    setErrorFocus([{ index: -1, field: "title" }]);
+                                } else {
+                                    setErrorFocus(prev =>
+                                        prev.filter(err => !(err.index === -1 && err.field === "title"))
+                                    );
+                                }
+                            }}
+                            error={errorFocus.some(err => err.index === -1 && err.field === "title")}
+                            helperText={
+                                errorFocus.some(err => err.index === -1 && err.field === "title")
+                                    ? "Tiêu đề phải ≥ 3 ký tự, không bắt đầu bằng số và không chứa ký tự đặc biệt"
+                                    : ""
+                            }
+                        />
+
 
                         {/* RIGHT: 50% */}
                         <Box
@@ -733,7 +824,11 @@ const Game = forwardRef<GameHandle, GameProps>(({
             )}
             {
                 questions.map((q, index) => (
-                    <Paper key={index} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+                    <Paper key={index}
+                        ref={(el) => {
+                            questionRefs.current[index] = el;
+                        }}
+                        sx={{ p: 3, mb: 4, borderRadius: 2 }}>
                         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
                             <Box sx={{ minWidth: 150 }}>
                                 {type === "lession" ? (
@@ -771,47 +866,68 @@ const Game = forwardRef<GameHandle, GameProps>(({
                             <Box>
                                 {/* IMAGE GAME UI */}
                                 {isImageGame && (
-                                    <Box sx={{ display: "flex", gap: 2, mb: 3, justifyContent: "left", alignItems: "center" }}>
-                                        <Select
-                                            sx={{ width: "20%", height: "10%", justifyContent: "center", alignItems: "center" }}
-                                            fullWidth
-                                            value={q.image || ""}
-                                            onChange={(e) => {
-                                                const updated = [...questions];
-                                                updated[index].image = String(e.target.value);
-                                                setQuestions(updated);
-                                            }}
-                                            displayEmpty
-                                        >
-                                            <MenuItem value="">-Chọn hình ảnh-</MenuItem>
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            gap: 2,
+                                            mb: 3,
+                                            alignItems: "center"
+                                        }}
+                                    >
+                                        {/* LEFT: SELECT (rộng 30%) */}
+                                        <Box sx={{ flex: 0.3, display: "flex", flexDirection: "column" }}>
+                                            <Select
+                                                fullWidth
+                                                value={q.image || ""}
+                                                onChange={(e) => {
+                                                    const updated = [...questions];
+                                                    updated[index].image = String(e.target.value);
+                                                    setQuestions(updated);
+                                                }}
+                                                error={errorFocus.some(err => err.index === index && err.field === "image")}
+                                                displayEmpty
+                                                sx={{
+                                                    minHeight: 56,
+                                                    "& .MuiSelect-select": {
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                    }
+                                                }}
+                                            >
+                                                <MenuItem value="">-Chọn hình ảnh-</MenuItem>
 
-                                            {gameData?.mediaAssets?.map((m) => (
-                                                <MenuItem key={m.id} value={m.url}>
-                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                        <img
-                                                            src={m.url}
-                                                            alt={m.altText}
-                                                            style={{
-                                                                width: 60,
-                                                                height: 60,
-                                                                objectFit: "contain",
-                                                                borderRadius: 4,
-                                                            }}
-                                                        />
-                                                        <Typography sx={{ fontSize: 18, fontWeight: 500 }}>
-                                                            {m.altText}
-                                                        </Typography>
-                                                    </Box>
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                                                {gameData?.mediaAssets?.map((m) => (
+                                                    <MenuItem key={m.id} value={m.url}>
+                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                            <img
+                                                                src={m.url}
+                                                                alt={m.altText}
+                                                                style={{
+                                                                    width: 60,
+                                                                    height: 60,
+                                                                    objectFit: "contain",
+                                                                }}
+                                                            />
+                                                            <Typography sx={{ fontSize: 18, fontWeight: 500 }}>
+                                                                {m.altText}
+                                                            </Typography>
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
 
+                                            {errorFocus.some(err => err.index === index && err.field === "image") && (
+                                                <FormHelperText error>Vui lòng chọn hình ảnh</FormHelperText>
+                                            )}
+                                        </Box>
+
+                                        {/* RIGHT: PREVIEW (rộng 70%) */}
                                         <Box
                                             sx={{
-                                                width: "60%",
+                                                flex: 0.7,
                                                 border: "1px solid #ccc",
                                                 borderRadius: 2,
-                                                height: 120,
+                                                height: 150,
                                                 display: "flex",
                                                 justifyContent: "center",
                                                 alignItems: "center",
@@ -833,29 +949,43 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                     </Box>
                                 )}
 
+
+
                                 {/* VOICE GAME UI */}
                                 {isVoiceGame && (
                                     <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-                                        <Select
-                                            fullWidth
-                                            value={q.sound}
-                                            onChange={(e) => {
-                                                const updated = [...questions];
-                                                updated[index].sound = String(e.target.value);
-                                                setQuestions(updated);
-                                            }}
-                                        >
+                                        <Box sx={{ display: "flex", flexDirection: "column" }}>
+                                            <Select
+                                                fullWidth
+                                                value={q.sound}
+                                                onChange={(e) => {
+                                                    const updated = [...questions];
+                                                    updated[index].sound = String(e.target.value);
+                                                    setQuestions(updated);
+                                                }}
+                                                error={errorFocus.some(err => err.index === index && err.field === "sound")}
 
-                                            <MenuItem value="">-Chọn âm thanh-</MenuItem>
 
-                                            {gameData?.mediaAssets
-                                                ?.filter((m) => m.tag === "normal")
-                                                .map((m) => (
-                                                    <MenuItem key={m.id} value={m.url}>
-                                                        {m.altText}
-                                                    </MenuItem>
-                                                ))}
-                                        </Select>
+                                            >
+
+                                                <MenuItem value="">-Chọn âm thanh-</MenuItem>
+
+                                                {gameData?.mediaAssets
+                                                    ?.filter((m) => m.tag === "normal")
+                                                    .map((m) => (
+                                                        <MenuItem key={m.id} value={m.url}>
+                                                            {m.altText}
+                                                        </MenuItem>
+                                                    ))}
+                                            </Select>
+                                            {errorFocus.some(err => err.index === index && err.field === "sound") && (
+                                                <Typography color="error" fontSize={12} sx={{ mt: 1 }}>
+                                                    Vui lòng chọn âm thanh
+                                                </Typography>
+                                            )}
+
+                                        </Box>
+
 
                                         <audio controls src={q.sound} style={{ width: "100%" }} />
                                     </Box>
@@ -876,11 +1006,23 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                         label="Điểm tối đa"
                                         value={q.maxScore}
                                         onChange={(e) => {
-                                            const updated = [...questions];
-                                            updated[index].maxScore = e.target.value;
-                                            setQuestions(updated);
+                                            const value = e.target.value;
+
+                                            // Chỉ cho nhập số hoặc chuỗi rỗng (để cho phép user xoá)
+                                            if (value === "" || /^[0-9]+$/.test(value)) {
+                                                const updated = [...questions];
+                                                updated[index].maxScore = value;
+                                                setQuestions(updated);
+                                            }
                                         }}
+                                        error={errorFocus.some(err => err.index === index && err.field === "maxScore")}
+                                        helperText={
+                                            errorFocus.some(err => err.index === index && err.field === "maxScore")
+                                                ? "Điểm tối đa phải là số và không được để trống"
+                                                : ""
+                                        }
                                     />
+
                                 </Box>
                                 {/* CHOICES */}
                                 <Typography fontWeight="bold" sx={{ mb: 2 }}>
@@ -898,56 +1040,74 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                             border: "1px solid #ddd",
                                             p: 2,
                                             borderRadius: 1,
+                                            width: "100%",
+                                            overflow: "hidden",
                                         }}
                                     >
-                                        <Select
-                                            fullWidth
-                                            value={choice}
-                                            onChange={(e) => {
-                                                const updated = [...questions];
-                                                updated[index].choices[i] = String(e.target.value);
-                                                setQuestions(updated);
+                                        {/* LEFT COLUMN: Select + Error */}
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                flex: "1 1 0",
+                                                minWidth: 0,
                                             }}
-                                            displayEmpty
                                         >
-                                            <MenuItem value="">
-                                                {gameType === "WORD_TO_SENTENCE"
-                                                    ? "-Chọn câu cần sắp xếp-"
-                                                    : "-Chọn từ vựng-"}
-                                            </MenuItem>
-                                            {gameData?.options?.map((opt) => (
-                                                <MenuItem key={opt.id} value={opt.term_en}>
-                                                    {opt.term_en}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                                            <FormControl
+                                                fullWidth
+                                                error={errorFocus.some(err => err.index === index && err.field === `choice_${i}`)}
+                                            >
+                                                <Select
+                                                    value={choice}
+                                                    displayEmpty
+                                                    onChange={(e) => {
+                                                        const updated = [...questions];
+                                                        updated[index].choices[i] = String(e.target.value);
+                                                        setQuestions(updated);
+                                                    }}
+                                                >
+                                                    <MenuItem value="">
+                                                        {gameType === "WORD_TO_SENTENCE"
+                                                            ? "-Chọn câu cần sắp xếp-"
+                                                            : "-Chọn từ vựng-"}
+                                                    </MenuItem>
 
+                                                    {gameData?.options?.map((opt) => (
+                                                        <MenuItem key={opt.id} value={opt.term_en}>
+                                                            {opt.term_en}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
 
+                                                {/* ERROR TEXT */}
+                                                {errorFocus.some(err => err.index === index && err.field === `choice_${i}`) && (
+                                                    <FormHelperText>Vui lòng chọn đáp án</FormHelperText>
+                                                )}
+                                            </FormControl>
+                                        </Box>
+
+                                        {/* RIGHT COLUMN */}
                                         {!isPicture4Game && q.choices.length === 4 && (
-                                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                                <Typography variant="body2" sx={{ mr: 1 }}>
-                                                    Đúng
-                                                </Typography>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 1,
+                                                    whiteSpace: "nowrap",
+                                                }}
+                                            >
+                                                <Typography variant="body2">Đúng</Typography>
                                                 <input
                                                     type="checkbox"
                                                     checked={q.correctIndex === i}
                                                     onChange={(e) => {
                                                         const updated = [...questions];
-
-                                                        if (e.target.checked) {
-                                                            updated[index].correctIndex = i;
-                                                        } else {
-                                                            // Nếu uncheck option đúng → reset
-                                                            if (updated[index].correctIndex === i) {
-                                                                updated[index].correctIndex = -1;
-                                                            }
-                                                        }
+                                                        updated[index].correctIndex = e.target.checked ? i : -1;
                                                         setQuestions(updated);
                                                     }}
                                                 />
                                             </Box>
                                         )}
-
 
                                         <IconButton
                                             color="error"
@@ -961,6 +1121,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                         </IconButton>
                                     </Box>
                                 ))}
+
                             </Box>
                         )}
                         {isPicture4Game && (
@@ -974,11 +1135,23 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                         label="Điểm tối đa"
                                         value={q.maxScore}
                                         onChange={(e) => {
-                                            const updated = [...questions];
-                                            updated[index].maxScore = e.target.value;
-                                            setQuestions(updated);
+                                            const value = e.target.value;
+
+                                            // ❗ Chỉ cho phép: rỗng hoặc toàn số
+                                            if (value === "" || /^[0-9]+$/.test(value)) {
+                                                const updated = [...questions];
+                                                updated[index].maxScore = value;
+                                                setQuestions(updated);
+                                            }
                                         }}
+                                        error={errorFocus.some(err => err.index === index && err.field === "maxScore")}
+                                        helperText={
+                                            errorFocus.some(err => err.index === index && err.field === "maxScore")
+                                                ? "Điểm tối đa phải là số và không được để trống"
+                                                : ""
+                                        }
                                     />
+
                                 </Box>
                                 <Box
                                     sx={{
@@ -996,38 +1169,46 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                                 borderRadius: 2,
                                             }}
                                         >
-                                            {/* CHỌN HÌNH */}
-                                            <Select
-                                                fullWidth
-                                                value={q.images?.[i] || ""}
-                                                onChange={(e) => {
-                                                    const updated = [...questions];
-                                                    if (!updated[index].images) updated[index].images = ["", "", "", ""];
-                                                    updated[index].images[i] = String(e.target.value);
-                                                    setQuestions(updated);
-                                                }}
-                                                displayEmpty
-                                                sx={{ mb: 2 }}
-                                            >
-                                                <MenuItem value="">-Chọn hình ảnh-</MenuItem>
+                                            <Box sx={{ display: "flex", flexDirection: "column" }}>
+                                                <Select
+                                                    fullWidth
+                                                    value={q.images?.[i] || ""}
+                                                    onChange={(e) => {
+                                                        const updated = [...questions];
+                                                        if (!updated[index].images) updated[index].images = ["", "", "", ""];
+                                                        updated[index].images[i] = String(e.target.value);
+                                                        setQuestions(updated);
+                                                    }}
+                                                    displayEmpty
+                                                    error={errorFocus.some(err => err.index === index && err.field === "images")}
 
-                                                {gameData?.mediaAssets?.map((m) => (
-                                                    <MenuItem key={m.id} value={m.url}>
-                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                            <img
-                                                                src={m.url}
-                                                                alt={m.altText}
-                                                                style={{ width: 50, height: 50, objectFit: "contain" }}
-                                                            />
-                                                            <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
-                                                                {m.altText}
-                                                            </Typography>
-                                                        </Box>
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
+                                                    sx={{ mb: 2 }}
+                                                >
+                                                    <MenuItem value="">-Chọn hình ảnh-</MenuItem>
 
-                                            {/* PREVIEW HÌNH */}
+                                                    {gameData?.mediaAssets?.map((m) => (
+                                                        <MenuItem key={m.id} value={m.url}>
+                                                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                                <img
+                                                                    src={m.url}
+                                                                    alt={m.altText}
+                                                                    style={{ width: 50, height: 50, objectFit: "contain" }}
+                                                                />
+                                                                <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
+                                                                    {m.altText}
+                                                                </Typography>
+                                                            </Box>
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                                {errorFocus.some(err => err.index === index && err.field === "images") && (
+                                                    <Typography color="error" fontSize={12}>
+                                                        Vui lòng chọn đầy đủ 4 hình ảnh
+                                                    </Typography>
+                                                )}
+
+
+                                            </Box>
                                             <Box
                                                 sx={{
                                                     width: "100%",
@@ -1084,11 +1265,23 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                         label="Điểm tối đa"
                                         value={q.maxScore}
                                         onChange={(e) => {
-                                            const updated = [...questions];
-                                            updated[index].maxScore = e.target.value;
-                                            setQuestions(updated);
+                                            const value = e.target.value;
+
+                                            // ❗ Chỉ cho phép rỗng hoặc các ký tự 0–9
+                                            if (value === "" || /^[0-9]+$/.test(value)) {
+                                                const updated = [...questions];
+                                                updated[index].maxScore = value;
+                                                setQuestions(updated);
+                                            }
                                         }}
+                                        error={errorFocus.some(err => err.index === index && err.field === "maxScore")}
+                                        helperText={
+                                            errorFocus.some(err => err.index === index && err.field === "maxScore")
+                                                ? "Vui lòng nhập điểm tối đa (chỉ số)"
+                                                : ""
+                                        }
                                     />
+
                                 </Box>
                                 <Box sx={{ mb: 3 }}>
 
@@ -1096,47 +1289,63 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                         HÌNH ẢNH CHO CÂU HỎI:
                                     </Typography>
 
-                                    <Box sx={{ display: "flex", gap: 2 }}>
-                                        <Select
-                                            sx={{ width: "50%" }}
-                                            fullWidth
-                                            value={q.image || ""}
-                                            onChange={(e) => {
-                                                const updated = [...questions];
-                                                updated[index].image = String(e.target.value);
-                                                setQuestions(updated);
-                                            }}
-                                            displayEmpty
-                                        >
-                                            <MenuItem value="">-Chọn hình ảnh-</MenuItem>
+                                    <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+                                        {/* LEFT COLUMN – Select (30%) */}
+                                        <Box sx={{ flex: 0.3, display: "flex", flexDirection: "column" }}>
+                                            <Select
+                                                fullWidth
+                                                value={q.image || ""}
+                                                onChange={(e) => {
+                                                    const updated = [...questions];
+                                                    updated[index].image = String(e.target.value);
+                                                    setQuestions(updated);
+                                                }}
+                                                error={errorFocus.some(err => err.index === index && err.field === "image")}
+                                                displayEmpty
+                                                sx={{
+                                                    minHeight: 56,
+                                                    "& .MuiSelect-select": {
+                                                        display: "flex",
+                                                        alignItems: "center"
+                                                    }
+                                                }}
+                                            >
+                                                <MenuItem value="">-Chọn hình ảnh-</MenuItem>
 
-                                            {gameData?.mediaAssets?.map((m) => (
-                                                <MenuItem key={m.id} value={m.url}>
-                                                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                                        <img
-                                                            src={m.url}
-                                                            alt={m.altText}
-                                                            style={{
-                                                                width: 60,
-                                                                height: 60,
-                                                                objectFit: "contain",
-                                                                borderRadius: 4,
-                                                            }}
-                                                        />
-                                                        <Typography sx={{ fontSize: 18, fontWeight: 500 }}>
-                                                            {m.altText}
-                                                        </Typography>
-                                                    </Box>
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
+                                                {gameData?.mediaAssets?.map((m) => (
+                                                    <MenuItem key={m.id} value={m.url}>
+                                                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                                            <img
+                                                                src={m.url}
+                                                                alt={m.altText}
+                                                                style={{
+                                                                    width: 60,
+                                                                    height: 60,
+                                                                    objectFit: "contain",
+                                                                }}
+                                                            />
+                                                            <Typography sx={{ fontSize: 16, fontWeight: 500 }}>
+                                                                {m.altText}
+                                                            </Typography>
+                                                        </Box>
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
 
+                                            {errorFocus.some(err => err.index === index && err.field === "image") && (
+                                                <Typography color="error" fontSize={12}>
+                                                    Vui lòng chọn hình ảnh
+                                                </Typography>
+                                            )}
+                                        </Box>
+
+                                        {/* RIGHT COLUMN – Preview (70%) */}
                                         <Box
                                             sx={{
-                                                width: "50%",
+                                                flex: 0.7,
                                                 border: "1px solid #ccc",
                                                 borderRadius: 2,
-                                                height: 120,
+                                                height: 150,
                                                 display: "flex",
                                                 justifyContent: "center",
                                                 alignItems: "center",
@@ -1145,17 +1354,14 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                             {q.image ? (
                                                 <img
                                                     src={q.image}
-                                                    style={{
-                                                        width: "100%",
-                                                        height: "100%",
-                                                        objectFit: "contain",
-                                                    }}
+                                                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
                                                 />
                                             ) : (
                                                 <Typography color="text.secondary">+</Typography>
                                             )}
                                         </Box>
                                     </Box>
+
                                 </Box>
 
                                 <Box sx={{ display: "flex", gap: 4 }}>
@@ -1176,6 +1382,12 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                                 updated[index].content = e.target.value;
                                                 setQuestions(updated);
                                             }}
+                                            error={errorFocus.some(err => err.index === index && err.field === "content")}
+                                            helperText={
+                                                errorFocus.some(err => err.index === index && err.field === "content")
+                                                    ? "Vui lòng nhập câu gốc"
+                                                    : ""
+                                            }
                                         />
                                     </Box>
 
@@ -1190,6 +1402,12 @@ const Game = forwardRef<GameHandle, GameProps>(({
                                             label="Nhập từ, cách nhau bằng khoảng trắng"
                                             value={q.choices[0]}
                                             onChange={(e) => handleRightInput(e, index, q)}
+                                            error={errorFocus.some(err => err.index === index && err.field === "hiddenWord")}
+                                            helperText={
+                                                errorFocus.some(err => err.index === index && err.field === "hiddenWord")
+                                                    ? "Có từ không tồn tại trong câu gốc"
+                                                    : ""
+                                            }
                                         />
 
 
