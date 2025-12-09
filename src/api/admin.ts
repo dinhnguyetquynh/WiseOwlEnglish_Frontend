@@ -388,8 +388,8 @@ export interface LessonUpdatedRes {
     updatedAt: string;
 
 }
-export const updateLesson = async (id: number, data: UpdateLessonReq) => {
+export const updateLesson = async (id: number, data: UpdateLessonReq):Promise<LessonUpdatedRes> => {
     // Đường dẫn API phải khớp với Backend Controller bạn đã viết
-    const response = await axiosClient.put(`/api/lessons-admin/update/${id}`, data);
+    const response = await axiosClient.put(`/api/lesson-admin/update/${id}`, data);
     return response.data;
 };

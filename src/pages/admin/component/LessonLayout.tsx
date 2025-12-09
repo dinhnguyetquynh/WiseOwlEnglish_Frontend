@@ -176,9 +176,16 @@ export default function LessonLayout() {
         }
         
         if (name === "unitName") {
-            if (!value.trim()) errorMsg = "Tên Unit không được để trống.";
+            if (!value.trim()) {
+                errorMsg = "Tên unit không được để trống.";
+            } else if (!/^[a-zA-ZÀ-ỹ]/.test(value)) { 
+                // Giải thích Regex:
+                // ^           : Bắt đầu chuỗi
+                // [a-zA-ZÀ-ỹ] : Chấp nhận chữ cái thường/hoa và các ký tự tiếng Việt
+                // ! (...).test: Nếu KHÔNG khớp (tức là bắt đầu bằng số hoặc ký tự đặc biệt) -> Báo lỗi
+                errorMsg = "Tên unit phải bắt đầu bằng chữ cái.";
+            }
         }
-
         setErrors(prev => ({ ...prev, [name]: errorMsg }));
         return errorMsg === "";
     };
@@ -186,60 +193,69 @@ export default function LessonLayout() {
 
 
     // 2. Khi bấm "Lưu" trong Dialog
-    // 5. CẬP NHẬT HÀM LƯU (handleConfirmUpdate)
+   // 5. CẬP NHẬT HÀM LƯU (handleConfirmUpdate) - PHIÊN BẢN MỚI
     const handleConfirmUpdate = async () => {
-        // A. Validate toàn bộ trước khi xử lý
+        // A. Validate form (Giữ nguyên logic cũ)
         const isLessonNameValid = validateForm("lessonName", editFormData.lessonName);
         const isUnitNameValid = validateForm("unitName", editFormData.unitName);
 
-        // Nếu có lỗi thì dừng lại, kiểm tra thông qua state errors hiện tại
-        // (Hoặc check lại trực tiếp để chắc chắn)
         if (!editFormData.lessonName.trim() || /\d/.test(editFormData.lessonName) || !editFormData.unitName.trim()) {
              return; 
         }
 
-        setIsSubmitting(true); // Bật loading
+        setIsSubmitting(true);
 
         try {
-            let finalImageUrl = editFormData.mascot; // Mặc định dùng link ảnh cũ
+            let finalImageUrl = editFormData.mascot; 
 
-            // B. Nếu có chọn file mới -> Upload lên Cloudinary trước
+            // B. Upload ảnh lên Cloudinary nếu có chọn file mới
             if (selectedFile) {
-                console.log("Đang upload ảnh...");
                 finalImageUrl = await uploadMascot(selectedFile);
             }
 
-            // C. Gọi API Update Lesson với link ảnh (mới hoặc cũ)
+            // C. Gọi API Update
             if (editingLessonId) {
+                // Gọi API update (trả về LessonUpdatedRes)
                 const updatedData = await updateLesson(editingLessonId, {
                     unitName: editFormData.unitName,
                     lessonName: editFormData.lessonName,
                     mascot: finalImageUrl 
                 });
 
-                // D. Cập nhật UI
+                console.log("Dữ liệu sau khi update từ Server:", updatedData);
+
+                // D. Cập nhật UI (Local State) dựa trên dữ liệu chuẩn từ Server trả về
                 setLessonData((prevData) =>
                     prevData.map((item) => {
                         if (item.id === editingLessonId) {
                             return {
-                                ...item,
+                                ...item, // Giữ lại các trường cũ không bị thay đổi (nếu có)
+                                
+                                // Gán đè dữ liệu mới từ response API
+                                id: updatedData.id,
+                                unitNumber: updatedData.unitNumber,
                                 unitName: updatedData.unitName,
-                                lessonName: updatedData.lessonName,
-                                urlMascot: updatedData.mascot, // mascot trả về từ API update
-                                updatedAt: new Date(),
+                                orderIndex: updatedData.orderIndex,
+                                active: updatedData.active,
+                                urlMascot: updatedData.urlMascot, // Mapping đúng tên trường urlMascot
+                                
+                                // QUAN TRỌNG: Convert chuỗi thời gian từ API sang Object Date để UI hiển thị đúng
+                                updatedAt: new Date(updatedData.updatedAt),
                             };
                         }
                         return item;
                     })
                 );
                 
+                // Reset và đóng form
                 setOpenEditDialog(false);
+                setEditingLessonId(null);
             }
         } catch (error) {
             console.error("Lỗi khi lưu:", error);
-            // Alert lỗi nếu cần
+            // Có thể thêm toast notification lỗi ở đây
         } finally {
-            setIsSubmitting(false); // Tắt loading
+            setIsSubmitting(false);
         }
     };
 
