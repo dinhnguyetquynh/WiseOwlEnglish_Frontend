@@ -8,6 +8,7 @@ import "../css/PronunciationPracticePage.css"; // 👈 File CSS mới (Bước 2
 import { gradePronunciationApi, type PronounceGradeResponse } from "../../../api/game";
 import { claimEpicRewardApi, type StickerRes } from "../../../api/shop";
 import RewardModal from "../../../components/learner/ui/RewardModal";
+import LessonCompletion from "../../../components/learner/ui/LessonCompletion";
 
 type HeaderState = { unitName?: string; unitTitle?: string; title?: string };
 
@@ -39,6 +40,7 @@ export default function PronunciationPracticePage() {
   const [earnedSticker, setEarnedSticker] = useState<StickerRes>();
 
   const [passedCount, setPassedCount] = useState(0);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
 
   const total = list.length;
@@ -184,14 +186,14 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
         setShowRewardModal(true);
       } catch (rewardErr) {
         console.error("Lỗi nhận thưởng:", rewardErr);
-        navigate(-1);
+        setShowCompletionModal(true);
       }
     } else {
-      // Không đủ điều kiện nhận quà -> Thông báo và thoát
-      alert("Bé đã hoàn thành bài học! Hãy cố gắng đọc đúng nhiều hơn để nhận Sticker nhé!");
-      navigate(-1);
+      setShowCompletionModal(true);
     }
   };
+
+
   // Hàm xử lý nút BỎ QUA
   const handleSkip = () => {
     if (isLastWord) {
@@ -237,7 +239,7 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
   // 4. Hàm đóng Modal (được gọi khi bé bấm nút trên Modal)
   const handleCloseReward = () => {
     setShowRewardModal(false);
-    navigate(-1); // Quay về trang trước
+    setShowCompletionModal(true);
   };
   // Lấy class màu cho feedback
   const feedbackClass = useMemo(() => {
@@ -247,6 +249,30 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
     return 'pp-feedback--bad';
   }, [gradeResult]);
 
+
+// Hàm 3: Nút "Học lại" (Reset toàn bộ để học lại từ đầu)
+  const handleReplay = () => {
+    setIdx(0);
+    setPassedCount(0);
+    setGradeResult(null);
+    setShowCompletionModal(false);
+    // Nếu muốn random lại danh sách từ, bạn có thể gọi lại hàm fetch data ở đây
+  };
+
+  // Hàm 4: "Đóng" (Thoát ra menu)
+  const handleCloseCompletion = () => {
+    setShowCompletionModal(false);
+    navigate(-1);
+  };
+
+  // 👇 Hàm xử lý nút "Ôn tập"
+  const handleReview = () => {
+    // Chuyển hướng sang trang chọn game từ vựng
+    // Giữ nguyên state để breadcrumb hoạt động nếu cần
+    navigate(`/learn/units/${unitId}/vocab/review`, { 
+      state: state 
+    });
+  };
 
   // --- RENDER ---
 
@@ -354,6 +380,17 @@ const handleSubmitRecording = async (audioBlob: Blob) => {
         sticker={earnedSticker??null} 
         onClose={handleCloseReward} 
       />
+      {/* 2. Modal tổng kết bài học */}
+      {showCompletionModal && (
+        <LessonCompletion
+          type="pronunciation"
+          totalItem={total}
+          correctCount={passedCount}
+          onRetry={handleReplay}           // Nút "Học lại"
+          onReview={handleReview} // Nút "Ôn tập" -> Tạm thời cho về menu
+          onClose={handleCloseCompletion}  // Nút "X" -> Về menu
+        />
+      )}
 
     </div>
   );

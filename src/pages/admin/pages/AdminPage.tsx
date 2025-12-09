@@ -23,6 +23,8 @@ import { clearProfile, clearRole } from "../../../store/storage";
 import LessionPage from "../component/LessionLayout/pages/LessionPage";
 import UserStatsPage from "../component/StatsComponent/UserStatsPage";
 import LearningReportPage from "../component/StatsComponent/LearningReportPage";
+import DashboardStats from "../component/StatsComponent/DashboardStats";
+import { Dashboard as DashboardIcon } from "@mui/icons-material";
 
 
 type Game = { vocab: string[]; sentence: string[] };
@@ -33,7 +35,7 @@ const drawerWidth = 240;
 
 // --- Component chính ---
 export default function AdminPageMUI() {
-    const [activeItem, setActiveItem] = useState("game");
+    const [activeItem, setActiveItem] = useState("dashboard");
     const { setSelectedClass } = useHomeContext();
     const navigate = useNavigate();
     // Hàm xử lý đăng xuất
@@ -64,7 +66,7 @@ export default function AdminPageMUI() {
         <Box sx={{ display: "flex" }}>
             <AdminHeader />
             <SidebarMUI activeItem={activeItem} setActiveItem={setActiveItem} />
-            <MainContentMUI activeItem={activeItem} />
+            <MainContentMUI activeItem={activeItem} setActiveItem={setActiveItem}/>
         </Box>
     );
 }
@@ -101,6 +103,12 @@ function SidebarMUI({
     setActiveItem: (id: string) => void;
 }) {
     const navSections = [
+        {
+            title: "Tổng quan", // 👈 Thêm Section mới hoặc gộp vào section khác
+            items: [
+                { id: "dashboard", label: "Dashboard", icon: <DashboardIcon /> }, // 👈 Mục Dashboard
+            ],
+        },
         {
             title: "Quản lý nội dung học",
             items: [
@@ -189,7 +197,13 @@ function SidebarMUI({
 }
 
 // --- MainContent (hiển thị layout theo menu) ---
-function MainContentMUI({ activeItem }: { activeItem: string }) {
+function MainContentMUI({ 
+  activeItem, 
+  setActiveItem 
+}: { 
+  activeItem: string; 
+  setActiveItem: (key: string) => void;
+}) {
     if (activeItem === "logout") return null;
     return (
         <Box
@@ -203,6 +217,7 @@ function MainContentMUI({ activeItem }: { activeItem: string }) {
                 overflow: "auto",
             }}
         >
+            {activeItem === "dashboard" && <DashboardStats onNavigate={setActiveItem} />}
             {activeItem === "lesson" && <LessonLayout />}
             {activeItem === "game" && <GameLayout />}
             {activeItem === "test" && <LessionPage />}

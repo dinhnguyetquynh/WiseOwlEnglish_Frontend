@@ -30,7 +30,17 @@ export interface GradeReportRes {
   totalStudentsInGrade: number;
   lessons: LessonStatsRes[];
 }
-
+export interface TotalDataRes {
+  totalLessons: number;
+  totalVocabularies: number;
+  totalSentences: number;
+  totalGameQuestions: number;
+  totalTestQuestions: number;
+}
+export interface DailyStatRes {
+  date: string;
+  count: number;
+}
 export async function getLearnerStats(year: number): Promise<LearnerStatsRes> {
   const res = await axiosClient.get("/api/admin/stats/learners", {
     params: { year }
@@ -41,5 +51,17 @@ export async function getLearnerStats(year: number): Promise<LearnerStatsRes> {
 // Cập nhật hàm gọi API trả về GradeReportRes
 export async function getGradeReport(gradeId: number): Promise<GradeReportRes> {
   const res = await axiosClient.get(`/api/admin/stats/lessons-by-grade/${gradeId}`);
+  return res.data;
+}
+
+export async function getTotalData(): Promise<TotalDataRes> {
+  const res = await axiosClient.get<TotalDataRes>("/api/admin/stats/total-data");
+  return res.data;
+}
+// 👇 Thêm hàm gọi API (startDate, endDate dạng YYYY-MM-DD)
+export async function getLearningActivity(startDate: string, endDate: string): Promise<DailyStatRes[]> {
+  const res = await axiosClient.get<DailyStatRes[]>("/api/admin/stats/learning-activity", {
+    params: { startDate, endDate }
+  });
   return res.data;
 }

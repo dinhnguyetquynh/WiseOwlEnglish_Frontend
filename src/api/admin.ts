@@ -320,6 +320,7 @@ export interface LessonDetailResponse {
     testList: TestDetailItem[];
 }
 
+
 export async function getTestsByLesson(lessonId: number): Promise<LessonDetailResponse> {
     const res = await axiosClient.get(
         `/api/test-admin/get-all/${lessonId}`
@@ -369,5 +370,26 @@ export const deleteSentence = async (id: number): Promise<string> => {
 export const deleteGame = async (gameId: number) => {
     // API endpoint khớp với backend controller: /api/games/delete/{id}
     const response = await axiosClient.delete(`/api/games/delete/${gameId}`);
+    return response.data;
+};
+// Định nghĩa kiểu dữ liệu gửi lên
+export interface UpdateLessonReq {
+    unitName: string;
+    lessonName: string;
+    mascot: string;
+}
+export interface LessonUpdatedRes {
+    id : number;
+    unitNumber : string;
+    unitName : string;
+    orderIndex : number;
+    active : boolean;
+    urlMascot : string;
+    updatedAt: string;
+
+}
+export const updateLesson = async (id: number, data: UpdateLessonReq) => {
+    // Đường dẫn API phải khớp với Backend Controller bạn đã viết
+    const response = await axiosClient.put(`/api/lessons-admin/update/${id}`, data);
     return response.data;
 };
