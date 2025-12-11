@@ -118,10 +118,10 @@ function SidebarMUI({
             ],
         },
         {
-            title: "Thống kê và Báo cáo",
+            title: "Thống kê ",
             items: [
                 { id: "stats", label: "Thống kê người dùng", icon: <UsersIcon /> },
-                { id: "report", label: "Báo cáo học tập", icon: <ReportIcon /> },
+                { id: "report", label: "Thống kê học tập", icon: <ReportIcon /> },
             ],
         },
         {

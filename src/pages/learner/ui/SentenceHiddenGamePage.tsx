@@ -6,9 +6,9 @@ import { getSentenceHiddenGames, submitGameAnswer, type GameAnswerReq, type Sent
 import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 
-// Giả định API Fetch, bạn cần điều chỉnh trong file api/game.ts của bạn
-// Ví dụ:
-// export const getSentenceHiddenGames = async (lessonId: number): Promise<SentenceHiddenRes[]> => { ... }
+// --- CẤU HÌNH ĐƯỜNG DẪN ÂM THANH ---
+const SOUND_CORRECT = "/sounds/correct_sound.mp3";
+const SOUND_WRONG = "/sounds/wrong_sound.mp3";
 
 export default function SentenceHiddenGamePage() {
   const navigate = useNavigate();
@@ -31,6 +31,21 @@ export default function SentenceHiddenGamePage() {
 
   const total = games.length;
   const current = games[idx];
+
+  // --- HÀM PHÁT ÂM THANH (MỚI) ---
+    const playAudio = (type: "correct" | "wrong") => {
+        try {
+            const audioSrc = type === "correct" ? SOUND_CORRECT : SOUND_WRONG;
+            const audio = new Audio(audioSrc);
+            // Giảm âm lượng một chút nếu cần (0.0 đến 1.0)
+            audio.volume = 0.8; 
+            audio.play().catch((err) => {
+                console.warn("Không thể phát âm thanh (có thể do trình duyệt chặn hoặc sai đường dẫn):", err);
+            });
+        } catch (e) {
+            console.error("Lỗi khởi tạo âm thanh:", e);
+        }
+    };
 
 
   // --- 1. Fetch Dữ liệu ---
@@ -62,7 +77,13 @@ export default function SentenceHiddenGamePage() {
   }, [idx]);
 
   // Tính toán phần trăm tiến độ
-  const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
+  // const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
+    // --- GAMEPLAY LOGIC ---
+  const progressPct = useMemo(() => {
+    if (total === 0) return 0;
+    return Math.round(((idx + 1) / total) * 100);
+  }, [idx, total]);
+
 
   // --- 3. Xử lý Kiểm tra ---
 const handleCheck = useCallback(async () => {
@@ -96,10 +117,12 @@ const handleCheck = useCallback(async () => {
         ]);
 
         if (answerResult.isCorrect) {
+            playAudio("correct");
             setJudge("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
         } else {
+            playAudio("wrong");
             setJudge("wrong");
         }
         setCorrectAnswerText(answerResult.correctAnswerText); 

@@ -123,10 +123,9 @@ function ReviewItemRenderer({ question, userResult }: { question: any, userResul
       </div>
 
       {/* Phần giải thích đáp án */}
-      {!userResult.correct && (
+      {/* {!userResult.correct && (
         <div style={{ marginTop: "15px", padding: "10px", background: "#f9fafb", borderRadius: "8px", fontSize: "14px" }}>
           <strong>Đáp án đúng: </strong> 
-          {/* Logic hiển thị đáp án đúng dựa vào ID */}
           {question.options
             .filter((o: any) => userResult.correctOptionIds.includes(o.id))
             .map((o: any) => o.optionText || o.text || "Hình ảnh")
@@ -134,7 +133,7 @@ function ReviewItemRenderer({ question, userResult }: { question: any, userResul
           }
           {question.hiddenWord && <span>{question.hiddenWord}</span>}
         </div>
-      )}
+      )} */}
     </div>
   );
 }

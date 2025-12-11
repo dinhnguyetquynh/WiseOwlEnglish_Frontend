@@ -11,6 +11,9 @@ function normalize(s: string) {
     if (!s) return "";
     return s.trim().toLowerCase();
 }
+
+const SOUND_CORRECT = "/sounds/correct_sound.mp3";
+const SOUND_WRONG = "/sounds/wrong_sound.mp3";
 export default function PictureSentenceGamePage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
@@ -33,8 +36,21 @@ export default function PictureSentenceGamePage() {
 
   const total = games.length;
   const current = games[idx];
-
-
+  
+  // --- HÀM PHÁT ÂM THANH (MỚI) ---
+    const playAudio = (type: "correct" | "wrong") => {
+        try {
+            const audioSrc = type === "correct" ? SOUND_CORRECT : SOUND_WRONG;
+            const audio = new Audio(audioSrc);
+            // Giảm âm lượng một chút nếu cần (0.0 đến 1.0)
+            audio.volume = 0.8; 
+            audio.play().catch((err) => {
+                console.warn("Không thể phát âm thanh (có thể do trình duyệt chặn hoặc sai đường dẫn):", err);
+            });
+        } catch (e) {
+            console.error("Lỗi khởi tạo âm thanh:", e);
+        }
+    };
 
   useEffect(() => {
     let alive = true;
@@ -60,7 +76,12 @@ export default function PictureSentenceGamePage() {
     setJudge(null);
   }, [idx]);
 
-  const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
+  // const progressPct = useMemo(() => (total ? Math.round((idx / total) * 100) : 0), [idx, total]);
+    // --- GAMEPLAY LOGIC ---
+  const progressPct = useMemo(() => {
+    if (total === 0) return 0;
+    return Math.round(((idx + 1) / total) * 100);
+  }, [idx, total]);
 
   // const correctAnswerText =
   //   current?.options.find((o) => o.isCorrect)?.sentenceAnswer ?? "";
@@ -96,10 +117,12 @@ export default function PictureSentenceGamePage() {
         ]);
 
         if (answerResult.isCorrect) {
+            playAudio("correct");
             setJudge("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
         } else {
+            playAudio("wrong");
             setJudge("wrong");
         }
         setCorrectAnswerText(answerResult.correctAnswerText);

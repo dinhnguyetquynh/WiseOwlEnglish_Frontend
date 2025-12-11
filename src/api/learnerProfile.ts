@@ -122,4 +122,20 @@ export async function getProfileByLearnerApi(learnerId: number): Promise<Profile
     }
     throw new Error(message);
   }
+
+  
 }
+// 1. Thêm Interface cho response điểm số
+export interface LearnerPointsRes {
+  pointBalance: number;
+  totalRewardCount: number;
+}
+
+// ... các hàm cũ ...
+
+// 2. Thêm hàm lấy điểm số
+export const getLearnerPoints = async (id: number | string): Promise<LearnerPointsRes> => {
+  const url = `/api/learner-profiles/${id}/points`;
+  const response = await axiosClient.get(url);
+  return response.data;
+};

@@ -365,6 +365,10 @@ import { getProfileId } from "../../../store/storage";
 import { markItemAsCompleted, type LessonProgressReq } from "../../../api/lessonProgress";
 import type { MenuState } from "../../../type/menu";
 
+// --- CẤU HÌNH ĐƯỜNG DẪN ÂM THANH ---
+const SOUND_CORRECT = "/sounds/correct_sound.mp3";
+const SOUND_WRONG = "/sounds/wrong_sound.mp3";
+
 export default function SoundWordGamePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -392,6 +396,21 @@ export default function SoundWordGamePage() {
   const total = questions.length;
   const current = questions[idx];
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // --- HÀM PHÁT ÂM THANH (MỚI) ---
+    const playAudioNotice = (type: "correct" | "wrong") => {
+        try {
+            const audioSrc = type === "correct" ? SOUND_CORRECT : SOUND_WRONG;
+            const audio = new Audio(audioSrc);
+            // Giảm âm lượng một chút nếu cần (0.0 đến 1.0)
+            audio.volume = 0.8; 
+            audio.play().catch((err) => {
+                console.warn("Không thể phát âm thanh (có thể do trình duyệt chặn hoặc sai đường dẫn):", err);
+            });
+        } catch (e) {
+            console.error("Lỗi khởi tạo âm thanh:", e);
+        }
+    };
 
   // --- LOGIC NAV STATE ---
   const navState = useMemo(() => {
@@ -469,7 +488,7 @@ export default function SoundWordGamePage() {
   // --- GAMEPLAY LOGIC ---
   const progressPercent = useMemo(() => {
     if (total === 0) return 0;
-    return Math.round((idx / total) * 100);
+    return Math.round(((idx + 1) / total) * 100);
   }, [idx, total]);
 
   const handleSelect = (op: SoundWordOptionRes) => {
@@ -511,10 +530,12 @@ export default function SoundWordGamePage() {
       ]);
 
       if (answerResult.isCorrect) {
+        playAudioNotice("correct");
         setJudge("correct");
         setCorrectCount((c) => c + 1);
         setEarned((p) => p + answerResult.rewardEarned);
       } else {
+        playAudioNotice("wrong");
         setJudge("wrong");
       }
       setCorrectAnswerText(answerResult.correctAnswerText);

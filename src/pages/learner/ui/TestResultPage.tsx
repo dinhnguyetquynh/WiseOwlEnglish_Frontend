@@ -13,19 +13,17 @@ export default function TestResultPage() {
   };
   return (
     <div className="result-wrap">
-      <div className="header-link">
-        <p>Trang chủ {'>'} Menu Bài học {'>'} Kiểm tra {'>'} Kết quả  </p>
-      </div>
+    
       <h1 className="result-title">KẾT QUẢ KIỂM TRA</h1>
 
       <div className="result-summary">
-        <p><strong>Điểm:</strong> {result.score.toFixed(2)} / {result.questionCount}</p>
+        <p><strong>Điểm:</strong> {result.score.toFixed(2)} / 10</p>
         <p><strong>Đúng:</strong> {result.correctCount} câu</p>
         <p><strong>Sai:</strong> {result.wrongCount} câu</p>
         <p><strong>Thời gian làm bài:</strong> {Math.floor(result.durationSec / 60)} phút {result.durationSec % 60} giây</p>
       </div>
 
-      <div className="result-questions">
+      {/* <div className="result-questions">
         <h2>Chi tiết từng câu:</h2>
         {result.questionResults.map((qr, index) => (
           <div key={qr.questionId} className={`result-question ${qr.correct ? "ok" : "no"}`}>
@@ -46,7 +44,7 @@ export default function TestResultPage() {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       <div className="result-actions">
         <button onClick={handleReview} className="pg-btn pg-btn--ghost" style={{ marginRight: 10 }}>

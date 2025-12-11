@@ -75,7 +75,7 @@ export default function TestPWW({
      style={inputStyle}
      autoFocus
     />
-    {/* {disabled && !isUserCorrect && (
+    {disabled && !isUserCorrect && (
           <div style={{ marginTop: "12px", textAlign: "center", animation: "fadeIn 0.3s" }}>
             <span style={{ color: "#6b7280", fontSize: "14px", marginRight: "6px" }}>
               Đáp án đúng:
@@ -84,7 +84,7 @@ export default function TestPWW({
               {correctAnswerText}
             </span>
           </div>
-        )} */}
+        )}
    </div>
   </div>
  );

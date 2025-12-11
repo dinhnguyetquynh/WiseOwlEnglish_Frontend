@@ -1,11 +1,11 @@
-/* src/components/learner/css/UserBadge.css */
+/* 
 .user-badge {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px 12px 8px 8px; /* padding trái nhỏ hơn để avatar sát lề */
+  padding: 8px 12px 8px 8px;
   background: #fff;
-  border-radius: 99px; /* Pill shape */
+  border-radius: 99px; 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -50,12 +50,106 @@
   font-weight: 500;
 }
 
-/* Loading state */
 .user-badge__loading {
   width: 120px;
   height: 40px;
   background: #f3f4f6;
   border-radius: 20px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+} */
+/* src/components/learner/css/UserBadge.css */
+
+.user-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px 6px 6px; /* Tinh chỉnh lại padding cho cân đối */
+  background: #fff;
+  border-radius: 99px; /* Pill shape */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer; /* Đổi thành pointer để người dùng biết có thể click (nếu sau này muốn click vào xem chi tiết) */
+  max-width: 260px; /* Tăng nhẹ max-width để chứa đủ số liệu */
+}
+
+.user-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.user-badge__avatar {
+  width: 42px; /* Tăng nhẹ kích thước avatar */
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  flex-shrink: 0;
+  background-color: #f1f5f9;
+}
+
+.user-badge__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  gap: 2px; /* Khoảng cách giữa Tên và Chỉ số */
+}
+
+.user-badge__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* --- PHẦN MỚI THÊM VÀO --- */
+
+.user-badge__stats {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Khoảng cách giữa cụm Kim cương và Cụm thưởng */
+  font-size: 12px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Khoảng cách giữa icon và số */
+}
+
+.stat-icon {
+  font-size: 13px; /* Kích thước emoji */
+  line-height: 1;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: #475569; /* Màu xám đậm dễ đọc */
+  font-variant-numeric: tabular-nums; /* Giúp các con số thẳng hàng đẹp hơn */
+}
+
+.stat-divider {
+  width: 1px;
+  height: 12px;
+  background-color: #cbd5e1; /* Màu thanh chia cắt */
+}
+
+/* --- LOADING STATE --- */
+.user-badge__loading {
+  width: 140px;
+  height: 48px;
+  background: #f3f4f6;
+  border-radius: 99px;
   animation: pulse 1.5s infinite;
 }
 

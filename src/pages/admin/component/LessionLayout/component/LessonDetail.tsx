@@ -255,3 +255,4 @@ export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
 
     );
 }
+

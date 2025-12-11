@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import "../css/GradeProgress.css"; // Import file CSS mới
 import { getGradeProgress, type GradeProgress } from "../../../api/gradeProgress";
-import { getProfileId } from "../../../store/storage";
+import { getPrimaryGrade, getProfileId } from "../../../store/storage";
 import FancyClassSelect from "../../../components/learner/ui/FancyClassSelect";
 
 // --- COMPONENT CON: VÒNG TRÒN TIẾN ĐỘ ---
@@ -47,7 +47,10 @@ export default function GradeProgress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Mặc định chọn lớp 1 (orderIndex = 1)
-  const [selectedGrade, setSelectedGrade] = useState(1);
+  const [selectedGrade, setSelectedGrade] = useState(() => {
+    const saved = getPrimaryGrade();
+    return saved ?? 1;
+  });
 
   const profileId = getProfileId();
 
@@ -186,8 +189,14 @@ export default function GradeProgress() {
 
                   {/* Điểm test */}
                   <div className="pr-score" data-label="Điểm test">
-                    {/* Giả định điểm test trên thang 10 */}
-                    {lesson.lastTestScore.toFixed(1)} / 10
+                    {/* Kiểm tra: nếu có giá trị (khác null/undefined) và điểm >= 0 */}
+                    {(lesson.lastTestScore !== null && lesson.lastTestScore !== undefined && lesson.lastTestScore >= 0) ? (
+                      <span>{lesson.lastTestScore.toFixed(1)} / 10</span>
+                    ) : (
+                      <span style={{ fontSize: "0.85rem", color: "#999", fontStyle: "italic" }}>
+                        Chưa có điểm
+                      </span>
+                    )}
                   </div>
 
                   {/* Hành động */}

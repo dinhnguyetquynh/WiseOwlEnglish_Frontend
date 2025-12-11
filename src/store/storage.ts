@@ -24,3 +24,14 @@ export function getRole(): string | null {
 export function clearRole() {
   localStorage.removeItem("role");
 }
+
+const KEY_PRIMARY_GRADE = "primary_grade";
+
+export const savePrimaryGrade = (grade: number) => {
+  localStorage.setItem(KEY_PRIMARY_GRADE, String(grade));
+};
+
+export const getPrimaryGrade = (): number | null => {
+  const val = localStorage.getItem(KEY_PRIMARY_GRADE);
+  return val ? Number(val) : null;
+};

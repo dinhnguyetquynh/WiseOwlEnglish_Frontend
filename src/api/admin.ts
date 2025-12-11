@@ -167,15 +167,19 @@ export async function createLesson(payload: CreateLessonReq): Promise<CreateLess
     return res.data;
 }
 
-
-
-
 export const VocabResSchema = z.object({
     id: z.number().int().nonnegative(),
     orderIndex: z.number().int().nonnegative(),
     term_en: z.string(),
     phonetic: z.string().nullable().optional(),
     partOfSpeech: z.string().nullable().optional(),
+
+    // Thêm các trường mới
+    term_vi: z.string().nullable().optional(),
+    isForLearning: z.boolean().optional().default(true),
+    imgUrl: z.string().nullable().optional(),
+    audioNormal: z.string().nullable().optional(),
+    audioSlow: z.string().nullable().optional(),
 });
 
 export const SentenceAdminResSchema = z.object({
@@ -391,5 +395,23 @@ export interface LessonUpdatedRes {
 export const updateLesson = async (id: number, data: UpdateLessonReq):Promise<LessonUpdatedRes> => {
     // Đường dẫn API phải khớp với Backend Controller bạn đã viết
     const response = await axiosClient.put(`/api/lesson-admin/update/${id}`, data);
+    return response.data;
+};
+
+// 3. THÊM INTERFACE CHO REQUEST UPDATE
+export interface VocabUpdateReq {
+    term_en: string;
+    term_vi: string;
+    phonetic: string;
+    partOfSpeech: string;
+    isForLearning: boolean;
+    imgUrl: string | null;
+    audioNormal: string | null;
+    audioSlow: string | null;
+}
+
+// 4. HAM UPDATE VOCAB
+export const updateVocab = async (id: number, data: VocabUpdateReq): Promise<VocabRes> => {
+    const response = await axiosClient.put<VocabRes>(`/api/admin/vocab/update/${id}`, data);
     return response.data;
 };

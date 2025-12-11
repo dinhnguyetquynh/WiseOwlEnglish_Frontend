@@ -13,6 +13,10 @@ function normalize(s: string) {
     return s.trim().toLowerCase();
 }
 
+// --- CẤU HÌNH ĐƯỜNG DẪN ÂM THANH ---
+const SOUND_CORRECT = "/sounds/correct_sound.mp3";
+const SOUND_WRONG = "/sounds/wrong_sound.mp3";
+
 export default function PictureGuessingGamePage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
@@ -29,6 +33,23 @@ export default function PictureGuessingGamePage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [correctAnswerText, setCorrectAnswerText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+  // --- HÀM PHÁT ÂM THANH (MỚI) ---
+    const playAudio = (type: "correct" | "wrong") => {
+        try {
+            const audioSrc = type === "correct" ? SOUND_CORRECT : SOUND_WRONG;
+            const audio = new Audio(audioSrc);
+            // Giảm âm lượng một chút nếu cần (0.0 đến 1.0)
+            audio.volume = 0.8; 
+            audio.play().catch((err) => {
+                console.warn("Không thể phát âm thanh (có thể do trình duyệt chặn hoặc sai đường dẫn):", err);
+            });
+        } catch (e) {
+            console.error("Lỗi khởi tạo âm thanh:", e);
+        }
+    };
+
     useEffect(() => {
       if (!unitId) return;
       let isMounted = true;
@@ -104,11 +125,15 @@ export default function PictureGuessingGamePage() {
         // 3. Dùng kết quả chấm điểm (answerResult) để cập nhật UI
         if (answerResult.isCorrect) {
             console.log("ket qua cua dap an la: "+answerResult.isCorrect+answerResult.correctAnswerText+answerResult.rewardEarned);
+            // --- PHÁT ÂM THANH ĐÚNG ---
+                playAudio("correct");
             setShowResult("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
         } else {
             console.log("ket qua sai roi"+answerResult.isCorrect+answerResult.correctAnswerText+answerResult.rewardEarned);
+            // --- PHÁT ÂM THANH SAI ---
+                playAudio("wrong");
             setShowResult("wrong");
         }
         setCorrectAnswerText(answerResult.correctAnswerText); // Lưu đáp án đúng
@@ -170,7 +195,13 @@ export default function PictureGuessingGamePage() {
     );
   }
 
-  const percent = Math.round((idx / Math.max(total, 1)) * 100);
+  const percent = Math.round(((idx + 1) / total) * 100);
+    // --- GAMEPLAY LOGIC ---
+  // const percent = useMemo(() => {
+  //   if (total === 0) return 0;
+  //   return Math.round(((idx + 1) / total) * 100);
+  // }, [idx, total]);
+
 
   return (
     <div className="pg-wrap">
@@ -258,29 +289,6 @@ export default function PictureGuessingGamePage() {
         </button>
       </div>
 
-      {/* {showResult && (
-        <div className={`pg-result ${showResult === "wrong" ? "pg-result--wrong" : "pg-result--correct"}`}>
-          <div className="pg-result__info">
-            <div className="pg-result__icon">{showResult === "wrong" ? "✖" : "✔"}</div>
-            <div>
-              <div className="pg-result__title">{showResult === "wrong" ? "Đáp án đúng:" : "Đáp án đúng"}</div>
-              <div className="pg-result__desc">
-               {correctAnswerText}
-               {showResult === "correct" && (
-                  <span className="pg-reward">+{earned - (correctCount - 1) * current.reward} điểm thưởng</span>
-                )}
-              </div>
-            </div>
-          </div>
-          <div>
-            <button onClick={gotoNext} className={`pg-btn ${showResult === "wrong" ? "pg-btn--danger" : "pg-btn--success"}`}>
-              {showResult === "wrong" ? "ĐÃ HIỂU" : "TIẾP TỤC"}
-            </button>
-          </div>
-        </div>
-      )} */}
-
-      {/* 👇 CẬP NHẬT PHẦN HIỂN THỊ KẾT QUẢ (FEEDBACK BANNER) */}
       {showResult && (
         <div className={`pg-feedback ${showResult === "correct" ? "pg-feedback--correct" : "pg-feedback--wrong"}`}>
           <div className="pg-feedback-inner">

@@ -22,7 +22,8 @@ function shuffleArray<T>(array: T[]): T[] {
   return newArray;
 }
 
-
+  const SOUND_CORRECT = "/sounds/correct_sound.mp3";
+  const SOUND_WRONG = "/sounds/wrong_sound.mp3";
 export default function PictureMatchWordGamePage() {
   const navigate = useNavigate();
   const { unitId = "" } = useParams();
@@ -49,6 +50,22 @@ export default function PictureMatchWordGamePage() {
 
   const total = games.length;
   const current = games[idx];
+
+
+  // --- HÀM PHÁT ÂM THANH (MỚI) ---
+    const playAudio = (type: "correct" | "wrong") => {
+        try {
+            const audioSrc = type === "correct" ? SOUND_CORRECT : SOUND_WRONG;
+            const audio = new Audio(audioSrc);
+            // Giảm âm lượng một chút nếu cần (0.0 đến 1.0)
+            audio.volume = 0.8; 
+            audio.play().catch((err) => {
+                console.warn("Không thể phát âm thanh (có thể do trình duyệt chặn hoặc sai đường dẫn):", err);
+            });
+        } catch (e) {
+            console.error("Lỗi khởi tạo âm thanh:", e);
+        }
+    };
 
   // (useEffect fetch data giữ nguyên)
   useEffect(() => {
@@ -151,6 +168,7 @@ export default function PictureMatchWordGamePage() {
       setPaired((p) => ({ ...p, [leftOpt.id]: rightOpt.id }));
       // 2. Báo 'correct'
       setJudge("correct");
+      playAudio("correct");
       // 3. 💥 KHÔNG CỘNG ĐIỂM Ở ĐÂY 💥
 
       // 4. Reset và mở khóa
@@ -164,7 +182,7 @@ export default function PictureMatchWordGamePage() {
     } else {
       // 1. Nối sai -> Báo 'wrong'
       setJudge("wrong");
-      
+      playAudio("wrong");
       // 2. 💥 KHÔNG THÊM VÀO 'paired' 💥
 
       // 3. Reset và mở khóa (thời gian xem 5s hơi lâu, giảm còn 1.5s)
@@ -279,6 +297,10 @@ export default function PictureMatchWordGamePage() {
   const totalPairs = leftOptions.length;
   const canFinish = allPairedCount >= totalPairs;
 
+    // --- GAMEPLAY LOGIC ---
+ 
+  const percent = Math.round(((idx + 1) / total) * 100);
+
   return (
     <div className="pmw__wrap">
       {/* (Top bar, Title, Game Area giữ nguyên) */}
@@ -287,7 +309,7 @@ export default function PictureMatchWordGamePage() {
         <div className="pmw__progress">
           {/* 💥 Progress bar hiển thị số cặp đã nối / tổng số cặp 💥 */}
           <div className="pmw__progress-bar">
-            <div className="pmw__progress-fill" style={{ width: `${(allPairedCount / totalPairs) * 100}%` }} />
+            <div className="pmw__progress-fill" style={{ width: `${percent}%` }} />
           </div>
           <div className="pmw__progress-text">{idx + 1}/{total}</div>
         </div>

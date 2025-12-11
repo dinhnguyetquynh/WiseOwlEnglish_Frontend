@@ -4,6 +4,15 @@ import type { TestQuestionRes } from "../../../type/test";
 
 type Pair = { leftOptionId: number; rightOptionId: number };
 
+// Hàm tiện ích để xáo trộn mảng
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]; // Tạo bản sao để không ảnh hưởng mảng gốc
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 export default function TestPMW({
   q,
   pairs, // Danh sách các cặp người dùng đã nối
@@ -21,9 +30,13 @@ export default function TestPMW({
   const [hintId, setHintId] = useState<number | null>(null); 
 
   const { leftOpts, rightOpts } = useMemo(() => {
-    const left = q.options?.filter((o) => o.side === "LEFT") || [];
-    const right = q.options?.filter((o) => o.side === "RIGHT") || [];
-    return { leftOpts: left, rightOpts: right };
+    const leftRaw = q.options?.filter((o) => o.side === "LEFT") || [];
+    const rightRaw = q.options?.filter((o) => o.side === "RIGHT") || [];
+    
+    const leftShuffled = shuffleArray(leftRaw);
+    const rightShuffled = shuffleArray(rightRaw);
+
+    return { leftOpts: leftShuffled, rightOpts: rightShuffled };
   }, [q.options]);
 
   // --- LOGIC HELPERS ---
@@ -138,7 +151,7 @@ export default function TestPMW({
         style={{
           padding: 8,
           borderRadius: 12,
-          cursor: disabled ? "help" : "pointer", // Cursor help khi review
+          cursor: disabled ? "help" : "pointer", 
           background: bg,
           border: border,
           color: color,

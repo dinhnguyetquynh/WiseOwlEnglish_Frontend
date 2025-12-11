@@ -4,7 +4,7 @@ import "./css/HomePage.css";
 import FancyClassSelect from "../../components/learner/ui/FancyClassSelect.tsx";
 import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { fetchLessonsByGradeForProfile, fetchLessonsForHomePage, type LessonsByClassRes } from "../../api/learn.ts";
-import { getProfileId } from "../../store/storage.ts";
+import { getProfileId, savePrimaryGrade } from "../../store/storage.ts";
 import { getProfile, type LearnerProfileRes } from "../../api/learnerProfile.ts";
 
 export default function HomePage() {
@@ -47,6 +47,9 @@ useEffect(() => {
         const data: LessonsByClassRes = await fetchLessonsForHomePage(profileId);
         setPrimaryGrade(data.gradeOrderIndex);
         setSelectedGrade(data.gradeOrderIndex);
+
+        //Lưu primaryGrade vào localStorage
+        savePrimaryGrade(data.gradeOrderIndex);
 
       } catch (e: any) {
         setErr(e?.message ?? "Lỗi tải bài học");
