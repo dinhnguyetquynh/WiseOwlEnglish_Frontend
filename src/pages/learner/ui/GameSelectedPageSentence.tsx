@@ -135,10 +135,10 @@ export default function GameSelectedPageSentence() {
   return (
     <div className="gs-wrap">
       <header className="gs-header">
-      <button className="gs-back-btn" onClick={handleBack}>
+      {/* <button className="gs-back-btn" onClick={handleBack}>
         ← Trở lại trang trước
       </button>
-        <p>Trang chủ &gt; Menu bài học &gt; Ôn tập câu </p>
+        <p>Trang chủ &gt; Menu bài học &gt; Ôn tập câu </p> */}
         <h1 className="gs-title"><span>🌟</span> Sẵn Sàng Học Chưa? <span>🌟</span></h1>
         <p className="gs-subtitle">Chọn trò chơi bạn muốn chinh phục hôm nay!</p>
       </header>

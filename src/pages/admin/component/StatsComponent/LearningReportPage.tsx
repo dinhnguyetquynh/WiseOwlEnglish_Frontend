@@ -25,7 +25,7 @@ export default function LearningReportPage() {
     <Box>
       {/* Header & Filter */}
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h5" fontWeight={700} color="#1a237e">BÁO CÁO HỌC TẬP</Typography>
+        <Typography variant="h5" fontWeight={700} color="#1a237e">THỐNG KÊ HỌC TẬP</Typography>
         <Select 
           value={selectedGrade} 
           onChange={(e) => setSelectedGrade(Number(e.target.value))}
@@ -44,7 +44,7 @@ export default function LearningReportPage() {
               <ClassOutlined sx={{ fontSize: 40, color: '#f57c00' }} />
               <Box>
                 <Typography variant="subtitle1" color="#e65100" fontWeight={600}>
-                   Đang xem báo cáo: Lớp {selectedGrade}
+                   Đang xem thống kê học tập: Lớp {selectedGrade}
                 </Typography>
                 <Typography variant="h4" fontWeight={800} color="#f57c00">
                    {reportData.totalStudentsInGrade} <span style={{fontSize: '1rem', fontWeight: 500}}>học sinh đang theo học</span>

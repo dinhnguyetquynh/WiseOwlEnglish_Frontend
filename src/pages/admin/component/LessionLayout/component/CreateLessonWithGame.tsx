@@ -328,7 +328,7 @@ export default function CreateLessonWithGame({
                         sx={{ width: 300 }}   // căn giữa cần width cố định
                     >
                         <MenuItem value="">
-                            <i>-- Chọn loại game --</i>
+                            <i>-- Chọn loại câu hỏi --</i>
                         </MenuItem>
 
                         <MenuItem value="PICTURE4_WORD4_MATCHING">Picture 4 - Word 4</MenuItem>

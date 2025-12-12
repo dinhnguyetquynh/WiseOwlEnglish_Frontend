@@ -186,6 +186,12 @@ export const SentenceAdminResSchema = z.object({
     id: z.number().int().nonnegative(),
     orderIndex: z.number().int().nonnegative(),
     sen_en: z.string(),
+
+     sen_vi: z.string(),
+     imgUrl: z.string().nullable().optional(),
+    audioNormal: z.string().nullable().optional(),
+    audioSlow: z.string().nullable().optional(),
+
 });
 
 export const LessonDetailSchema = z.object({
@@ -413,5 +419,41 @@ export interface VocabUpdateReq {
 // 4. HAM UPDATE VOCAB
 export const updateVocab = async (id: number, data: VocabUpdateReq): Promise<VocabRes> => {
     const response = await axiosClient.put<VocabRes>(`/api/admin/vocab/update/${id}`, data);
+    return response.data;
+};
+
+export const deleteTestById = async (id: number) => {
+    const url = `/api/test-admin/delete/${id}`; 
+    return axiosClient.delete(url);
+};
+
+// 1. Interface cho Request Update Câu
+export interface SentenceUpdateReq {
+    sen_en: string;
+    sen_vi: string;
+    imgUrl: string | null;
+    audioNormal: string | null;
+    audioSlow: string | null;
+}
+
+// 2. Interface đầy đủ cho Sentence (để hiển thị lên form sửa)
+// (Lưu ý: SentenceAdminRes hiện tại của bạn hơi thiếu trường, bạn có thể dùng cái này cho Modal)
+export interface SentenceFullRes {
+    id: number;
+    orderIndex: number;
+    sen_en: string;
+    sen_vi: string;
+    imgUrl: string | null;
+    audioNormal: string | null;
+    audioSlow: string | null;
+    isForLearning: boolean;
+}
+
+// 3. Hàm gọi API Update Sentence
+export const updateSentence = async (id: number, data: SentenceUpdateReq): Promise<SentenceFullRes> => {
+    const response = await axiosClient.put<SentenceFullRes>(
+        `/api/admin/sentences/update/${id}`, // Endpoint này cần khớp với Controller Java của bạn
+        data
+    );
     return response.data;
 };

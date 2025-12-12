@@ -121,6 +121,7 @@ export default function PictureSentenceGamePage() {
             setJudge("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
+            window.dispatchEvent(new Event("EVENT_UPDATE_POINTS"));
         } else {
             playAudio("wrong");
             setJudge("wrong");
@@ -171,7 +172,7 @@ export default function PictureSentenceGamePage() {
 
   if (loading) return <div className="psg__wrap"><div className="psg__loader">Đang tải...</div></div>;
   if (error) return <div className="psg__wrap"><div className="psg__error">{error}</div></div>;
-  if (!current) return <div className="psg__wrap"><div className="psg__empty">Không có dữ liệu.</div></div>;
+  if (!current) return <div className="psg__wrap"><div className="psg__empty">Đang tải...</div></div>;
 
   return (
     <div className="psg__wrap">
@@ -251,7 +252,8 @@ export default function PictureSentenceGamePage() {
                 <div className="psg__fb-answer">{correctAnswerText}</div>
                 {judge === "correct" && (
                   <div className="psg__fb-reward">
-                    Bạn nhận được <b>+{current.rewardPoint ?? 0}</b> điểm thưởng
+                    {/* Bạn nhận được <b>+{current.rewardPoint ?? 0}</b> điểm thưởng */}
+                    Bạn nhận được <b>+{current.rewardPoint ?? 0}</b> điểm thưởng ⭐  và <b>+{current.rewardPoint?? 0}</b> kim cương 💎
                   </div>
                 )}
               </div>

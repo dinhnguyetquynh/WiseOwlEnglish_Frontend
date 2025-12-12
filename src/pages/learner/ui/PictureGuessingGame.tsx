@@ -130,6 +130,9 @@ export default function PictureGuessingGamePage() {
             setShowResult("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
+                 // --- CẬP NHẬT MỚI TẠI ĐÂY ---
+        // Phát sự kiện để báo cho UserBadge biết cần cập nhật điểm
+        window.dispatchEvent(new Event("EVENT_UPDATE_POINTS"));
         } else {
             console.log("ket qua sai roi"+answerResult.isCorrect+answerResult.correctAnswerText+answerResult.rewardEarned);
             // --- PHÁT ÂM THANH SAI ---
@@ -312,7 +315,8 @@ export default function PictureGuessingGamePage() {
                 {/* Reward Point */}
                 {showResult === "correct" && (
                   <div className="pg-fb-reward">
-                    +{earned - (correctCount - 1) * (current.reward || 0)} điểm thưởng
+                    {/* +{earned - (correctCount - 1) * (current.reward || 0)} điểm thưởng */}
+                    Bạn nhận được <b>+{current.reward ?? 0}điểm thưởng ⭐  và +{current.reward ?? 0}</b> kim cương 💎
                   </div>
                 )}
               </div>

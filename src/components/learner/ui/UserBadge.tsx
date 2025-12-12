@@ -63,7 +63,7 @@
 //     </div>
 //   );
 // }
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getProfileId } from "../../../store/storage";
 // Import thêm getLearnerPoints và LearnerPointsRes
 import { 
@@ -76,11 +76,26 @@ import "../css/UserBadge.css";
 
 const DEFAULT_AVATAR = "https://res.cloudinary.com/dxhhluk84/image/upload/v1759137636/unit1_color_noBG_awzhqe.png";
 
+// Tên sự kiện thống nhất giữa 2 file
+export const EVENT_UPDATE_POINTS = "EVENT_UPDATE_POINTS";
+
 export default function UserBadge() {
   const [profile, setProfile] = useState<LearnerProfileRes | null>(null);
   // State mới để lưu điểm
   const [points, setPoints] = useState<LearnerPointsRes | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // 1. Hàm riêng để tải điểm (Dùng để gọi lại khi cần)
+  const fetchPoints = useCallback(async () => {
+    const id = getProfileId();
+    if (!id) return;
+    try {
+      const pointsData = await getLearnerPoints(id);
+      setPoints(pointsData);
+    } catch (error) {
+      console.error("Failed to update points:", error);
+    }
+  }, []);
 
   useEffect(() => {
     const id = getProfileId();
@@ -109,10 +124,23 @@ export default function UserBadge() {
       }
     })();
 
+    // return () => {
+    //   isMounted = false;
+    // };
+    // 2. Đăng ký lắng nghe sự kiện cập nhật điểm
+    const handleUpdateEvent = () => {
+      // Khi nghe thấy sự kiện, gọi lại API lấy điểm mới nhất
+      fetchPoints();
+    };
+
+    window.addEventListener(EVENT_UPDATE_POINTS, handleUpdateEvent);
+
     return () => {
       isMounted = false;
+      // Dọn dẹp sự kiện khi component bị hủy
+      window.removeEventListener(EVENT_UPDATE_POINTS, handleUpdateEvent);
     };
-  }, []);
+  }, [fetchPoints]);
 
   if (loading) {
     return <div className="user-badge__loading" />;

@@ -157,7 +157,12 @@ export default function LessonProgressDetailPage() {
           data.incorrectSentences.map((item, i) => (
             <div className="lpd-review-item" key={`s-${i}`}>
               {/* (Đối với câu, chúng ta có thể chỉ hiển thị lpd-item-en) */}
-              <div className="lpd-item-en">{item.itemEn}</div>
+              <div>
+                <div className="lpd-item-en">{item.itemEn}</div>
+                 <div className="lpd-item-vi">{item.itemVi}</div>
+              </div>
+              
+             
               <span className="lpd-item-count">{item.wrongCount} lần sai</span>
             </div>
           ))

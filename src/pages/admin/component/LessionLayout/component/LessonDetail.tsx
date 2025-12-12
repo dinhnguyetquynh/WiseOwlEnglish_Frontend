@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useEffect, useState } from "react";
-import { updateTestStatus } from "../../../../../api/admin";
+import { deleteTestById, updateTestStatus } from "../../../../../api/admin";
 
 import { getTestsByLesson, type LessonDetailResponse } from "../../../../../api/admin";
 import CreateLessonWithGame from "./CreateLessonWithGame";
@@ -66,6 +66,38 @@ export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
             console.error(err);
         } finally {
             // tắt loading
+            setLoadingStatus(prev => ({ ...prev, [testId]: false }));
+        }
+    };
+
+    // --- HÀM XỬ LÝ XOÁ ---
+    const handleDeleteTest = async (testId: number) => {
+        // 1. Xác nhận trước khi xoá
+        if (!window.confirm("Bạn có chắc chắn muốn xoá bài kiểm tra này không?")) {
+            return;
+        }
+
+        // 2. Bật loading cho item này
+        setLoadingStatus(prev => ({ ...prev, [testId]: true }));
+
+        try {
+            // 3. Gọi API
+            const res = await deleteTestById(testId); 
+            
+            // 4. Hiển thị thông báo từ Backend (Backend trả về String message)
+            // Giả sử axios trả về res.data là string message
+            alert(res.data || "Xoá thành công!");
+
+            // 5. Reload lại dữ liệu để cập nhật danh sách
+            loadData();
+
+        } catch (error: any) {
+            console.error(error);
+            // 6. Xử lý lỗi (Ví dụ: Lesson đang active -> Backend ném 400 BadRequest)
+            const errorMessage = error.response?.data?.message || error.response?.data || "Có lỗi xảy ra khi xoá!";
+            alert(errorMessage);
+        } finally {
+            // 7. Tắt loading
             setLoadingStatus(prev => ({ ...prev, [testId]: false }));
         }
     };
@@ -201,10 +233,19 @@ export default function LessonDetail({ lessonId, onBack }: LessonDetailProps) {
 
                     {/* Delete */}
                     <Box flex={1}>
-                        <IconButton disabled={t.hasAttempt}>
-                            <DeleteIcon
-                                sx={{ color: t.hasAttempt ? "grey" : "#222" }}
-                            />
+                       <IconButton 
+                            onClick={() => handleDeleteTest(t.id)}
+                            disabled={loadingStatus[t.id]} 
+                        >
+                            {loadingStatus[t.id] ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <DeleteIcon
+                                    sx={{ 
+                                        color: t.hasAttempt ? "warning.main" : "#d32f2f" 
+                                    }}
+                                />
+                            )}
                         </IconButton>
                     </Box>
                 </Box>

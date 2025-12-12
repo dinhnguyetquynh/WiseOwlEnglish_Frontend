@@ -129,6 +129,9 @@ async function handleCheck() {
             setJudge("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
+            // --- CẬP NHẬT MỚI TẠI ĐÂY ---
+        // Phát sự kiện để báo cho UserBadge biết cần cập nhật điểm
+        window.dispatchEvent(new Event("EVENT_UPDATE_POINTS"));
         } else {
             playAudio("wrong");
             setJudge("wrong");
@@ -178,7 +181,7 @@ async function handleCheck() {
 
   if (loading) return <div className="psg__wrap"><div className="psg__loader">Đang tải...</div></div>;
   if (error) return <div className="psg__wrap"><div className="psg__error">{error}</div></div>;
-  if (!current) return <div className="psg__wrap"><div className="psg__empty">Không có dữ liệu.</div></div>;
+  if (!current) return <div className="psg__wrap"><div className="psg__empty">Đang tải...</div></div>;
 
   return (
     <div className="psg__wrap">
@@ -248,7 +251,7 @@ async function handleCheck() {
                 </div>
                 <div className="psg__fb-answer">{correctAnswerText}</div>
                 {judge === "correct" && (
-                  <div className="psg__fb-reward">Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng</div>
+                  <div className="psg__fb-reward">Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng ⭐  và <b>+{current.rewardCore ?? 0}</b> kim cương 💎</div>
                 )}
               </div>
             </div>

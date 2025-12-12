@@ -178,7 +178,7 @@ html, body, #root { height: 100%; }
   justify-content:space-between;
   padding: 0 20px;
 }
-.pmw__fb-left{ display:flex; gap:12px; align-items:center; }
+.pmw__fb-left{ display:flex; gap:12px; align-items:center;flex: 1; }
 .pmw__fb-icon{ width:44px; height:44px; border-radius:50%; background:#fff; display:grid; place-items:center; box-shadow: 0 2px 6px rgba(0,0,0,.06); }
 .pmw__fb-icon.ok::before{
   content:""; width:20px; height:20px; background-image: url("data:image/svg+xml,%3Csvg...%3E"); display:block;
@@ -196,10 +196,118 @@ html, body, #root { height: 100%; }
   text-align:center;
 }
 
+
 /* Responsive: giảm min-height trên màn nhỏ */
 @media (max-width: 800px) {
   .pmw__game-area { flex-direction: column; }
   .pmw__left, .pmw__right { width: 100%; }
   .pmw__word, .pmw__imgbtn { min-height: 84px; }
   .pmw__imgbtn img { max-height: 64px; }
+}
+/* --- PictureMatchWord.css --- */
+
+/* Banner dính đáy màn hình */
+.pmw__feedback {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 2px solid #e5e5e5;
+  padding: 20px;
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+}
+
+.pmw__feedback--ok {
+  background-color: #dff6dd; /* Màu nền xanh nhạt khi đúng */
+  border-top-color: #badcba;
+}
+
+.pmw__feedback--bad {
+  background-color: #ffdfe0; /* Màu nền đỏ nhạt khi sai */
+  border-top-color: #ffbaba;
+}
+
+.pmw__feedback-inner {
+  max-width: 1100px; /* Tăng từ 600px lên 1100px để rộng bằng khung game */
+  width: 100%;       /* Đảm bảo chiếm hết chiều ngang cho phép */
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between; /* Đẩy text sang trái, button sang phải */
+  align-items: center;
+  padding: 0 24px;   /* Thêm đệm 2 bên để không bị sát mép màn hình */
+}
+
+.pmw__fb-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1; /* Cho phép phần text chiếm khoảng trống còn dư */
+}
+
+/* Icon trạng thái */
+.pmw__fb-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-size: 60%;
+  background-repeat: no-repeat;
+  background-position: center;
+  flex-shrink: 0;
+}
+.pmw__fb-icon.ok {
+  background-color: #27ae60;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>');
+}
+.pmw__fb-icon.bad {
+  background-color: #e74c3c;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>');
+}
+
+.pmw__fb-title {
+  font-weight: bold;
+  font-size: 18px;
+  color: #2c3e50;
+}
+.pmw__feedback--ok .pmw__fb-title { color: #27ae60; }
+.pmw__feedback--bad .pmw__fb-title { color: #c0392b; }
+
+.pmw__fb-reward {
+  font-size: 14px;
+  color: #555;
+  margin-top: 4px;
+}
+.pmw__fb-right {
+  margin-left: 20px; /* Tạo khoảng cách an toàn tối thiểu với phần text */
+  flex-shrink: 0;    /* Đảm bảo nút không bị co lại */
+}
+/* Nút bấm trong banner */
+.pmw__fb-right button {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.pmw__fb-right button.ok {
+  background: #27ae60;
+  color: white;
+}
+.pmw__fb-right button.no {
+  background: #e74c3c;
+  color: white;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Ẩn nút check chính khi banner hiện lên để tránh bấm nhầm */
+.pmw__actions.hidden {
+  display: none;
 }

@@ -10,12 +10,35 @@ import LessonDetail from "../component/LessonDetail";
 export default function LessionPage() {
     const { selectedClass, setSelectedClass, setSelectedLesson, selectedLesson } = useHomeContext();
     const [data, setData] = useState<LessonTestItem[]>([]);
+
+    // 1. Tách logic gọi API ra thành 1 hàm riêng để dễ quản lý
+    const loadData = async () => {
+        if (!selectedClass) return;
+        try {
+            const res = await getTestsByGrade(selectedClass);
+            setData(res);
+        } catch (error) {
+            console.error("Failed to load tests:", error);
+        }
+    };
+
+    // useEffect(() => {
+    //     if (!selectedClass) return;    
+
+    //     getTestsByGrade(selectedClass).then(setData);
+    // }, [selectedClass]);
+
     useEffect(() => {
-        if (!selectedClass) return;     // tránh gọi API khi chưa có lớp
-
-        getTestsByGrade(selectedClass).then(setData);
-    }, [selectedClass]);
-
+        // Chỉ gọi API khi:
+        // - Có lớp được chọn (selectedClass)
+        // - VÀ đang ở màn hình danh sách (selectedLesson === null)
+        if (selectedClass && !selectedLesson) {
+            loadData();
+        }
+        
+    // 3. Thêm selectedLesson vào dependency array
+    // Khi bạn bấm nút Back, selectedLesson chuyển về null -> useEffect chạy lại -> loadData()
+    }, [selectedClass, selectedLesson]);
 
 
     const renderHeader = (
@@ -209,13 +232,6 @@ export default function LessionPage() {
                     </Box>
                 ))}
             </Box>
-
-
-
-
-
-
-
         </Box>
     );
 }

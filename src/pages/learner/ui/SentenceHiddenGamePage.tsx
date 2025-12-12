@@ -121,6 +121,7 @@ const handleCheck = useCallback(async () => {
             setJudge("correct");
             setCorrectCount((c) => c + 1);
             setEarned((p) => p + answerResult.rewardEarned);
+            window.dispatchEvent(new Event("EVENT_UPDATE_POINTS"));
         } else {
             playAudio("wrong");
             setJudge("wrong");
@@ -212,7 +213,7 @@ const handleCheck = useCallback(async () => {
 
   if (loading) return <div className="shg__wrap"><div className="shg__loader">Đang tải...</div></div>;
   if (error) return <div className="shg__wrap"><div className="shg__error">{error}</div></div>;
-  if (!current) return <div className="shg__wrap"><div className="shg__empty">Không có dữ liệu.</div></div>;
+  if (!current) return <div className="shg__wrap"><div className="shg__empty">Đang tải...</div></div>;
 
   return (
     <div className="shg__wrap">
@@ -272,7 +273,8 @@ const handleCheck = useCallback(async () => {
                 <div className="shg__fb-answer">{correctAnswerText}</div>
                 {judge === "correct" && (
                   <div className="shg__fb-reward">
-                    Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng
+                    {/* Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng */}
+                    Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng ⭐  và <b>+{current.rewardCore?? 0}</b> kim cương 💎
                   </div>
                 )}
               </div>

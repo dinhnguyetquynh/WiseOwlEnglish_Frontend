@@ -158,6 +158,7 @@ export default function WordToSentenceGamePage() {
                 setJudge("correct");
                 setCorrectCount((x) => x + 1);
                 setEarned((x) => x + (answerResult.rewardEarned ?? 0));
+                window.dispatchEvent(new Event("EVENT_UPDATE_POINTS"));
             } else {
                 playAudio("wrong");
                 setJudge("wrong");
@@ -192,7 +193,7 @@ export default function WordToSentenceGamePage() {
 
     if (loading) return <div className="wtsg__wrap"><div className="wtsg__loader">Đang tải...</div></div>;
     if (error) return <div className="wtsg__wrap"><div className="wtsg__error">{error}</div></div>;
-    if (!current) return <div className="wtsg__wrap"><div className="wtsg__empty">Không có dữ liệu.</div></div>;
+    if (!current) return <div className="wtsg__wrap"><div className="wtsg__empty">Đang tải...</div></div>;
 
     return (
         <div className="wtsg__wrap">
@@ -281,7 +282,7 @@ export default function WordToSentenceGamePage() {
                                 <div className="wtsg__fb-answer">{correctAnswerText}</div> 
                                 {judge === "correct" && (
                                     <div className="wtsg__fb-reward">
-                                        Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng
+                                        Bạn nhận được <b>+{current.rewardCore ?? 0}</b> điểm thưởng ⭐  và <b>+{current.rewardCore ?? 0}</b> kim cương 💎
                                     </div>
                                 )}
                             </div>

@@ -413,7 +413,7 @@ export default function DashboardStats({ onNavigate }: Props) {
                     <Legend wrapperStyle={{ paddingTop: '20px' }} />
                     <Bar 
                         dataKey="count" 
-                        name="Bài học hoàn thành" 
+                        name="Lượt học hoàn thành" 
                         fill="#4caf50" 
                         radius={[6, 6, 0, 0]} 
                         barSize={40} 

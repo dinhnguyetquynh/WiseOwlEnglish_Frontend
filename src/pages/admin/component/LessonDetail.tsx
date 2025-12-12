@@ -13,6 +13,8 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
+    Snackbar,
+    Alert,
 
 } from "@mui/material";
 import { CheckCircle, Cancel } from "@mui/icons-material";
@@ -52,9 +54,21 @@ export default function LessonDetail({
     const [gameTypes, setGameTypes] = useState<string[]>([]);
     const [loadingTypes, setLoadingTypes] = useState(false);
 
-    // 👇 State cho Dialog xóa
+    //  State cho Dialog xóa
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [gameToDelete, setGameToDelete] = useState<{ id: number; title: string } | null>(null);
+
+    //  State mới cho Toast thông báo
+    const [toast, setToast] = useState({
+        open: false,
+        message: "",
+        severity: "success" as "success" | "error" | "warning" | "info" // Kiểu dữ liệu màu sắc
+    });
+
+    //  Hàm đóng Toast khi hết giờ hoặc bấm tắt
+    const handleCloseToast = () => {
+        setToast({ ...toast, open: false });
+    };
 
     useEffect(() => {
         const fetchLesson = async () => {
@@ -111,12 +125,24 @@ export default function LessonDetail({
                     ),
                 });
             }
+            // 3. THÔNG BÁO THÀNH CÔNG (Màu xanh)
+            setToast({
+                open: true,
+                message: message || "Xóa game thành công!",
+                severity: "success"
+            });
             // Đóng dialog
             setOpenDeleteDialog(false);
             setGameToDelete(null);
         } catch (err: any) {
             console.error("Lỗi khi xóa game:", err);
-            alert("Xóa thất bại: " + (err.response?.data?.message || err.message));
+            // 4. ❌ THÔNG BÁO LỖI (Màu đỏ) thay vì alert
+            setToast({
+                open: true,
+                message: err.response?.data?.message || err.message || "Có lỗi xảy ra!",
+                severity: "error"
+            });
+            setOpenDeleteDialog(false);
         }
     };
 
@@ -465,6 +491,22 @@ export default function LessonDetail({
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Snackbar 
+                open={toast.open} 
+                autoHideDuration={4000} // Tự tắt sau 4 giây
+                onClose={handleCloseToast}
+                anchorOrigin={{ vertical: 'top', horizontal: 'right' }} // Hiện ở góc trên bên phải
+            >
+                <Alert 
+                    onClose={handleCloseToast} 
+                    severity={toast.severity} 
+                    variant="filled" // Đổ màu nền cho đẹp (Đỏ đậm/Xanh đậm)
+                    sx={{ width: '100%' }}
+                >
+                    {toast.message}
+                </Alert>
+            </Snackbar>
 
         </Box>
     );
