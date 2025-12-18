@@ -17,10 +17,11 @@ import { useSnackbar } from "notistack";
 
 interface CreateNewLessonProps {
     onSuccess: () => void;
-    lessonIds: number[];   // thêm hàng này
+    lessonIds: number[];   
+    selectedClassId: number;// thêm hàng này
 }
 
-export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLessonProps) {
+export default function CreateNewLesson({ onSuccess, lessonIds,selectedClassId }: CreateNewLessonProps) {
     console.log("lessonIds", lessonIds)
     const { enqueueSnackbar } = useSnackbar();
     const availableOrders = Array.from({ length: 20 }, (_, i) => i + 1)
@@ -106,7 +107,7 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                 unitName,
                 orderIndex,
                 active: true,
-                gradeLevelId: 1,
+                gradeLevelId: selectedClassId,
                 urlMascot: mascotUrl,
             });
 
@@ -188,23 +189,6 @@ export default function CreateNewLesson({ onSuccess, lessonIds }: CreateNewLesso
                     />
                 </Box>
 
-                {/* <Box sx={{ width: "48%" }}>
-                    <Typography sx={{ mb: 1 }}>Thứ tự bài học</Typography>
-                    <Select
-                        value={orderIndex}
-                        onChange={(e) => setOrderIndex(Number(e.target.value))}
-                        fullWidth
-                        IconComponent={ArrowDownIcon}
-                    >
-                        {availableOrders.map((num) => (
-                            <MenuItem key={num} value={num}>
-                                {num}
-                            </MenuItem>
-                        ))}
-
-                    </Select>
-
-                </Box> */}
 
                 <Box sx={{ width: "48%" }}>
                     <Typography sx={{ mb: 1 }}>Chọn ảnh minh hoạ<span style={{ color: 'red' }}>*</span></Typography>

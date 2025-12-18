@@ -457,3 +457,26 @@ export const updateSentence = async (id: number, data: SentenceUpdateReq): Promi
     );
     return response.data;
 };
+
+export const importVocabExcel = async (lessonId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Lưu ý: Content-Type 'multipart/form-data' thường được axios tự động xử lý khi thấy FormData,
+    // nhưng nếu cần thiết bạn có thể config header thủ công.
+    const response = await axiosClient.post(`/api/admin/vocab/import/${lessonId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+export const importSentenceExcel = async (lessonId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await axiosClient.post(`/api/admin/sentences/import/${lessonId}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};

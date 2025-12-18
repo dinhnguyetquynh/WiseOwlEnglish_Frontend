@@ -82,3 +82,10 @@
 .sidebar__buttonlike:hover {
   background: rgba(0,0,0,0.06);
 }
+.layout__header-bar {
+  display: flex;
+  justify-content: space-between; /* 👈 Quan trọng: Đẩy 2 phần tử ra 2 đầu */
+  align-items: center;            /* 👈 Căn giữa theo chiều dọc */
+  margin-bottom: 20px;            /* Tăng khoảng cách dưới một chút cho thoáng */
+  gap: 16px;                      /* Khoảng cách an toàn giữa 2 phần tử */
+}

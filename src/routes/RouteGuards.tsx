@@ -1,6 +1,6 @@
 // src/routes/RouteGuards.tsx
 import { Navigate, Outlet } from "react-router-dom";
-import { getRole } from "../store/storage";
+import { getRole, isGuestMode, KEY_IS_GUEST } from "../store/storage";
 
 // Tùy bạn đọc token từ đâu (localStorage, cookie, zustand...):
 function hasToken() {
@@ -9,7 +9,13 @@ function hasToken() {
 
 export function ProtectedRoute() {
   // Chặn vào các trang cần đăng nhập
-  return hasToken() ? <Outlet /> : <Navigate to="/login" replace />;
+  // return hasToken() ? <Outlet /> : <Navigate to="/login" replace />;
+  if (hasToken() || isGuestMode()) {
+    return <Outlet />;
+  }
+
+  // Nếu không thỏa mãn cả 2, đá về login
+  return <Navigate to="/login" replace />;
 }
 
 export function PublicRoute() {

@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/RegisterPage.css";
+import { clearGuestMode } from "../../../store/storage";
+import { registerApi } from "../../../api/auth";
 
 type RegisterRes = {
   id: number | string;
@@ -55,32 +57,37 @@ export default function RegisterPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:8081/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          password: pw2, // 👈 Gửi password là giá trị của ô "Nhập lại mật khẩu"
-        }),
+      // const res = await fetch("http://localhost:8081/api/auth/register", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     email: email.trim(),
+      //     password: pw2, // 👈 Gửi password là giá trị của ô "Nhập lại mật khẩu"
+      //   }),
+      // });
+
+      // // nếu server trả JSON thông tin lỗi/ok
+      // if (!res.ok) {
+      //   // cố gắng lấy message từ body
+      //   let message = "Đăng ký thất bại. Vui lòng thử lại.";
+      //   try {
+      //     const data = await res.json();
+      //     if (data?.message) message = data.message;
+      //     if (data?.error) message = data.error;
+      //   } catch {
+      //     /* ignore parse error */
+      //   }
+      //   setServerErr(message);
+      //   return;
+      // }
+      const data = await registerApi({
+        email: email.trim(),
+        password: pw2,
       });
 
-      // nếu server trả JSON thông tin lỗi/ok
-      if (!res.ok) {
-        // cố gắng lấy message từ body
-        let message = "Đăng ký thất bại. Vui lòng thử lại.";
-        try {
-          const data = await res.json();
-          if (data?.message) message = data.message;
-          if (data?.error) message = data.error;
-        } catch {
-          /* ignore parse error */
-        }
-        setServerErr(message);
-        return;
-      }
-
-      const data = (await res.json()) as RegisterRes;
+      // const data = (await res.json()) as RegisterRes;
       console.log("Đăng ký thành công:", data);
+      clearGuestMode();
       // TODO: nếu bạn có bước OTP thì navigate sang trang OTP
       // navigate(`/verify-otp?email=${encodeURIComponent(email)}`);
 

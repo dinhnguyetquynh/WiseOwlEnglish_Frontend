@@ -1,41 +1,4 @@
-/* .hp { 
-  display: flex; 
-  flex-direction: column; 
-  gap: 5px; }
 
-.hp__header {
-  display: flex;
-  align-items: center; 
-  gap: 10px; 
-  padding: 6px 8px;
-}
-.hp__back {
-  border: 0; background: transparent; font-size: 20px;
-  cursor: pointer; color: #64748b;
-}
-.hp__title { 
-  font-size: 18px;
-  font-weight: 600; 
-  color: #0f172a; 
-}
-.hp__select {
-  padding: 15px 15px; 
-  border-radius: 10px; 
-  border: 1px solid #e5e7eb;
-  font-size: 16px;
-  font-weight: 600; 
-  background: #fff;
-}
-.hp__select:focus { 
-  outline: 2px solid #93c5fd; 
-}
-.hp__divider { 
-  border: 0; 
-  border-top: 1px solid #e5e7eb; }
-
-.hp__units { display: flex; flex-direction: column; gap: 16px; }
- */
-/* ===== HomePage header & layout ===== */
 .hp { 
   display: flex; 
   flex-direction: column; 
@@ -170,4 +133,159 @@
     max-width: 100px;
     font-size: 13px;
   }
+}
+/* =========================================
+   STYLE CHO NÚT ĐĂNG NHẬP Ở HEADER
+   ========================================= */
+.hp-login-btn {
+  background: linear-gradient(to bottom, #FFD93D, #FFC107); /* Vàng tươi */
+  color: #583a03;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 8px 16px;
+  border: 2px solid #F6B93B;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #d9a406; /* Hiệu ứng nổi 3D */
+  transition: all 0.1s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hp-login-btn::before {
+  content: "🔐"; /* Thêm icon cho sinh động */
+  font-size: 14px;
+}
+
+.hp-login-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #d9a406;
+}
+
+.hp-login-btn:active {
+  transform: translateY(4px); /* Nhún xuống khi bấm */
+  box-shadow: 0 0 0 #d9a406;
+}
+
+/* =========================================
+   STYLE CHO POPUP (GUEST MODE)
+   ========================================= */
+
+/* Nền mờ phía sau */
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6); /* Màu tối xanh hiện đại */
+  backdrop-filter: blur(4px); /* Làm mờ nền phía sau */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Hộp nội dung popup */
+.popup-content {
+  background: #fff;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px 24px;
+  border-radius: 24px;
+  text-align: center;
+  border: 4px solid #bce6fb; /* Viền xanh nhạt dễ thương */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Hiệu ứng nảy */
+  position: relative;
+}
+
+/* Trang trí thêm cho popup (Ví dụ icon cú mèo hoặc ngôi sao) */
+.popup-content::before {
+  content: "🦉";
+  font-size: 40px;
+  display: block;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 0 #ccc);
+}
+
+.popup-content h3 {
+  font-size: 24px;
+  color: #0c4a6e;
+  margin: 0 0 10px 0;
+  font-weight: 800;
+}
+
+.popup-content p {
+  color: #64748b;
+  font-size: 16px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+/* Container chứa các nút */
+.popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Style chung cho nút trong popup */
+.popup-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.1s, filter 0.2s;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.1); /* Bóng nhẹ */
+  position: relative;
+  overflow: hidden;
+}
+
+.popup-btn:active {
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* Nút Đăng nhập (Xanh dương) */
+.popup-btn.login {
+  background-color: #38bdf8;
+  color: #fff;
+  box-shadow: 0 4px 0 #0284c7;
+}
+
+/* Nút Đăng ký (Xanh lá - Nổi bật nhất) */
+.popup-btn.register {
+  background-color: #4ade80;
+  color: #fff;
+  box-shadow: 0 4px 0 #16a34a;
+  font-size: 18px; /* To hơn xíu */
+}
+
+/* Nút Đóng (Xám/Đỏ nhạt) */
+.popup-btn.close {
+  background-color: #f1f5f9;
+  color: #64748b;
+  box-shadow: 0 4px 0 #cbd5e1;
+  margin-top: 5px;
+}
+.popup-btn.close:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+  box-shadow: 0 4px 0 #fecaca;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }

@@ -35,3 +35,38 @@ export const getPrimaryGrade = (): number | null => {
   const val = localStorage.getItem(KEY_PRIMARY_GRADE);
   return val ? Number(val) : null;
 };
+
+export function clearPrimaryGrade(){
+  localStorage.removeItem("primary_grade");
+}
+
+export const KEY_IS_GUEST = "is_guest";
+
+export function saveGuestMode(isGuest: boolean) {
+  if (isGuest) {
+    localStorage.setItem(KEY_IS_GUEST, "true");
+  } else {
+    localStorage.removeItem(KEY_IS_GUEST);
+  }
+}
+
+export function isGuestMode(): boolean {
+  return localStorage.getItem(KEY_IS_GUEST) === "true";
+}
+
+export function clearGuestMode() {
+  localStorage.removeItem(KEY_IS_GUEST);
+}
+
+const KEY_CURRENT_VIEWING_GRADE = "ws_current_viewing_grade";
+
+// Lưu lớp đang xem vào bộ nhớ
+export const saveCurrentViewingGrade = (grade: number) => {
+  localStorage.setItem(KEY_CURRENT_VIEWING_GRADE, grade.toString());
+};
+
+// Lấy lớp đang xem từ bộ nhớ
+export const getCurrentViewingGrade = (): number | null => {
+  const stored = localStorage.getItem(KEY_CURRENT_VIEWING_GRADE);
+  return stored ? parseInt(stored, 10) : null;
+};

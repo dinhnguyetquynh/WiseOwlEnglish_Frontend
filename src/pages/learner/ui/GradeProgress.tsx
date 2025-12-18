@@ -6,6 +6,7 @@ import "../css/GradeProgress.css"; // Import file CSS mới
 import { getGradeProgress, type GradeProgress } from "../../../api/gradeProgress";
 import { getPrimaryGrade, getProfileId } from "../../../store/storage";
 import FancyClassSelect from "../../../components/learner/ui/FancyClassSelect";
+import { useLearnerLayoutContext } from "../../../layouts/LearnerLayout";
 
 // --- COMPONENT CON: VÒNG TRÒN TIẾN ĐỘ ---
 function CircularProgress({ percent }: { percent: number }) {
@@ -47,18 +48,56 @@ export default function GradeProgress() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   // Mặc định chọn lớp 1 (orderIndex = 1)
-  const [selectedGrade, setSelectedGrade] = useState(() => {
-    const saved = getPrimaryGrade();
-    return saved ?? 1;
-  });
+  // const [selectedGrade, setSelectedGrade] = useState(() => {
+  //   const saved = getPrimaryGrade();
+  //   return saved ?? 1;
+  // });
+  const { selectedGrade } = useLearnerLayoutContext();
 
   const profileId = getProfileId();
 
+
+  // useEffect(() => {
+  //   if (!profileId) {
+  //     setError("Không tìm thấy hồ sơ người học. Vui lòng chọn lại hồ sơ.");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   let isMounted = true;
+  //   (async () => {
+  //     try {
+  //       setLoading(true);
+  //       setError(null);
+  //       const progressData = await getGradeProgress(selectedGrade, profileId);
+  //       if (isMounted) {
+  //         setData(progressData);
+  //       }
+  //     } catch (e: any) {
+  //       if (isMounted) {
+  //         setError(e.message || "Không thể tải dữ liệu tiến độ");
+  //       }
+  //     } finally {
+  //       if (isMounted) {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   })();
+
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, [profileId, selectedGrade]); 
   useEffect(() => {
+    // Nếu chưa có profile hoặc chưa chọn lớp (từ layout), chưa tải
     if (!profileId) {
       setError("Không tìm thấy hồ sơ người học. Vui lòng chọn lại hồ sơ.");
-      setLoading(false);
       return;
+    }
+
+    if (!selectedGrade) {
+       // Đợi Layout cập nhật selectedGrade (từ storage hoặc API)
+       return; 
     }
 
     let isMounted = true;
@@ -66,12 +105,15 @@ export default function GradeProgress() {
       try {
         setLoading(true);
         setError(null);
+        // Gọi API với grade lấy từ Layout context
         const progressData = await getGradeProgress(selectedGrade, profileId);
         if (isMounted) {
           setData(progressData);
         }
       } catch (e: any) {
         if (isMounted) {
+          // Chỉ báo lỗi nếu thực sự lỗi API, còn lỗi do chưa có dữ liệu thì thôi
+          console.error(e);
           setError(e.message || "Không thể tải dữ liệu tiến độ");
         }
       } finally {
@@ -84,7 +126,9 @@ export default function GradeProgress() {
     return () => {
       isMounted = false;
     };
-  }, [profileId, selectedGrade]); // Fetch lại khi đổi lớp
+  }, [profileId, selectedGrade]); // 3. Trigger lại khi selectedGrade trên Layout thay đổi
+
+  // Tính toán % tổng
 
   // Tính toán % tổng (theo gợi ý của bạn)
   const percentCompleteOfGrade = useMemo(() => {
@@ -105,7 +149,7 @@ export default function GradeProgress() {
     <div className="pr-wrapper">
       <header className="pr-header">
         <h1 className="pr-title">Tiến độ học tập</h1>
-        <FancyClassSelect value={selectedGrade} onChange={setSelectedGrade} />
+        {/* <FancyClassSelect value={selectedGrade} onChange={setSelectedGrade} /> */}
       </header>
 
       {loading && <div>Đang tải dữ liệu tiến độ...</div>}

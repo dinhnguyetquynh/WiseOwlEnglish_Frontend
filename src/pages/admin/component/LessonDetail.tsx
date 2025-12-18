@@ -250,7 +250,9 @@ export default function LessonDetail({
                 </Box>
             </Box>
 
+            {/* Header - Đã sửa lại style */}
             <Paper
+                elevation={0} // Bỏ bóng cho header phẳng hơn nếu muốn
                 sx={{
                     display: "flex",
                     alignItems: "center",
@@ -260,175 +262,116 @@ export default function LessonDetail({
                     fontWeight: "bold",
                 }}
             >
-                <Box sx={{ flexBasis: "40%", pl: 1 }}>
+                {/* Cột 1: Tên game (40%) */}
+                <Box sx={{ width: "40%", flexShrink: 0, pl: 1 }}>
                     <Typography variant="subtitle2">Tên game</Typography>
                 </Box>
 
-                <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
+                {/* Cột 2: Loại (15%) */}
+                <Box sx={{ width: "15%", flexShrink: 0, textAlign: "center" }}>
                     <Typography variant="subtitle2">Loại</Typography>
                 </Box>
 
-                <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                {/* Cột 3: Active (10%) */}
+                <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
                     <Typography variant="subtitle2">Active</Typography>
                 </Box>
 
-                <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                {/* Cột 4: Số câu (10%) */}
+                <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
                     <Typography variant="subtitle2">Số câu</Typography>
                 </Box>
 
-                <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
+                {/* Cột 5: Cập nhật (15%) */}
+                <Box sx={{ width: "15%", flexShrink: 0, textAlign: "center" }}>
                     <Typography variant="subtitle2">Cập nhật</Typography>
                 </Box>
 
-                <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                {/* Cột 6: Hành động (10%) */}
+                <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
                     <Typography variant="subtitle2">Hành động</Typography>
                 </Box>
             </Paper>
 
 
-            {/* Danh sách game */}
-            {/* {lesson.games.map((game) => (
-                
-                <Paper
-                    key={game.id ?? (game as any).gameId}
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        p: 1.5,
-                        mb: 1,
-                        border: "1px solid",
-                        borderColor: "grey.200",
-                        borderRadius: 1,
-                        "&:hover": { bgcolor: "grey.100" },
-                    }}
-                >
-                    <Box sx={{ flexBasis: "40%", pl: 1 }}>
-                        <Typography
-                            variant="body1"
-                            fontWeight="500"
-                            sx={{
-                                mb: 0.3,
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                            }}
-                        >
-                            {game.title}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
-                        <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                            {game.gameType}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
-                        {game.active ? (
-                            <CheckCircle sx={{ color: "green" }} />
-                        ) : (
-                            <Cancel sx={{ color: "red" }} />
-                        )}
-                    </Box>
-
-                    <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
-                        <Typography variant="body1" fontWeight="bold">
-                            {game.totalQuestion}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
-                        <Typography variant="body2">
-                            {new Date(game.updatedDate).toLocaleDateString("vi-VN")}
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
-                        <Tooltip title="Chỉnh sửa game">
-                            <IconButton
-                                color="primary"
-                                size="small"
-                                sx={{ mr: 1 }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const resolvedId = game.id ?? (game as any).gameId;
-                                    console.log("LessonDetail → Edit clicked. ID =", resolvedId);
-                                    if (resolvedId === undefined) {
-                                        console.warn("Không tìm thấy gameId cho game", game);
-                                        return;
-                                    }
-                                    setEditingGameInfo({
-                                        gameType: game.gameType,
-                                        lessonId: lessonId,
-                                        gameId: resolvedId,
-                                    });
-                                    onUpdateGame(game.gameType, lessonId, resolvedId);
-                                }}
-                            >
-                                <EditIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip title="Xóa game">
-                            <IconButton 
-                                color="error" 
-                                size="small"
-                                onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (resolvedId !== undefined) {
-                                            handleClickDelete(resolvedId, game.title);
-                                        }
-                                    }}
-                            >
-                                <DeleteIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    </Box>
-
-                </Paper>
-            ))} */}
-            {/* Danh sách game */}
+            {/* Danh sách game - Đã sửa lại style tương ứng với Header */}
             {lesson.games.map((game) => {
                 const resolvedId = game.id ?? (game as any).gameId;
                 return (
                     <Paper
                         key={resolvedId}
                         sx={{
-                            display: "flex", alignItems: "center", p: 1.5, mb: 1,
-                            border: "1px solid", borderColor: "grey.200", borderRadius: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            p: 1.5,
+                            mb: 1,
+                            border: "1px solid",
+                            borderColor: "grey.200",
+                            borderRadius: 1,
                             "&:hover": { bgcolor: "grey.100" },
                         }}
                     >
-                        <Box sx={{ flexBasis: "40%", pl: 1 }}>
-                            <Typography variant="body1" fontWeight="500" sx={{ mb: 0.3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                                {game.title}
-                            </Typography>
+                        {/* Cột 1: Tên game (40%) */}
+                        <Box sx={{ width: "40%", flexShrink: 0, pl: 1, overflow: "hidden" }}>
+                            <Tooltip title={game.title}>
+                                <Typography
+                                    variant="body1"
+                                    fontWeight="500"
+                                    sx={{
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis"
+                                    }}
+                                >
+                                    {game.title}
+                                </Typography>
+                            </Tooltip>
                         </Box>
 
-                        <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
-                            <Typography variant="body2" color="text.secondary" fontStyle="italic">
-                                {game.gameType}
-                            </Typography>
+                        {/* Cột 2: Loại (15%) - Thêm xử lý cắt chữ nếu tên loại quá dài */}
+                        <Box sx={{ width: "15%", flexShrink: 0, textAlign: "center", overflow: "hidden", px: 1 }}>
+                             <Tooltip title={game.gameType}>
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    fontStyle="italic"
+                                    sx={{
+                                        whiteSpace: "nowrap",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        display: "block" // Quan trọng để ellipsis hoạt động
+                                    }}
+                                >
+                                    {game.gameType}
+                                </Typography>
+                            </Tooltip>
                         </Box>
 
-                        <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                        {/* Cột 3: Active (10%) */}
+                        <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
                             {game.active ? <CheckCircle sx={{ color: "green" }} /> : <Cancel sx={{ color: "red" }} />}
                         </Box>
 
-                        <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                        {/* Cột 4: Số câu (10%) */}
+                        <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
                             <Typography variant="body1" fontWeight="bold">{game.totalQuestion}</Typography>
                         </Box>
 
-                        <Box sx={{ flexBasis: "15%", textAlign: "center" }}>
-                            <Typography variant="body2">{new Date(game.updatedDate).toLocaleDateString("vi-VN")}</Typography>
+                        {/* Cột 5: Cập nhật (15%) */}
+                        <Box sx={{ width: "15%", flexShrink: 0, textAlign: "center" }}>
+                            <Typography variant="body2">
+                                {new Date(game.updatedDate).toLocaleDateString("vi-VN")}
+                            </Typography>
                         </Box>
 
-                        <Box sx={{ flexBasis: "10%", textAlign: "center" }}>
+                        {/* Cột 6: Hành động (10%) */}
+                        <Box sx={{ width: "10%", flexShrink: 0, textAlign: "center" }}>
+                            {/* ... (Giữ nguyên phần nút bấm của bạn) ... */}
                             <Tooltip title="Chỉnh sửa game">
                                 <IconButton
                                     color="primary"
                                     size="small"
-                                    sx={{ mr: 1 }}
+                                    sx={{ mr: 0.5 }} // Giảm margin một chút cho gọn
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         if (resolvedId === undefined) return;
@@ -444,7 +387,6 @@ export default function LessonDetail({
                                 </IconButton>
                             </Tooltip>
 
-                            {/* 👇 Nút Xóa Đã Được Gắn Sự Kiện */}
                             <Tooltip title="Xóa game">
                                 <IconButton
                                     color="error"

@@ -277,8 +277,13 @@ const Game = forwardRef<GameHandle, GameProps>(({
             return { valid: false, errors };
         }
 
-        // ---- CHECK TITLE ----
-        if (!title.trim()) {
+        // // ---- CHECK TITLE ----
+        // if (!title.trim()) {
+        //     errors.push({ index: -1, field: "title" });
+        // }
+        // ---- SỬA LẠI ĐOẠN CHECK TITLE Ở ĐÂY ----
+        // Chỉ bắt buộc nhập title nếu KHÔNG PHẢI là "lession"
+        if (type !== "lession" && !title.trim()) {
             errors.push({ index: -1, field: "title" });
         }
 
@@ -677,7 +682,7 @@ const Game = forwardRef<GameHandle, GameProps>(({
 
         getTestQuestions: () => buildTestPayload(),
 
-        validateGame: () => {
+        validateGame: () => { 
             const result = validateGameDetailed();
 
             setErrorFocus(result.errors || []);

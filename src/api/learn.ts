@@ -119,3 +119,15 @@ export async function fetchSentenceByLesson(lessonId: string | number): Promise<
         throw new Error(getErrMsg(e, "Không lấy được danh sách bài học cho lớp này"));
       }
     }
+
+    export async function fecthLessonsForGuest(gradeId:number):Promise<LessonsByClassRes> {
+      try{
+        const res = await axiosClient.get<LessonsByClassRes>(
+          `/api/learn/lessons/for-guest/${gradeId}`
+        );
+        return res.data;
+      } catch (e: any) {
+        throw new Error(getErrMsg(e, "Không lấy được danh sách bai hoc cho guest"));
+    }
+      
+    }

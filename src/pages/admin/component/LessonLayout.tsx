@@ -268,6 +268,7 @@ export default function LessonLayout() {
                     fetchData();
                 }}
                 lessonIds={lessonData.map(item => item.orderIndex)}
+                selectedClassId={Number(selectedClass)}
             />
         );
     }

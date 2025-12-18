@@ -51,19 +51,7 @@ export default function Sidebar({ onLogoutClick }: Props) {
     <aside className="sidebar">
       <div className="sidebar__brand">WiseOwl English</div>
       <nav className="sidebar__nav">
-        {/* {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to!}
-            end
-            className={({ isActive }) =>
-              "sidebar__item" + (isActive ? " sidebar__item--active" : "")
-            }
-          >
-            <img src={item.imgSrc} alt={item.label} className="sidebar__icon" />
-            <span className="sidebar__label">{item.label.toUpperCase()}</span>
-          </NavLink>
-        ))} */}
+
         {navItems.map((item, idx) => {
           if (item.kind === "action" || item.label === "Đăng xuất") {
             return (

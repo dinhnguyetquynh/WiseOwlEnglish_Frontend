@@ -62,24 +62,58 @@ export default function GameResultPage() {
       : "Huy hiệu Tập sự";
 
   const playAgain = () => {
-    // Quay lại game vừa chơi (dựa theo "from")
-    if (from === "picture-guessing") {
-      unitId ? nav(`/games/picture-guessing/${unitId}`) : nav(`/games/picture-guessing`);
-    } else {
-      nav("/games/select");
-    }
+    // Sử dụng switch case để code gọn gàng và logic rõ ràng hơn
+    switch (from) {
+      case "picture-guessing":
+        console.log("da vao game nhin hinh chon tu:" + unitId);
+        unitId
+          ? nav(`/games/picture-guessing/${unitId}`)
+          : nav(`/games/picture-guessing`);
+        break;
 
-    if (from === "sound-word") {
-      unitId ? nav(`/games/sound-word/${unitId}`) : nav(`/games/sound-word`);
-    } else {
-      nav("/games/select");
-    }
+      case "sound-word":
+        unitId
+          ? nav(`/games/sound-word/${unitId}`)
+          : nav(`/games/sound-word`);
+        break;
 
+      case "word-writing":
+        unitId
+          ? nav(`/games/picture-word/${unitId}`)
+          : nav(`/games/picture-word`);
+        break;
+
+      case "picture-match-word":
+        unitId
+          ? nav(`/games/picture-match-word/${unitId}`)
+          : nav(`/games/picture-match-word`);
+        break;
+
+      case "picture-sentence":
+        unitId
+          ? nav(`/games/picture-sentence/${unitId}`)
+          : nav(`/games/picture-sentence`);
+        break;
+
+      case "sentence-hidden":
+        unitId
+          ? nav(`/games/sentence-word-hidden/${unitId}`)
+          : nav(`/games/sentence-word-hidden`);
+        break;
+
+      case "word-to-sentence":
+        unitId
+          ? nav(`/games/word-to-sentence/${unitId}`)
+          : nav(`/games/word-to-sentence`);
+        break;
+
+      default:
+        // Nếu không khớp game nào, hoặc gameType lạ thì về trang chọn
+        console.log("Có lỗi, không chơi lại game được.")
+        break;
+    }
   };
 
-  // const toSelectGame = () => {
-  //   unitId ? nav(`/learn/units/${unitId}/vocab/review`,{ replace: true }) : nav("/learn/units/:unitId/sentence/review");
-  // };
 
   const toSelectGame = () => {
     if (!unitId || !gameType) {
@@ -94,7 +128,7 @@ export default function GameResultPage() {
       nav(`/learn/units/${unitId}/sentence/review`, { replace: true });
     } else {
         // Xử lý các loại game khác hoặc fallback
-        nav("/games/select", { replace: true });
+        console.log("Có lỗi xảy ra đối với hiển thị màn hình chọn game .")
     }
 };
 
