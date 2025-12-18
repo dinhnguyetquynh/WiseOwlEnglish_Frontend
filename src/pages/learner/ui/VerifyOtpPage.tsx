@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import "../css/VerifyOtpPage.css";
+import { resendOtpApi, verifyOtp } from "../../../api/auth";
 
 type VerifyOtpRes = {
   message?: string;
@@ -100,30 +101,35 @@ export default function VerifyOtpPage() {
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8081/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          otp: otpValue, // "123456"
-        }),
-      });
+      // const res = await fetch("http://localhost:8081/api/auth/verify-otp", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({
+      //     email: email.trim(),
+      //     otp: otpValue, // "123456"
+      //   }),
+      // });
 
-      if (!res.ok) {
-        let message = "Xác thực OTP thất bại. Vui lòng thử lại.";
-        try {
-          const data = (await res.json()) as VerifyOtpRes & { error?: string };
-          if (data?.message) message = data.message;
-          if (data?.error) message = data.error;
-        } catch { }
-        setServerErr(message);
-        return;
-      }
+      // if (!res.ok) {
+      //   let message = "Xác thực OTP thất bại. Vui lòng thử lại.";
+      //   try {
+      //     const data = (await res.json()) as VerifyOtpRes & { error?: string };
+      //     if (data?.message) message = data.message;
+      //     if (data?.error) message = data.error;
+      //   } catch { }
+      //   setServerErr(message);
+      //   return;
+      // }
+      await verifyOtp({
+      email: email.trim(),
+      otp: otpValue,
+    });
 
       // Thành công → điều hướng đăng nhập (hoặc /learn nếu bạn có auto-login)
       navigate("/login", { state: { verifiedEmail: email } });
-    } catch {
-      setServerErr("Không thể kết nối máy chủ. Hãy kiểm tra backend hoặc mạng.");
+    } catch(error: any) {
+      const errorMessage = error.message || "Không thể kết nối máy chủ hoặc lỗi không xác định.";
+    setServerErr(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,29 +149,32 @@ export default function VerifyOtpPage() {
     if (!canResend) return;
 
     try {
-      const res = await fetch("http://localhost:8081/api/auth/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
+      // const res = await fetch("http://localhost:8081/api/auth/resend-otp", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ email: email.trim() }),
+      // });
 
-      if (!res.ok) {
-        let message = "Gửi lại OTP thất bại. Vui lòng thử lại.";
-        try {
-          const data = await res.json();
-          if (data?.message) message = data.message;
-          if (data?.error) message = data.error;
-        } catch { }
-        setServerErr(message);
-        return;
-      }
+      // if (!res.ok) {
+      //   let message = "Gửi lại OTP thất bại. Vui lòng thử lại.";
+      //   try {
+      //     const data = await res.json();
+      //     if (data?.message) message = data.message;
+      //     if (data?.error) message = data.error;
+      //   } catch { }
+      //   setServerErr(message);
+      //   return;
+      // }
+      await resendOtpApi({ email: email.trim() });
 
       // reset input OTP và bắt đầu đếm ngược
       setOtp(["", "", "", "", "", ""]);
       inputsRef.current[0]?.focus();
       setCooldown(60);
-    } catch {
-      setServerErr("Không thể kết nối máy chủ. Hãy kiểm tra backend hoặc mạng.");
+    } catch (error: any) {
+      // 4. Xử lý lỗi
+      // Lấy message từ error đã được throw bên auth.ts
+      setServerErr(error.message || "Không thể kết nối máy chủ. Hãy kiểm tra backend hoặc mạng.");
     }
   };
 

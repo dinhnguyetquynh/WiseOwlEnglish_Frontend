@@ -64,5 +64,48 @@ export async function registerApi(payload: RegisterRequest): Promise<RegisterRes
   }
 }
 
+export type VerifyOtpReq ={
+  email:string;
+  otp:string;
+}
+
+export async function verifyOtp(payload:VerifyOtpReq){
+  try{
+    await axiosClient.post("/api/auth/verify-otp",payload);
+  }catch(error:any){
+    let message ="Xác thực otp thất bại";
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.response?.data?.error) {
+      message = error.response.data.error;
+    }
+    
+    throw new Error(message);
+  }
+}
+
+export type ResendOtpReq = {
+  email: string;
+};
+
+// 2. Hàm gọi API Resend OTP
+export async function resendOtpApi(payload: ResendOtpReq) {
+  try {
+    // Đảm bảo đường dẫn khớp với Controller: /api/auth/resend-otp
+    await axiosClient.post("/api/auth/resend-otp", payload);
+  } catch (error: any) {
+    let message = "Gửi lại OTP thất bại. Vui lòng thử lại.";
+    
+    // Logic bắt lỗi giống hệt verifyOtp để đồng bộ
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (error.response?.data?.error) {
+      message = error.response.data.error;
+    }
+    
+    throw new Error(message);
+  }
+}
+
 
 
